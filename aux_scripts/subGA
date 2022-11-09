@@ -1,0 +1,19 @@
+#! /bin/bash 
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -q core-24.q
+#$ -pe smp 24
+#$ -l h_rt=960:00:00
+
+#echo $HOSTNAME > test-file 
+source /home/matma/.bashrc
+export PGI_FASTMATH_CPU=sandybridge
+
+conda activate glyP
+
+
+python run_ga.py 
+
+
+
