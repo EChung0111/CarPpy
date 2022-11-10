@@ -95,7 +95,7 @@ class Space(list):
 
         #self.logfiles_dir.append(path)
 
-        for (root, dirs, files) in os.walk('./'+path):
+        for (root, dirs, files) in os.walk(path):
             for dirname in dirs:
                 for ifiles in os.walk(path+'/'+dirname):
                     for filename in ifiles[2]:
