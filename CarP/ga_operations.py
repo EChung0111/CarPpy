@@ -11,11 +11,12 @@ These functions are all genetic algorithm operations. Each operation modifies ex
 """
 
 def modify_glyc(conf, bond, model = "random", Fmap = None):
-    """Modifies the angle between the two rings attached by a specified glycosidic bond
 
+    """Modifies the angle between the two rings attached by a specified glycosidic bond
     :param conf: a conformer object
     :param bond: (int) index of which edge in the list of edges of the conformer
     """
+
     edge = conf.graph.edges[bond]
     atoms = len(edge['linker_atoms']) ; angles = [] ; n=0
 
@@ -72,7 +73,6 @@ def modify_c6(conf, ring):
 def modify_ring(conf, ring, prob_model = None):
 
     pucker = draw_random_pucker(prob_model)
-    #print("setting ring {0:5d} to {1:5s}".format(ring, pucker))
     utilities.set_ring_pucker(conf, ring, pucker)
 
 def draw_random_pucker(prob_model=None):
@@ -103,8 +103,8 @@ def draw_random_pucker(prob_model=None):
             return puckers[pucker][utilities.draw_random_int(top=len(puckers[pucker]))]
 
 def cross_over(conf1, conf2):
-    """Swaps angle measures of two conformers
 
+    """Swaps angle measures of two conformers
     :param conf1: the first conformer object
     :param conf2: the second conformer object
     """

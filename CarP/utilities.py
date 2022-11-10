@@ -140,6 +140,17 @@ def element_number(A):
 
     return periodic_table[A]
 
+def protecting_group_name(A):
+
+    protecting_groups = { 'H1O1' : 'OH', 'H3C1O1': 'OMe', 'H4C2O1': 'OEt', 'H5C6O1': 'OPh',
+            'H7C7O1': 'OBn', 'H3C2O2': 'OAc', 'H5C7O2': 'OBz', 'H4C2N1O1': 'NHCO-Me',
+            'H5C2N1O1': 'NHCOH-Me', 'H9C4O2': 'OPiv', 'H9C9O1': 'ONp', 'N3': 'Az', 'H2N1': 'NH2'}
+
+    if A in protecting_groups.keys(): 
+        return protecting_groups[A]
+    else: 
+        return A
+
 def determine_carried_atoms(conf, at1, at2):
 
     """Find all atoms necessary to be carried over during rotation

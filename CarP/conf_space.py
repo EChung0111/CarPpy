@@ -84,7 +84,7 @@ class Space(list):
 
         return self.__getitem(slice(i,j))
 
-    def load_dir(self, path, software='g16', carb = True, sort_atoms = False, distXX=1.65, distXH=1.25):
+    def load_dir(self, path, software='g16', carb = True, sort_atoms = False, determine_PGs = False, distXX=1.65, distXH=1.25):
         """Loads a directory with data files to be processed. The path is just the name of the directory, the function will handle the presence of multiple directories within it.
 
         :param path: (string) this is the path to the directory with all the conformer data. This directory should be filled with other directories with the intended name of the conformer and it's .xyz and input.log files
@@ -94,6 +94,9 @@ class Space(list):
         #check if this is wont lead to an error if the path doesnt exist 
 
         #self.logfiles_dir.append(path)
+
+        self.distXX = distXX
+        self.distXH = distXH
 
         for (root, dirs, files) in os.walk(path):
             for dirname in dirs:
@@ -123,11 +126,12 @@ class Space(list):
 
                                 if loaded: 
 
-                                    conf.connectivity_matrix(distXX, distXH) 
+                                    conf.connectivity_matrix(self.distXX, self.distXH)
+                                    conf.distXX = self.distXX ; conf.distXH = self.distXH
 
                                     if carb == True and  conf.Nmols == 1:
 
-                                        conf.assign_atoms( sort_atoms = sort_atoms) ; 
+                                        conf.assign_atoms( sort_atoms = sort_atoms, deter_PGs = determine_PGs) ; 
                                         conf.measure_c6()  
                                         conf.measure_glycosidic()  
                                         conf.measure_ring()

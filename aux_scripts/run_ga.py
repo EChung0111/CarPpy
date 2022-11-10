@@ -115,7 +115,7 @@ def run_ga():
 
                         for r in offspring.graph.nodes:
                             CarP.ga_operations.modify_c6(offspring, r)
-                            #CarP.ga_operations.modify_ring(offspring, r) #Don't modify rings in initial
+                            #CarP.ga_operations.modify_ring(offspring, r, GAsettings['pucker_P_model']) #Don't modify rings in initial
 
                     elif phase == "evolve": 
 
