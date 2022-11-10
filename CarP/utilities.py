@@ -7,7 +7,7 @@ from scipy import interpolate
 from scipy.linalg import expm
 from optparse import OptionParser
 from datetime import datetime
-
+#Hello this is the just a testing comment to commit
 def error(msg):
 
     """ write error message and quit
