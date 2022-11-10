@@ -21,6 +21,7 @@ The following packages are also required:
   - matplotlib
   - seaborn
   - texttable
+  - scipy
 
 ## Installation
 
