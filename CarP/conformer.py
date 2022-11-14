@@ -354,7 +354,7 @@ class Conformer():
 
             if job_type == 'nmr':
                 for at in spin:
-                    while len(at) < 71: at.append(0)
+                    while len(at) < self.NAtoms: at.append(0)
                 self.nmr = np.tril(spin) 
 
             self.xyz = np.array(geom)
