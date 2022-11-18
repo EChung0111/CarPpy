@@ -618,7 +618,7 @@ class Conformer():
                 if at in ['C2', 'C3', 'C4', 'C6']:
                     adj_atoms = adjacent_atoms(self.conn_mat, ra[at])
                     for at2 in adj_atoms:
-                        if self.atoms[at2] in ['O', 'C', 'N'] and at2 not in linkages:
+                        if self.atoms[at2] in ['C', 'N', 'O', 'F', 'S'] and at2 not in linkages:
                             if at2 not in ra.values() or ('O6' in ra.keys() and ra['O6'] == at2):
 
                                 disconnect_atoms(self, ra[at], at2)
@@ -626,16 +626,19 @@ class Conformer():
                                 connect_atoms(self, ra[at], at2)
 
                                 self.graph.nodes[ring_number][at] = {}
-                                self.graph.nodes[ring_number][at]['PG_atoms'] = PG_atoms
+                                #self.graph.nodes[ring_number][at]['PG_atoms'] = PG_atoms
 
-                                self.graph.nodes[ring_number][at]['PG_sum'] = ""
+                                PG_sum = ""
                                 PG_atoms_names = [ self.atoms[pgat] for pgat in PG_atoms ]
                                 for atom in [ 'H', 'B', 'C', 'N', 'O', 'F', 'Si', 'P', 'S', 'Cl', 'Br']: 
                                     natom = PG_atoms_names.count(atom) 
                                     if  natom > 0: 
-                                        self.graph.nodes[ring_number][at]['PG_sum'] += atom + str(natom)
+                                        PG_sum += atom + str(natom)
 
-                                self.graph.nodes[ring_number][at]['PG_name'] = protecting_group_name(self.graph.nodes[ring_number][at]['PG_sum'])
+                                self.graph.nodes[ring_number][at]['PG_name'] = protecting_group_name(PG_sum)
+                                self.graph.nodes[ring_number][at]['dihedrals'] = protecting_group_dihedrals(self, at2, PG_sum, PG_atoms)
+                                if at == 'C6': 
+                                    self.graph.nodes[ring_number][at]['dihedrals'][0] = copy.copy(self.graph.nodes[ring_number]['c6_atoms'])
 
         def resort_atoms(self):
 
@@ -679,7 +682,7 @@ class Conformer():
         cm = nx.graph.Graph(self.conn_mat)
         cycles_in_graph = nx.cycle_basis(cm) #a cycle in the conn_mat would be a ring
 
-        print(cycles_in_graph)
+        #print(cycles_in_graph)
 
         #Remove Bz/Np/etx, i.e. rings without 'O'
         #Remove bond in dioxolenium/oxonium/fused rings:
@@ -692,21 +695,21 @@ class Conformer():
         for unique in unique_atoms_in_cycles: 
             if atoms_in_cycles.count(unique) >= 2: #Atom in multiple rings
 
-                print('multiple', unique)
+                #print('multiple', unique)
                 adj_atoms = []
                 for adj in adjacent_atoms(self.conn_mat, unique): #check how many Os are adj
                     adj_atoms.append(self.atoms[adj])
 
                 if adj_atoms.count('O') == 2:
-                    print('remove', unique)
+                    #print('remove', unique)
 
                     #dioxolenium ion => break the C1-O bond, we will check 
-                    #(1) bonds around O (oxonium), 
-                    #(2) whether next C is planar or not. 
+                    #(1) how many bonds around O (oxonium), 
+                    #(2) whether next C is carbonyl or not. 
 
                     for adj in adjacent_atoms(self.conn_mat, unique): 
                         if self.atoms[adj] == 'O':
-                            print(adj)
+                            #print(adj)
                             if len(adjacent_atoms(self.conn_mat, adj)) == 3:
                                 disconnect_atoms(self, unique, adj)
                             else:
@@ -717,14 +720,15 @@ class Conformer():
         #redo cycles in new matrix: 
         cm = nx.graph.Graph(self.conn_mat)
         cycles_in_graph = nx.cycle_basis(cm) 
-        print(cycles_in_graph)
+        #print(cycles_in_graph)
+
         #Remove Bz/Np/etx, i.e. rings without 'O'
         cycles_to_keep = []
         for cycle in cycles_in_graph: 
             for at in cycle: 
                 if self.atoms[at] == 'O': cycles_to_keep.append(cycle)
         cycles_in_graph = cycles_to_keep
-        print(cycles_in_graph)
+        #print(cycles_in_graph)
         C1s = get_C1s(self, cycles_in_graph)
         C1s, C1pos, ring_atoms = order_rings(cm, C1s)
 
@@ -840,6 +844,7 @@ class Conformer():
             else: node['absconf'] = 'L'
 
         #determine anomaricity of the redicing end: 
+
         adj = adjacent_atoms(self.conn_mat, self.graph.nodes[0]['ring_atoms']['C1'])
         for at in adj:
             if self.atoms[at] == 'H': Ha = at

@@ -142,14 +142,107 @@ def element_number(A):
 
 def protecting_group_name(A):
 
-    protecting_groups = { 'H1O1' : 'OH', 'H3C1O1': 'OMe', 'H4C2O1': 'OEt', 'H5C6O1': 'OPh',
-            'H7C7O1': 'OBn', 'H3C2O2': 'OAc', 'H5C7O2': 'OBz', 'H4C2N1O1': 'NHCO-Me',
-            'H5C2N1O1': 'NHCOH-Me', 'H9C4O2': 'OPiv', 'H9C9O1': 'ONp', 'N3': 'Az', 'H2N1': 'NH2'}
+    protecting_groups = { 'H1O1' : 'OH', 'H3C1': 'Me', 'H3C1O1': 'OMe', 'H4C2O1': 'OEt', 'H5C6O1': 'OPh', 'H7C10O1': 'ONh',
+            'H7C7O1': 'OBn', 'H9C11O1': 'ONp', 
+            'H3C2O2': 'OAc', 'H5C7O2': 'OBz', 'H9C4O2': 'OPiv', 
+            'H4C2N1O1': 'NHCO-Me','H5C2N1O1': 'NHCOH-Me',
+            'N3': 'Az', 'H2N1': 'NH2'}
 
     if A in protecting_groups.keys(): 
         return protecting_groups[A]
     else: 
         return A
+
+def protecting_group_dihedrals(conf, atom, PG_sum, PG_atoms):
+
+    PG_name = protecting_group_name(PG_sum)
+    dih1 = [None, None, atom, None]
+
+    for at1 in adjacent_atoms(conf.conn_mat, atom):
+        if at1 not in PG_atoms: 
+            for at2 in adjacent_atoms(conf.conn_mat, at1):
+                if conf.atoms[at2] == 'H': 
+                    dih1[0] = copy.copy(at2) ; dih1[1] = copy.copy(at1)
+        elif at1 in PG_atoms: 
+            dih1[3] = copy.copy(at1)
+
+    #print(dih1)
+
+    if conf.atoms[atom] == 'O': 
+
+        if conf.atoms[dih1[3]] == 'H':
+            return [dih1]
+
+        elif conf.atoms[dih1[3]] == 'C':
+            adj_atoms = adjacent_atoms(conf.conn_mat, dih1[3])
+            if len(adj_atoms) == 3: #sp2 carbon in carbonyl of aromatic
+
+                adj_atoms_names = []
+                for at in adj_atoms: adj_atoms_names.append(conf.atoms[at])
+
+                if adj_atoms_names.count('O') == 2:  #carbonyl: OAc, OBz, OPiv, return only two dihedrals
+                    for at in adj_atoms: 
+                        if at not in dih1 and conf.atoms[at] == 'O': 
+                            dih2 = [ dih1[1], dih1[2], dih1[3], at]
+                            return [dih1, dih2]
+
+                elif adj_atoms_names.count('C') == 2: #Aromatic group: OPh, ONh, return any angle. 
+                    for at in adj_atoms: 
+                        if at not in dih1 and conf.atoms[at] == 'C': 
+                            dih2 = [ dih1[1], dih1[2], dih1[3], at]                      
+                            return [dih1, dih2]
+
+            if len(adj_atoms) == 4: #sp3 carbon - methyl/ene group. 
+
+                adj_atoms_names = []
+                for at in adj_atoms: adj_atoms_names.append(conf.atoms[at])
+
+                if adj_atoms_names.count('H') == 3: #OMe
+                    return dih1
+
+                elif adj_atoms_names.count('C') == 1: #Another carbon attached
+                    for at in adj_atoms: 
+                        if at not in dih1 and conf.atoms[at] == 'C': 
+                            dih2 = [ dih1[1], dih1[2], dih1[3], at]                      
+                            return [dih1, dih2]
+
+    if conf.atoms[atom] == 'N':
+
+        if   len(PG_atoms) == 3 and conf.atoms[dih1[3]] == 'H': #NH2 group
+            return [dih1]
+        elif len(PG_atoms) == 3 and conf.atoms[dih1[3]] == 'N': #N3 group
+            return [dih1] 
+
+        adj_atoms =  adjacent_atoms(conf.conn_mat, atom) 
+        adj_atoms_names = []
+        for at in adj_atoms: adj_atoms_names.append(conf.atoms[at])
+        
+        for at, atn in zip(adj_atoms, adj_atoms_names):
+            if atn == 'C' and at not in dih1: 
+
+                dih3 = None
+                adj_atoms2 = adjacent_atoms(conf.conn_mat, at) 
+                adj_atoms2_names = []
+                for at2 in adj_atoms2: adj_atoms2_names.append(conf.atoms[at2])
+
+                if len(adj_atoms2) == 3 and 'O' in adj_atoms2_names: #NHCO-CH3 or NHCOH-CHH3 
+
+                    for at2, atn2 in zip(adj_atoms2, adj_atoms_names2):
+
+                        if atn2 == 'C' and at not in dih1: 
+                           dih2 = [dih1[1], dih1[2], dih1[3], at]
+
+                        if atn2 == 'O': 
+                            adj_atoms3 = adjacent_atoms(conf.conf_conn, at2)
+                            if len(and_atoms3) == 2:
+                                if   adj_atoms3[0] == 'H': 
+                                    dih3 = [ dih1[2], dih1[3], at, adj_atoms3[0]]
+                                elif adj_atoms3[1] == 'H': 
+                                    dih3 = [ dih1[2], dih1[3], at, adj_atoms3[1]]
+
+                if dih3 is not None: return [dih1, dih2, dih3]
+                return [dih1, dih2]
+
 
 def determine_carried_atoms(conf, at1, at2):
 
