@@ -25,14 +25,14 @@ class Space(list):
     _kT=0.0019872036*_temp #boltzmann
     _Ha2kcal=627.5095  
 
-    def __init__(self, path, load=True, software='g16'):
+    def __init__(self, path, load=True, software='g16', sort_atoms = False, determine_PGs = False, distXX=1.65, distXH=1.25):
 
         self.path = path
         try: os.makedirs(self.path)
         except: 
             if load == True: 
                 print("{0:10s} directory already exists, load existing data".format(path))
-                self.load_dir(path, software=software)
+                self.load_dir(path, software=software, sort_atoms = sort_atoms, determine_PGs = determine_PGs, distXX=distXX, distXH=distXH)
             else: 
                 pass
 
@@ -84,7 +84,7 @@ class Space(list):
 
         return self.__getitem(slice(i,j))
 
-    def load_dir(self, path, software='g16', carb = True, sort_atoms = False, distXX=1.65, distXH=1.25):
+    def load_dir(self, path, software='g16', carb = True, sort_atoms = False, determine_PGs = False, distXX=1.65, distXH=1.25):
         """Loads a directory with data files to be processed. The path is just the name of the directory, the function will handle the presence of multiple directories within it.
 
         :param path: (string) this is the path to the directory with all the conformer data. This directory should be filled with other directories with the intended name of the conformer and it's .xyz and input.log files
@@ -94,6 +94,9 @@ class Space(list):
         #check if this is wont lead to an error if the path doesnt exist 
 
         #self.logfiles_dir.append(path)
+
+        self.distXX = distXX
+        self.distXH = distXH
 
         for (root, dirs, files) in os.walk(path):
             for dirname in dirs:
@@ -123,11 +126,12 @@ class Space(list):
 
                                 if loaded: 
 
-                                    conf.connectivity_matrix(distXX, distXH) 
+                                    conf.connectivity_matrix(self.distXX, self.distXH)
+                                    conf.distXX = self.distXX ; conf.distXH = self.distXH
 
                                     if carb == True and  conf.Nmols == 1:
 
-                                        conf.assign_atoms( sort_atoms = sort_atoms) ; 
+                                        conf.assign_atoms( sort_atoms = sort_atoms, deter_PGs = determine_PGs) ; 
                                         conf.measure_c6()  
                                         conf.measure_glycosidic()  
                                         conf.measure_ring()
@@ -165,7 +169,7 @@ class Space(list):
                 for at in range(conf.NAtoms):
                     out.write("{0:3s}{1:12.3f}{2:12.3f}{3:12.3f}\n".format(conf.atoms[at], conf.xyz[at][0], conf.xyz[at][1], conf.xyz[at][2]))
 
-    def load_models(self, path, sort_atoms = False):
+    def load_models(self, path, sort_atoms = False, deter_PGs = False):
         """Loads a set of specific models used of analysis
         """
         self.models = []
@@ -187,7 +191,8 @@ class Space(list):
             print("{0:10s}:   ".format(conf._id), end='')
             conf.ring = [] ; conf.ring_angle = [] ; conf.dih_angle = []
             conf.connectivity_matrix(distXX=1.65, distXH=1.25)
-            conf.assign_atoms(sort_atoms = sort_atoms) ; conf.measure_c6() ; conf.measure_ring() ; conf.measure_glycosidic()
+            conf.assign_atoms(sort_atoms = sort_atoms, deter_PGs = deter_PGs) ; 
+            conf.measure_c6() ; conf.measure_ring() ; conf.measure_glycosidic()
             if hasattr(conf, 'graph'):
                 for e in conf.graph.edges:
                     edge = conf.graph.edges[e]
