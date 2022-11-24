@@ -11,11 +11,12 @@ These functions are all genetic algorithm operations. Each operation modifies ex
 """
 
 def modify_glyc(conf, bond, model = "random", Fmap = None):
-    """Modifies the angle between the two rings attached by a specified glycosidic bond
 
+    """Modifies the angle between the two rings attached by a specified glycosidic bond
     :param conf: a conformer object
     :param bond: (int) index of which edge in the list of edges of the conformer
     """
+
     edge = conf.graph.edges[bond]
     atoms = len(edge['linker_atoms']) ; angles = [] ; n=0
 
@@ -69,10 +70,32 @@ def modify_c6(conf, ring):
         dih = ((utilities.draw_random_int(top=3)-1)*120.0)+60.0
         conf.set_c6(ring, dih)
 
+def modify_pg(conf, ring_number, PG = 'all'):
+
+    PGs = ['C2', 'C3', 'C4', 'C6'] 
+
+    if PG == 'all':
+        for pg in PGs: 
+            if pg in conf.graph.nodes[ring_number].keys(): 
+                for n, dih in enumerate(conf.graph.nodes[ring_number][pg]['dih_atoms']):
+                    utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+
+    elif PG == 'random':
+
+        while True: 
+            n = utilities.draw_random_int(top=4) 
+            pg = PGs[n]
+            if pg in conf.graph.nodes[ring_number].keys():
+                for n, dih in enumerate(conf.graph.nodes[ring_number][pg]['dih_atoms']):
+                    utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+                break
+    else: 
+        for n, dih in enumerate(conf.graph.nodes[ring_number][PG]['dih_atoms']):
+            utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+
 def modify_ring(conf, ring, prob_model = None):
 
     pucker = draw_random_pucker(prob_model)
-    #print("setting ring {0:5d} to {1:5s}".format(ring, pucker))
     utilities.set_ring_pucker(conf, ring, pucker)
 
 def draw_random_pucker(prob_model=None):
@@ -103,8 +126,8 @@ def draw_random_pucker(prob_model=None):
             return puckers[pucker][utilities.draw_random_int(top=len(puckers[pucker]))]
 
 def cross_over(conf1, conf2):
-    """Swaps angle measures of two conformers
 
+    """Swaps angle measures of two conformers
     :param conf1: the first conformer object
     :param conf2: the second conformer object
     """
