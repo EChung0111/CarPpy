@@ -25,14 +25,14 @@ class Space(list):
     _kT=0.0019872036*_temp #boltzmann
     _Ha2kcal=627.5095  
 
-    def __init__(self, path, load=True, software='g16'):
+    def __init__(self, path, load=True, software='g16', sort_atoms = False, determine_PGs = False, distXX=1.65, distXH=1.25):
 
         self.path = path
         try: os.makedirs(self.path)
         except: 
             if load == True: 
                 print("{0:10s} directory already exists, load existing data".format(path))
-                self.load_dir(path, software=software)
+                self.load_dir(path, software=software, sort_atoms = sort_atoms, determine_PGs = determine_PGs, distXX=distXX, distXH=distXH)
             else: 
                 pass
 
@@ -169,7 +169,7 @@ class Space(list):
                 for at in range(conf.NAtoms):
                     out.write("{0:3s}{1:12.3f}{2:12.3f}{3:12.3f}\n".format(conf.atoms[at], conf.xyz[at][0], conf.xyz[at][1], conf.xyz[at][2]))
 
-    def load_models(self, path, sort_atoms = False):
+    def load_models(self, path, sort_atoms = False, deter_PGs = False):
         """Loads a set of specific models used of analysis
         """
         self.models = []
@@ -191,7 +191,8 @@ class Space(list):
             print("{0:10s}:   ".format(conf._id), end='')
             conf.ring = [] ; conf.ring_angle = [] ; conf.dih_angle = []
             conf.connectivity_matrix(distXX=1.65, distXH=1.25)
-            conf.assign_atoms(sort_atoms = sort_atoms) ; conf.measure_c6() ; conf.measure_ring() ; conf.measure_glycosidic()
+            conf.assign_atoms(sort_atoms = sort_atoms, deter_PGs = deter_PGs) ; 
+            conf.measure_c6() ; conf.measure_ring() ; conf.measure_glycosidic()
             if hasattr(conf, 'graph'):
                 for e in conf.graph.edges:
                     edge = conf.graph.edges[e]

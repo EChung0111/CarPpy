@@ -354,7 +354,7 @@ class Conformer():
 
             if job_type == 'nmr':
                 for at in spin:
-                    while len(at) < 71: at.append(0)
+                    while len(at) < self.NAtoms: at.append(0)
                 self.nmr = np.tril(spin) 
 
             self.xyz = np.array(geom)
@@ -539,7 +539,7 @@ class Conformer():
             C1s = [ i[0] for i in sorted(zip(C1s, C1pos), key=itemgetter(1)) ]
             ring_atoms = [ i[0] for i in sorted(zip(ring_atoms, C1pos), key=itemgetter(1)) ]
             C1pos.sort()
-            #print(C1s, C1pos)
+            #print(self._id, C1s, C1pos)
 
             for i in range(len(C1pos)):
                 for j in range(i+1, len(C1pos)):
@@ -609,13 +609,14 @@ class Conformer():
         def determine_PGs(self, ring_number):
 
             ra = self.graph.nodes[ring_number]['ring_atoms']
+            self.graph.nodes[ring_number]['PGs_dih'] = []
             linkages = []
             for e in self.graph.edges:
                 for at in self.graph.edges[e]['linker_atoms']: linkages.append(at)
             #print(linkages)
 
-            for at in ra.keys(): 
-                if at in ['C2', 'C3', 'C4', 'C6']:
+            for at in ['C2', 'C3', 'C4', 'C6']:
+                if at in ra.keys():
                     adj_atoms = adjacent_atoms(self.conn_mat, ra[at])
                     for at2 in adj_atoms:
                         if self.atoms[at2] in ['C', 'N', 'O', 'F', 'S'] and at2 not in linkages:
@@ -635,10 +636,15 @@ class Conformer():
                                     if  natom > 0: 
                                         PG_sum += atom + str(natom)
 
-                                self.graph.nodes[ring_number][at]['PG_name'] = protecting_group_name(PG_sum)
-                                self.graph.nodes[ring_number][at]['dihedrals'] = protecting_group_dihedrals(self, at2, PG_sum, PG_atoms)
-                                if at == 'C6': 
-                                    self.graph.nodes[ring_number][at]['dihedrals'][0] = copy.copy(self.graph.nodes[ring_number]['c6_atoms'])
+                                self.graph.nodes[ring_number][at]['PG_name']   = protecting_group_name(PG_sum)
+                                self.graph.nodes[ring_number][at]['dih_atoms'] = protecting_group_dihedrals(self, at2, at, PG_atoms)
+                                self.graph.nodes[ring_number][at]['PG_dihs'] = []
+                                for d in self.graph.nodes[ring_number][at]['dih_atoms']:
+                                    self.graph.nodes[ring_number][at]['PG_dihs'].append(measure_dihedral(self, d)[0])
+
+
+                                #if at == 'C6': 
+                                #    self.graph.nodes[ring_number][at]['dihedrals'][0] = copy.copy(self.graph.nodes[ring_number]['c6_atoms'])
 
         def resort_atoms(self):
 
@@ -884,6 +890,23 @@ class Conformer():
             atoms = self.graph.nodes[ring]['c6_atoms']
             set_dihedral(self, atoms, dih)
             self.measure_c6()
+
+    def measure_pg(self, ring, PG = 'all'):
+        
+        if PG == 'all': 
+            for pg in ['C2', 'C3', 'C4', 'C6']: 
+                if pg in self.graph.nodes[ring].keys():
+                    for n, dih in enumerate(self.graph.nodes[ring][pg]['dih_atoms']):
+                        self.graph.nodes[ring][pg]['PG_dihs'][n] = measure_dihedral(self, dih)[0]
+        else: 
+            for n, dih in enumerate(self.graph.nodes[ring][PG]['dih_atoms']):
+                self.graph.nodes[ring][PG]['PG_dihs'][n] = measure_dihedral(self, dih)[0]
+
+    def set_pg(self, ring, PG, dihs):
+        
+        for n, dih in enumerate(self.graph.nodes[ring][PG]['dih_atoms']):
+            set_dihedral(self, dih, dihs[n])
+        self.measure_pg(ring, PG)
 
     def measure_glycosidic(self):
 

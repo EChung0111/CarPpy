@@ -7,6 +7,7 @@ GAsettings = {
             "generations"   : 60,
             "prob_dih_mut"  : 0.65,
             "prob_c6_mut"   : 0.65,
+            "prob_pg_mut"   : 0.65,
             "prob_ring_mut" : 0.33,
             "pucker_P_model": [0.2, 0.35, 0.35, 0.05, 0.05],
             "rmsd_cutoff"   : 0.1,
@@ -19,9 +20,9 @@ GAsettings = {
 
 dtime = CarP.utilities.dtime
 
-def  spawn_initial(GArun, n):
+def spawn_initial(GArun, n):
 
-    m = CarP.utilities.draw_random_int(len(GArun.models))
+    m = CarP.utilities.draw_random_int(top=len(GArun.models))
     GArun.append(copy.deepcopy(GArun.models[m]))
     GArun[-1]._id = "initial-{0:02d}".format(n)
     GArun[-1].path= '/'.join([GArun.path, GArun[-1]._id])
@@ -58,14 +59,19 @@ def run_ga():
 
         #Generation
         #Creates a conformer space and fills it with inital guesses, which are  generated from models from GAsettings['models']
-        GArun = CarP.Space(GAsettings["output_dir"], software=GAsettings["software"])
-        GArun.load_models(GAsettings["models"])
+
+        if GAsettings['prob_pg_mut'] > 0.0: 
+            GArun = CarP.Space(GAsettings["output_dir"], software=GAsettings["software"], determine_PGs =  True)
+            GArun.load_models(GAsettings["models"], deter_PGs = True)
+        else: 
+            GArun = CarP.Space(GAsettings["output_dir"], software=GAsettings["software"])
+            GArun.load_models(GAsettings["models"])
+
         if GAsettings["Fmaps"]: GArun.load_Fmaps(GAsettings["Fmaps"])
 
-        GArun.set_theory(nprocs=8, mem='16GB', 
-                         method='PM3', basis_set='', charge=0, multiplicity=1, 
-                         jobtype='sp', disp=False)
-
+        GArun.set_theory(nprocs=12, mem='16GB', 
+                         method='PM3', basis_set='', charge=1, multiplicity=1, 
+                         jobtype='opt', disp=False)
         #GArun.set_theory(nprocs=24, mem='64GB', charge=1, method='PBE1PBE' , basis_set='6-31G(d)', jobtype='opt=loose', disp=True)
         #GArun.set_theory(software='fhiaims', charge='1.0', basis_set='light', nprocs=24) 
 
@@ -115,6 +121,7 @@ def run_ga():
 
                         for r in offspring.graph.nodes:
                             CarP.ga_operations.modify_c6(offspring, r)
+                            if GAsettings['prob_pg_mut'] > 0.0: CarP.ga_operations.modify_pg(offspring, r, PG='all')
                             #CarP.ga_operations.modify_ring(offspring, r, GAsettings['pucker_P_model']) #Don't modify rings in initial
 
                     elif phase == "evolve": 
@@ -131,6 +138,9 @@ def run_ga():
 
                             if CarP.utilities.draw_random() < GAsettings['prob_c6_mut']:
                                 CarP.ga_operations.modify_c6(offspring, r)
+
+                            if CarP.utilities.draw_random() < GAsettings['prob_pg_mut']:
+                                CarP.ga_operations.modify_pg(offspring, r, PG='random')
 
                             if CarP.utilities.draw_random() < GAsettings['prob_ring_mut']:
                                 CarP.ga_operations.modify_ring(offspring, r, GAsettings['pucker_P_model'])

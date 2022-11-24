@@ -153,16 +153,21 @@ def protecting_group_name(A):
     else: 
         return A
 
-def protecting_group_dihedrals(conf, atom, PG_sum, PG_atoms):
+def protecting_group_dihedrals(conf, atom, pg_type, PG_atoms):
 
-    PG_name = protecting_group_name(PG_sum)
+    #PG_name = protecting_group_name(PG_sum)
     dih1 = [None, None, atom, None]
 
     for at1 in adjacent_atoms(conf.conn_mat, atom):
         if at1 not in PG_atoms: 
             for at2 in adjacent_atoms(conf.conn_mat, at1):
-                if conf.atoms[at2] == 'H': 
+                if pg_type == 'C6' and conf.atoms[at2] == 'C': #C5
+                    
                     dih1[0] = copy.copy(at2) ; dih1[1] = copy.copy(at1)
+
+                elif pg_type != 'C6' and  conf.atoms[at2] == 'H': 
+                    dih1[0] = copy.copy(at2) ; dih1[1] = copy.copy(at1)
+
         elif at1 in PG_atoms: 
             dih1[3] = copy.copy(at1)
 
@@ -198,7 +203,7 @@ def protecting_group_dihedrals(conf, atom, PG_sum, PG_atoms):
                 for at in adj_atoms: adj_atoms_names.append(conf.atoms[at])
 
                 if adj_atoms_names.count('H') == 3: #OMe
-                    return dih1
+                    return [dih1]
 
                 elif adj_atoms_names.count('C') == 1: #Another carbon attached
                     for at in adj_atoms: 
@@ -364,14 +369,14 @@ def set_angle(conf, list_of_atoms, new_ang):
 
     from scipy.linalg import expm
 
+    if len(list_of_atoms) != 3:
+        raise ValueError("The position needs to be defined by 4 integers")
+
     at1 = list_of_atoms[0]
     at2 = list_of_atoms[1] #midpoint
     at3 = list_of_atoms[2]
     #xyz = copy.copy(conf.xyz)
     xyz = conf.xyz
-
-    if len(position) != 3:
-        raise ValueError("The position needs to be defined by 4 integers")
 
     #   Determine the axis of rotation:
 
@@ -651,6 +656,14 @@ def set_ring_pucker(conf, ring_number, pucker):
     for n, oa in enumerate(['C1', 'C3', 'C5']):
 
         op_atoms_adj = adjacent_atoms(conf.conn_mat, ra[oa]) ;
+
+        if oa == 'C1' and conf.anomer == 'carbocation': #sp2 C1
+           #print(conf.atoms[op_atoms_adj[0]])
+            anomeric_h = copy.copy(op_atoms_adj[0])
+            set_dihedral(conf, [ra['C2'], ra['O'], ra['C1'], anomeric_h],   179.)
+            #set_dihedral(conf, [ra['C2'], ra['O'], ra['C1'], anomeric_h],   179.) #No idea why I need to do it twice
+            continue
+
         if conf.atoms[op_atoms_adj[0]] == 'H':
             op_atoms = [op_atoms_adj[0], ra[oa], op_atoms_adj[1]]
         else: 
@@ -703,6 +716,10 @@ def set_ring_pucker(conf, ring_number, pucker):
     #print("Step 3: Tilt")
 
     for n, rat in zip([0,1,2],['C1', 'C3', 'C5']):
+
+        if rat == 'C1' and conf.anomer == 'carbocation': #sp2 C1
+            set_angle(conf, [ra['C2'], ra['C1'], anomeric_h], 120.)
+            continue
 
         N1 = (n+3)%3
         N2 = (n+2)%3

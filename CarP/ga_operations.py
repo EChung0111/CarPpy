@@ -70,6 +70,29 @@ def modify_c6(conf, ring):
         dih = ((utilities.draw_random_int(top=3)-1)*120.0)+60.0
         conf.set_c6(ring, dih)
 
+def modify_pg(conf, ring_number, PG = 'all'):
+
+    PGs = ['C2', 'C3', 'C4', 'C6'] 
+
+    if PG == 'all':
+        for pg in PGs: 
+            if pg in conf.graph.nodes[ring_number].keys(): 
+                for n, dih in enumerate(conf.graph.nodes[ring_number][pg]['dih_atoms']):
+                    utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+
+    elif PG == 'random':
+
+        while True: 
+            n = utilities.draw_random_int(top=4) 
+            pg = PGs[n]
+            if pg in conf.graph.nodes[ring_number].keys():
+                for n, dih in enumerate(conf.graph.nodes[ring_number][pg]['dih_atoms']):
+                    utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+                break
+    else: 
+        for n, dih in enumerate(conf.graph.nodes[ring_number][PG]['dih_atoms']):
+            utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+
 def modify_ring(conf, ring, prob_model = None):
 
     pucker = draw_random_pucker(prob_model)
