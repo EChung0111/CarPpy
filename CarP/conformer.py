@@ -706,7 +706,7 @@ class Conformer():
                 for adj in adjacent_atoms(self.conn_mat, unique): #check how many Os are adj
                     adj_atoms.append(self.atoms[adj])
 
-                if adj_atoms.count('O') == 2:
+                if adj_atoms.count('O') == 2: #Change to how many non C and non H atoms are attached to it.
                     #print('remove', unique)
 
                     #dioxolenium ion => break the C1-O bond, we will check 

@@ -646,4 +646,163 @@ class Space(list):
         else: 
             fig.savefig('/'.join([self.path, 'ccs_plot.pdf']), dpi=200, transparent=True)
 
+    def plot_puckers(self, output=None, ring_number='all', ymin=-1, ymax=20, energy_function='E'):
+   
+        from matplotlib.ticker import NullFormatter, FormatStrFormatter
+       
+        nullfmt = NullFormatter()         # no labels
+ 
+        def reduce_pucker(p):
 
+            xaxis = {'4C1':0, '1C4':1, 'S': 2, 'B':3, 'H':4, 'E':5 }
+            S = ['1S3', '3S1', '2S6', '6S2','5S1', '1S5']
+            B = ['B1,4', 'B3,6', '3,6B', '1,4B', '2,5B', 'B2,5']
+            H = ['6H5', '5H6', '6H1', '1H6', '1H2', '2H1', '2H3', '3H2', '3H4', '4H3', '4H5', '5H4']
+            E = ['E'+str(x) for x in range(1,7)] + [str(x) + 'E' for x in range(1,7)]
+ 
+            if p in ['4C1', '1C4']:
+                pass
+            elif p in S: p = 'S'
+            elif p in B: p = 'B'
+            elif p in H: p = 'H'
+            elif p in E: p = 'E'
+            return xaxis[p]
+ 
+ 
+        if ring_number == 'all': 
+ 
+            nrings = len(self[0].graph.nodes)
+            
+            fig, axes = plt.subplots(1, nrings, figsize=(4*nrings,6))
+       
+            if   energy_function == 'E' : ylabel = '$\Delta$E PBE0+D3 [kcal/mol]'
+            elif energy_function == 'F':  ylabel = '$\Delta$F PBE0+D3 [kcal/mol]'
+ 
+            for n, ax in enumerate(axes):
+ 
+                ax.set_ylabel(ylabel, fontsize=18)
+                yaxis = np.linspace(ymin+1, ymax, 6)
+                ax.set_ylim(ymin, ymax)
+       
+                xmin = 0; xmax = 5
+                xaxis = np.linspace(xmin, xmax, 6)
+                x_extend = 0.5
+                ax.set_xlim(xmin-x_extend, xmax+x_extend+0.5)
+       
+                puckers = [r'$^4$C$_1$', r'$^1$C$_4$', 'S', 'B', 'H', 'E']
+                ax.set_xticks(xaxis+0.5); ax.set_yticks(yaxis)
+                ax.set_xticklabels(puckers, fontsize='16');
+                ax.set_yticklabels(yaxis, fontsize='16')
+       
+                ax.tick_params(axis='both', which='both', bottom=True, top=False, labelbottom=True, right=False, left=True, labelleft=True)
+                for s in ['top', 'right', 'left', 'bottom']: ax.spines[s].set_visible(False)
+                ax.xaxis.set_tick_params(direction='out')
+                ax.yaxis.set_tick_params(direction='out')
+                ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+       
+                ax.plot([xmin-x_extend,xmax+x_extend+0.5], [ymin+0.05, ymin+0.05], 'k', lw=1.5)
+                ax.plot([xmin-x_extend+0.05, xmin-x_extend+0.05], [0,ymax], 'k', lw=1.5)
+ 
+       
+                w = 0.2
+                for conf in self:
+                    p = reduce_pucker(conf.graph.nodes[n]['pucker'])
+                    if energy_function == 'E': E = conf.Erel*self._Ha2kcal 
+                    elif energy_function == 'F' : E = conf.Frel*self._Ha2kcal
+                    ax.plot([p+w, p+1-w], [E, E], lw=1, color='k')
+           
+            fig.tight_layout()
+            if output: 
+                fig.savefig('/'.join([output, 'ring_puckers.pdf']), dpi=200, transparent=True)
+            else: 
+                fig.savefig('/'.join([self.path, 'ring_puckers.pdf']), dpi=200, transparent=True)
+
+        else: 
+
+            fig, ax = plt.subplots(1, figsize=(4,6))
+
+            if   energy_function == 'E' : ylabel = '$\Delta$E PBE0+D3 [kcal/mol]'
+            elif energy_function == 'F':  ylabel = '$\Delta$F PBE0+D3 [kcal/mol]'
+
+
+            ax.set_ylabel(ylabel, fontsize=18)
+            yaxis = np.linspace(ymin+1, ymax, 6)
+            ax.set_ylim(ymin, ymax)
+
+            xmin = 0; xmax = 5
+            xaxis = np.linspace(xmin, xmax, 6)
+            x_extend = 0.5
+            ax.set_xlim(xmin-x_extend, xmax+x_extend+0.5)
+
+            puckers = [r'$^4$C$_1$', r'$^1$C$_4$', 'S', 'B', 'H', 'E']
+            ax.set_xticks(xaxis+0.5); ax.set_yticks(yaxis)
+            ax.set_xticklabels(puckers, fontsize='16');
+            ax.set_yticklabels(yaxis, fontsize='16')
+
+            ax.tick_params(axis='both', which='both', bottom=True, top=False, labelbottom=True, right=False, left=True, labelleft=True)
+            for s in ['top', 'right', 'left', 'bottom']: ax.spines[s].set_visible(False)
+            ax.xaxis.set_tick_params(direction='out')
+            ax.yaxis.set_tick_params(direction='out')
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+            ax.plot([xmin-x_extend,xmax+x_extend+0.5], [ymin+0.05, ymin+0.05], 'k', lw=1.5)
+            ax.plot([xmin-x_extend+0.05, xmin-x_extend+0.05], [0,ymax], 'k', lw=1.5)
+
+            w = 0.2
+            for conf in self:
+                p = reduce_pucker(conf.graph.nodes[ring_number]['pucker'])
+                if energy_function == 'E': E = conf.Erel*self._Ha2kcal
+                elif energy_function == 'F' : E = conf.Frel*self._Ha2kcal
+                ax.plot([p+w, p+1-w], [E, E], lw=1, color='k')
+       
+            fig.tight_layout()
+            if output: 
+                fig.savefig('/'.join([output, 'ring_'+str(ring_number)+'.pdf']), dpi=200, transparent=True)
+            else: 
+                fig.savefig('/'.join([self.path, 'ring_'+str(ring_number)+'.pdf']), dpi=200, transparent=True)
+
+
+    def plot_glycosidic_bond(self, output=None, angles='all'):
+
+        from matplotlib.ticker import NullFormatter, FormatStrFormatter      
+
+        if angles == 'all': 
+ 
+            nang = len(self[0].graph.edges)
+            
+            fig, axes = plt.subplots(1, nang, figsize=(4*nang,4))
+       
+            for e, ax in zip(self[0].graph.edges, axes):
+ 
+                ax.set_ylabel(r'$\psi$', fontsize=18)
+                yaxis = np.linspace(-180.0, 180.0, 7)
+                ax.set_ylim(-180.0, 180.0)
+                ax.set_yticks(yaxis)
+                ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+      
+                ax.set_xlabel(r'$\phi$', fontsize=18)
+                xaxis = np.linspace(-180, 180, 7)
+                ax.set_xlim(-180.0, 180.0)
+                ax.set_xticks(xaxis)
+                ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
+
+                ax.tick_params(axis='both', which='both', direction='out', bottom=True, top=True, labelbottom=True, right=True, left=True, labelleft=True)
+                ax.grid(visible=True)
+
+                ax.set_title(self[0].graph.edges[e]['linker_type'])
+
+                #for s in ['top', 'right', 'left', 'bottom']: ax.spines[s].set_visible(False)
+                #ax.xaxis.set_tick_params(direction='out')
+                #ax.yaxis.set_tick_params(direction='out')
+       
+                for conf in self:
+
+                    phi = conf.graph.edges[e]['dihedral'][0]
+                    psi = conf.graph.edges[e]['dihedral'][1]
+                    ax.scatter(phi, psi, color='k')
+           
+            fig.tight_layout()
+            if output: 
+                fig.savefig('/'.join([output, 'dihedrals_all.pdf']), dpi=200, transparent=True)
+            else: 
+                fig.savefig('/'.join([self.path, 'dihedrals_all.pdf']), dpi=200, transparent=True)
