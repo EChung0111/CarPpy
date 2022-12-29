@@ -806,3 +806,42 @@ class Space(list):
                 fig.savefig('/'.join([output, 'dihedrals_all.pdf']), dpi=200, transparent=True)
             else: 
                 fig.savefig('/'.join([self.path, 'dihedrals_all.pdf']), dpi=200, transparent=True)
+
+        else: 
+
+            fig, ax = plt.subplots(1, figsize=(4,4))
+
+            ax.set_ylabel(r'$\psi$', fontsize=18)
+            yaxis = np.linspace(-180.0, 180.0, 7)
+            ax.set_ylim(-180.0, 180.0)
+            ax.set_yticks(yaxis)
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+
+            ax.set_xlabel(r'$\phi$', fontsize=18)
+            xaxis = np.linspace(-180, 180, 7)
+            ax.set_xlim(-180.0, 180.0)
+            ax.set_xticks(xaxis)
+            ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
+
+            ax.tick_params(axis='both', which='both', direction='out', bottom=True, top=True, labelbottom=True, right=True, left=True, labelleft=True)
+            ax.grid(visible=True)
+
+            for n, e in zip(range(0, angles+1), self[0].graph.edges): pass
+            ax.set_title(self[0].graph.edges[e]['linker_type'])
+
+            #for s in ['top', 'right', 'left', 'bottom']: ax.spines[s].set_visible(False)
+            #ax.xaxis.set_tick_params(direction='out')
+            #ax.yaxis.set_tick_params(direction='out')
+
+            for conf in self:
+
+                phi = conf.graph.edges[e]['dihedral'][0]
+                psi = conf.graph.edges[e]['dihedral'][1]
+                ax.scatter(phi, psi, color='k')
+
+            fig.tight_layout()
+            if output:
+                fig.savefig('/'.join([output, 'dihedrals_'+str(angles)+'.pdf']), dpi=200, transparent=True)
+            else:
+                fig.savefig('/'.join([self.path, 'dihedrals_'+str(angles)+'.pdf']), dpi=200, transparent=True)
+
