@@ -169,7 +169,7 @@ class Space(list):
                 for at in range(conf.NAtoms):
                     out.write("{0:3s}{1:12.3f}{2:12.3f}{3:12.3f}\n".format(conf.atoms[at], conf.xyz[at][0], conf.xyz[at][1], conf.xyz[at][2]))
 
-    def load_models(self, path, sort_atoms = False, deter_PGs = False):
+    def load_models(self, path, sort_atoms = False, deter_PGs = False, distXH=1.25, distXX=1.65):
         """Loads a set of specific models used of analysis
         """
         self.models = []
@@ -190,7 +190,8 @@ class Space(list):
 
             print("{0:10s}:   ".format(conf._id), end='')
             conf.ring = [] ; conf.ring_angle = [] ; conf.dih_angle = []
-            conf.connectivity_matrix(distXX=1.65, distXH=1.25)
+            conf.distXH=distXH ; conf.distXX=distXX
+            conf.connectivity_matrix(distXX=distXX, distXH=distXH) ; 
             conf.assign_atoms(sort_atoms = sort_atoms, deter_PGs = deter_PGs) ; 
             conf.measure_c6() ; conf.measure_ring() ; conf.measure_glycosidic()
             if hasattr(conf, 'graph'):
@@ -353,7 +354,7 @@ class Space(list):
                 else: 
                     conf.Erel = conf.E - reference[0]
 
-    def print_relative(self, alive=None, pucker=False, output = None):
+    def print_relative(self, alive=None, pucker=False, glycosidic_bond=False, output = None):
         """Prints relative energies of each conformer, related to reference_to_zero
         """
 
@@ -407,13 +408,17 @@ class Space(list):
             if hasattr(conf, 'graph'):
 
                 for e in conf.graph.edges:
+
                     edge = conf.graph.edges[e]
                     out.write(" {0:1d}->{1:1d}:{2:>4s}".format(e[0], e[1], edge['linker_type']))
+                    if glycosidic_bond == True:
+                        out.write("{0:>6.1f}{1:>6.1f}".format(*edge['dihedral'][:2]))
 
                 if pucker == 'all':
                     for r in conf.graph.nodes:
                         ring = conf.graph.nodes[r]
                         out.write("{0:>5s}{1:6.1f}{2:6.1f}{3:6.1f}".format(ring['pucker'], *ring['theta']))
+
                 elif pucker == 'pucker': 
                     for r in conf.graph.nodes:
                         ring = conf.graph.nodes[r]
@@ -796,7 +801,7 @@ class Space(list):
                 fig.savefig('/'.join([self.path, 'ring_'+str(ring_number)+'.pdf']), dpi=200, transparent=True)
 
 
-    def plot_glycosidic_bond(self, output=None, angles='all', color = 'E', vmax = 20.0, cmap='Blues_r', cmap2='Set1', levels = 6):
+    def plot_glycosidic_bond(self, output=None, angles='all', color = 'E', vmax = 20.0, cmap='Blues_r', cmap2='Set1', levels = 6, flip_order=False):
 
         from matplotlib.ticker import NullFormatter, FormatStrFormatter      
 
@@ -858,6 +863,8 @@ class Space(list):
                     if type(color) == int: 
                         P.append(reduce_pucker(conf.graph.nodes[color]['pucker']))
 
+                if flip_order == True:
+                    phi.reverse() ; psi.reverse() ; E.reverse()
 
                 if color == 'E': 
                     plot = ax.scatter(phi, psi, 50, E, cmap=cmap, vmin=vmin, vmax=vmax, edgecolors='k', linewidth=0.5)
@@ -871,6 +878,7 @@ class Space(list):
                 cb_ticks = np.linspace(vmin, vmax, 9)
                 cb = fig.colorbar(plot, ax=axes[:], ticks=cb_ticks, pad=0.05, aspect=30, location='right', shrink=0.8)
                 cb.ax.set_yticklabels([ "{0:5.1f}".format(x) for x in cb_ticks], fontsize=12)
+
             else: 
                 cb_ticks = np.linspace(vmin+0.5, levels-0.5, levels) 
                 cb = fig.colorbar(plot, ax=axes[:], ticks=cb_ticks, pad=0.05, aspect=30, location='right', shrink=0.8)
@@ -913,6 +921,9 @@ class Space(list):
                 E.append(conf.Erel*self._Ha2kcal)
                 if type(color) == int:
                     P.append(reduce_pucker(conf.graph.nodes[color]['pucker']))
+
+            if flip_order == True: 
+                phi.reverse() ; psi.reverse() ; E.reverse() 
 
 
             if color == 'E':
