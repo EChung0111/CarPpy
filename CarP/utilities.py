@@ -781,22 +781,6 @@ def select_freeze(freeze, ra):
     elif freeze == "fhiaims":
         return [ra[x] for x in ['O', 'C1', 'C2', 'C3', 'C4', 'C5']]
     
-def order_layer(layer):
-
-    ord_layer=[]
-    ord_layer.append(layer[0][1])
-
-    del layer[:1]
-
-    for i,k in zip(layer[0::2], layer[1::2]):
-        temp = [i[1],k[1]]
-        temp.sort(key=lambda n:n[0])
-        midpoint = len(ord_layer)//2+1
-        ord_layer.insert(midpoint, temp[1])
-        ord_layer.insert(midpoint, temp[0])
-    midpoint = len(ord_layer)//2+1
-    ord_layer.insert(midpoint,layer[-1][1])
-    return ord_layer
 
 def pucker_scan(detail, canon=None):
     
@@ -823,24 +807,49 @@ def pucker_scan(detail, canon=None):
 
     slist=[]
 
-    if canon != None:
-        if canon in layer1:
-            index = layer1.index(canon)
-        if canon in layer2:
-            index = layer2.index(canon)
-        if canon in layer3:
-            index = layer3.index(canon)
-        #positive pole to L1, we don't want to include the point on L1 to avoid duplicates with the next segment
-        p_L1 =np.linspace(start=top  , stop=L1[index], num=polar,   endpoint=False)
-        #Layer 1 to Layer 2
-        L1_L2=np.linspace(start=L1[index], stop=L2[index], num=tropical,endpoint=False)
-        #Layer 2 to Layer 3
-        L2_L3=np.linspace(start=L2[index], stop=L3[index], num=tropical,endpoint=False)
-        #L3 to negative pole, we do want to include the endpoint to get the pole
-        L3_p =np.linspace(start=L3[index], stop=bot, num=(polar+1)) #MM: Why no endpoint = False? 
+    if canon and canon != 'all':
+        index=None
+        for l in layer1,layer2,layer3:
+            if canon in l:
+                index = l.index(canon)
+        if not index:
+            raise Exception(f"{canon} is not a canonical pucker conformation")
 
-        temp=np.concatenate((p_L1,L1_L2,L2_L3,L3_p))
-        return temp
+        #positive pole to L1, we don't want to include the point on L1 to avoid duplicates with the next segment
+        p_L1 = np.linspace(start=top  , stop=L1[index], num=polar,   endpoint=False)
+        #Layer 1 to Layer 2
+        L1_L2 = np.linspace(start=L1[index], stop=L2[index], num=tropical,endpoint=False)
+        #Layer 2 to Layer 3
+        L2_L3 = np.linspace(start=L2[index], stop=L3[index], num=tropical,endpoint=False)
+        #L3 to negative pole, we do want to include the endpoint to get the pole
+        L3_p = np.linspace(start=L3[index], stop=bot, num=(polar+1)) #MM: Why no endpoint = False? 
+
+        meridian = np.concatenate((p_L1,L1_L2,L2_L3,L3_p))
+        return meridian
+
+    if canon == 'all':
+        all_meridians = []
+        for i in range(len(L1)):
+            #positive pole to L1, we don't want to include the point on L1 to avoid duplicates with the next segment
+            p_L1 = np.linspace(start=top  , stop=L1[i], num=polar,   endpoint=False)
+            #Layer 1 to Layer 2
+            L1_L2 = np.linspace(start=L1[i], stop=L2[i], num=tropical,endpoint=False)
+            #Layer 2 to Layer 3
+            L2_L3 = np.linspace(start=L2[i], stop=L3[i], num=tropical,endpoint=False)
+            #L3 to negative pole, we do want to include the endpoint to get the pole
+            L3_p = np.linspace(start=L3[i], stop=bot  , num=(polar+1)) #MM: Why no endpoint = False?
+
+            meridian = np.concatenate((p_L1,L1_L2,L2_L3,L3_p))
+            #ignore the first and last point of each slice because they are poles
+            for arr in meridian[1:-1]:
+                all_meridians.append(arr)
+
+        all_meridians.append(np.array(top))
+        all_meridians.append(np.array(bot))
+        all_meridians = np.asarray(all_meridians)
+
+        #the order is bottom pole, top pole, then each meridian from top to bottom
+        return all_meridians
 
     for i in range(len(L1)):
 
@@ -895,7 +904,7 @@ def pucker_scan(detail, canon=None):
 
     return_mesh.append(np.array(bot))
     return_mesh.append(np.array(top))
-
+    return_mesh = np.asarray(return_mesh)
     return return_mesh
 
 def calculate_rmsd(conf1, conf2, atoms=None):
