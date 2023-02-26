@@ -67,7 +67,37 @@ def clashcheck(conf, cutoff=1.2):
     if np.amin(Dist) > cutoff:
         return False
     else:
+        print(np.amin(Dist))
+        print(np.nonzero(Dist <= cutoff))
         return True
+
+def clashcheck_list(conf, cutoff=1.2):
+
+    """Checks if there is a clash between atoms
+    :param conf: passes a conformer object. Conn_mat attributre of the conf is used to exclude 'bound' atoms. 
+    :param cutoff: (float) the maximum value that would not be considered a clashing distance, default to 1.2
+    :return: (bool) True for a clash or False for no clash
+    """
+
+    Inv_cm = np.ones( (conf.NAtoms, conf.NAtoms) ) + 10*conf.conn_mat
+    dist = np.zeros((conf.NAtoms, conf.NAtoms))
+
+    for at1 in range(conf.NAtoms):
+        for at2 in range(conf.NAtoms):
+            if at1 != at2 : 
+                dist[at1,at2] = get_distance(conf.xyz[at1], conf.xyz[at2])
+            else: dist[at1,at2] = 10.0
+
+    Dist = dist*Inv_cm
+
+    if np.amin(Dist) > cutoff:
+        return False, []
+    else:
+        #return only the first numpy array because it is tells us all the atoms that are colliding
+        #the second array tells us the corresponding atom thats being collided, but we dont need it
+        #the np.nonzero doesn't include elements that are 0, which is fine but maybe i'm overlooking a potential bug
+        return True, np.nonzero(Dist <= cutoff)[0]
+
 
 def adjacent_atoms(conn_mat, at):
 
@@ -232,15 +262,15 @@ def protecting_group_dihedrals(conf, atom, pg_type, PG_atoms):
 
                 if len(adj_atoms2) == 3 and 'O' in adj_atoms2_names: #NHCO-CH3 or NHCOH-CHH3 
 
-                    for at2, atn2 in zip(adj_atoms2, adj_atoms_names2):
+                    for at2, atn2 in zip(adj_atoms2, adj_atoms2_names):
 
                         if atn2 == 'C' and at not in dih1: 
                            dih2 = [dih1[1], dih1[2], dih1[3], at]
 
                         if atn2 == 'O': 
-                            adj_atoms3 = adjacent_atoms(conf.conf_conn, at2)
-                            if len(and_atoms3) == 2:
-                                if   adj_atoms3[0] == 'H': 
+                            adj_atoms3 = adjacent_atoms(conf.conn_mat, at2)
+                            if len(adj_atoms3) == 2:
+                                if adj_atoms3[0] == 'H': 
                                     dih3 = [ dih1[2], dih1[3], at, adj_atoms3[0]]
                                 elif adj_atoms3[1] == 'H': 
                                     dih3 = [ dih1[2], dih1[3], at, adj_atoms3[1]]

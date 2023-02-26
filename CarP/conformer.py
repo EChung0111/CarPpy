@@ -627,7 +627,7 @@ class Conformer():
                                 connect_atoms(self, ra[at], at2)
 
                                 self.graph.nodes[ring_number][at] = {}
-                                #self.graph.nodes[ring_number][at]['PG_atoms'] = PG_atoms
+                                self.graph.nodes[ring_number][at]['PG_atoms'] = PG_atoms
 
                                 PG_sum = ""
                                 PG_atoms_names = [ self.atoms[pgat] for pgat in PG_atoms ]

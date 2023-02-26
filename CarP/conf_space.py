@@ -103,7 +103,6 @@ class Space(list):
                 for ifiles in os.walk(path+'/'+dirname):
                     for filename in ifiles[2]:
                         if filename.endswith('.log') or (filename.endswith('.xyz') and software == 'xyz'):
-
                             loaded = False
                             for line in open('/'.join([path, dirname, filename]), 'r').readlines()[-10:]:
 
@@ -118,10 +117,9 @@ class Space(list):
                                     loaded = conf.load_log(software="fhiaims")
 
                                 elif software == 'xyz':
-
                                     conf = Conformer('/'.join([path, dirname]))
                                     loaded = conf.load_log(software="xyz")
-
+                                
                                 else: continue 
 
                                 if loaded: 
