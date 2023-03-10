@@ -318,6 +318,13 @@ def get_distance(at1, at2):
 
     return math.sqrt((at1[0]-at2[0])**2+(at1[1]-at2[1])**2+(at1[2]-at2[2])**2)
 
+def measure_distance(conf, list_of_atoms):
+ 
+    at1 = conf.xyz[list_of_atoms[0]]
+    at2 = conf.xyz[list_of_atoms[1]]
+
+    return math.sqrt((at1[0]-at2[0])**2+(at1[1]-at2[1])**2+(at1[2]-at2[2])**2)
+
 def norm(a):
 
     """Norm of a vector

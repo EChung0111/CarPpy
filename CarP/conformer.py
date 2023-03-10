@@ -706,7 +706,7 @@ class Conformer():
                 for adj in adjacent_atoms(self.conn_mat, unique): #check how many Os are adj
                     adj_atoms.append(self.atoms[adj])
 
-                if adj_atoms.count('O') == 2:
+                if adj_atoms.count('O') == 2: #Change to how many non C and non H atoms are attached to it.
                     #print('remove', unique)
 
                     #dioxolenium ion => break the C1-O bond, we will check 
@@ -850,12 +850,13 @@ class Conformer():
             else: node['absconf'] = 'L'
 
         #determine anomaricity of the redicing end: 
-
+        self.anomer = None
         adj = adjacent_atoms(self.conn_mat, self.graph.nodes[0]['ring_atoms']['C1'])
         for at in adj:
             if self.atoms[at] == 'H': Ha = at
-            elif self.atoms[at] in ['N', 'O', 'F', 'S']  and at not in self.graph.nodes[0]['ring_atoms'].values(): O = at
-            else: self.anomer = 'carbocation' 
+            elif self.atoms[at] in ['C', 'N', 'O', 'F', 'S']  and at not in self.graph.nodes[0]['ring_atoms'].values(): O = at
+        if len(adj) == 3: self.anomer = 'carbocation' 
+
         if not self.anomer:
             list_of_atoms = [ self.graph.nodes[0]['ring_atoms']['O'], self.graph.nodes[0]['ring_atoms']['C1'], O, Ha] 
             idih = measure_dihedral( self, list_of_atoms )[0]
