@@ -45,7 +45,7 @@ def norm(a):
 
     return math.sqrt(numpy.sum(a*a))
 
-def clashcheck(conf, cutoff=1.2):
+def clashcheck(conf, cutoff=1.2, return_atms = False):
 
     """Checks if there is a clash between atoms
     :param conf: passes a conformer object. Conn_mat attributre of the conf is used to exclude 'bound' atoms. 
@@ -65,39 +65,15 @@ def clashcheck(conf, cutoff=1.2):
     Dist = dist*Inv_cm
 
     if np.amin(Dist) > cutoff:
+        if return_atms:
+            return False, []
         return False
     else:
-        print(np.amin(Dist))
-        print(np.nonzero(Dist <= cutoff))
+        #print(np.amin(Dist))
+        #print(np.nonzero(Dist <= cutoff))
+        if return_atms:
+            return True, np.nonzero(Dist <= cutoff)[0]
         return True
-
-def clashcheck_list(conf, cutoff=1.2):
-
-    """Checks if there is a clash between atoms
-    :param conf: passes a conformer object. Conn_mat attributre of the conf is used to exclude 'bound' atoms. 
-    :param cutoff: (float) the maximum value that would not be considered a clashing distance, default to 1.2
-    :return: (bool) True for a clash or False for no clash
-    """
-
-    Inv_cm = np.ones( (conf.NAtoms, conf.NAtoms) ) + 10*conf.conn_mat
-    dist = np.zeros((conf.NAtoms, conf.NAtoms))
-
-    for at1 in range(conf.NAtoms):
-        for at2 in range(conf.NAtoms):
-            if at1 != at2 : 
-                dist[at1,at2] = get_distance(conf.xyz[at1], conf.xyz[at2])
-            else: dist[at1,at2] = 10.0
-
-    Dist = dist*Inv_cm
-
-    if np.amin(Dist) > cutoff:
-        return False, []
-    else:
-        #return only the first numpy array because it is tells us all the atoms that are colliding
-        #the second array tells us the corresponding atom thats being collided, but we dont need it
-        #the np.nonzero doesn't include elements that are 0, which is fine but maybe i'm overlooking a potential bug
-        return True, np.nonzero(Dist <= cutoff)[0]
-
 
 def adjacent_atoms(conn_mat, at):
 
