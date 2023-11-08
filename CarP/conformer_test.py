@@ -116,7 +116,7 @@ class Conformer_Test:
                                     rd = furanose_basis()
 
             rd_list.append(rd)
-            print(rd)
+        print(rd_list)
         return rd_list
 
 if __name__ == '__main__':
