@@ -1,5 +1,5 @@
 import math
-from . import rmsd
+import rmsd
 import numpy as np
 import networkx
 import sys, copy
