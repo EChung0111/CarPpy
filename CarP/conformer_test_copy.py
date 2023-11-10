@@ -198,6 +198,3 @@ if __name__ == '__main__':
     
     ring_dict_list = Conformer_Test.sort_ring_atoms(cycles_in_graph=fzcycles_in_graph, graph=Fused_Graph)
     print(ring_dict_list)
-    
-    nx.draw(Fused_Graph, with_labels=True); plt.show()
-    
