@@ -41,10 +41,11 @@ class Conformer_Test:
 
                 if sugar_basis.index(rd['C5']) == 0: #Check to see if order needs to be flipped
                     sugar_basis = sugar_basis.reverse()
-                    Carb_Oxygen = sugar_basis[0]
-                    sugar_basis.remove(Carb_Oxygen)
-                else:
-                    sugar_basis.pop(-1)
+           
+                for atom in sugar_basis:
+                    if 'O' in atom:
+                        Carb_Oxygen = atom
+                sugar_basis.remove(Carb_Oxygen)
                     
                 for atom_index, atom in enumerate(sugar_basis):
                     rd[f"C{atom_index+1}"] = atom
@@ -66,10 +67,11 @@ class Conformer_Test:
 
                 if sugar_basis.index(rd['C4']) == 0: #Check to see if order needs to be flipped
                     sugar_basis = sugar_basis.reverse()
-                    Carb_Oxygen = sugar_basis[0]
-                    sugar_basis.remove(Carb_Oxygen)
-                else:
-                    sugar_basis.pop(-1)
+                   
+                for atom in sugar_basis:
+                    if 'O' in atom:
+                        Carb_Oxygen = atom
+                sugar_basis.remove(Carb_Oxygen)
                     
                 for atom_index, atom in enumerate(sugar_basis):
                     rd[f"C{atom_index+1}"] = atom
@@ -80,10 +82,10 @@ class Conformer_Test:
                 sugar_basis = list(nx.cycle_basis(graph, oxygen_atom_list[0])[0])
                 rd['O'] = oxygen_atom_list[0]
                 if len(ring) == 6: #6 membered sugar rings
-                    rd = pyranose_basis()
+                    rd = pyranose_basis(sugar_basis)
                 
                 elif len(ring) == 5: #5 membered sugar ring
-                    rd = furanose_basis()
+                    rd = furanose_basis(sugar_basis)
 
             if oxygen_atoms == 3: #fused ring
                 if len(ring) >= 7:
@@ -102,7 +104,7 @@ class Conformer_Test:
                                 if oxygen_atom_counter == 1:
                                     rd['O'] = oxygen_atom_cycle_list[0]
                                     sugar_basis = list(cycle)
-                                    rd = pyranose_basis()
+                                    rd = pyranose_basis(sugar_basis)
                             elif len(cycle) == 5:
                                 oxygen_atom_cycle_list = []
                                 oxygen_atom_counter = 0
@@ -113,7 +115,7 @@ class Conformer_Test:
                                 if oxygen_atom_counter == 1:
                                     rd['O'] = oxygen_atom_cycle_list[0]
                                     sugar_basis = list(cycle)
-                                    rd = furanose_basis()
+                                    rd = furanose_basis(sugar_basis)
 
             rd_list.append(rd)
         print(rd_list)
@@ -122,5 +124,4 @@ class Conformer_Test:
 if __name__ == '__main__':
     
     Carb_Graph = nx.Graph()
-    nx.add_cycle(Carb_Graph, ['O','C','C','C','C','C'])
-    nx.draw(Carb_Graph) ;plt.show()
+    
