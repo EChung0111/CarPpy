@@ -87,6 +87,8 @@ class Conformer_Test:
                 sugar_basis.remove(Carb_Oxygen)
                     
                 for atom_index, atom in enumerate(sugar_basis):
+                    if 'O' in atom:
+                        sugar_basis.remove(atom)
                     rd[f"C{atom_index+1}"] = atom
 
                 return rd
