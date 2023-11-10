@@ -162,7 +162,8 @@ if __name__ == '__main__':
     Pyranose_Graph.add_edge('O12', 'C1')
     Pyranose_Graph.add_edge('O11', 'C3')
     Pyranose_Graph.add_edge('O9', 'C5')
-    Pyranose_Graph.add_edge('O10', 'C4')
+    Pyranose_Graph.add_edge('O10', 'C4')    
+
     Pyranose_Graph.add_edge('O8', 'C6')
     Pyranose_Graph.add_edge('H24', 'O12')
     Pyranose_Graph.add_edge('H13', 'C1')
