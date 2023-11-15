@@ -150,9 +150,14 @@ class ConformerTest:
                     adj_atom_list = ConformerTest.adjacent_atoms(conn_mat, HetAt)
 
                     if ConformerTest.count_n(conn_mat, HetAt, 'C') == 2 and rd['C5'] not in adj_atom_list:
+                        C1_count = 0
+
                         for adj_at in adj_atom_list:
                             if adj_at in C1_list:
-                                glycosidic_link_list.append(f"C{ring_index}")
+                                C1_count += 1
+                        
+                        if C1_count >1:
+                            glycosidic_link_list.append(f"C{ring_index}")
 
         return glycosidic_link_list
 
