@@ -43,7 +43,7 @@ def norm(a):
     :return: (float) the norm of the vector
     """
 
-    return math.sqrt(numpy.sum(a*a))
+    return math.sqrt(np.sum(a*a))
 
 def clashcheck(conf, cutoff=1.2):
 
