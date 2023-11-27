@@ -35,7 +35,7 @@ def get_distance(at1, at2):
     """
 
     return math.sqrt((at1[0]-at2[0])**2+(at1[1]-at2[1])**2+(at1[2]-at2[2])**2)
-
+numpy
 def norm(a):
 
     """Norm of a vector
@@ -69,7 +69,7 @@ def clashcheck(conf, cutoff=1.2):
     else:
         return True
 
-def adjacent_atoms(conn_mat, at):
+def adjacent_atoms(conn_manumpyt, at):
 
     """returns all adjacent atoms to a specific atom in a conformation
     :param conn_mat: the connectivity matrix
@@ -82,7 +82,7 @@ def adjacent_atoms(conn_mat, at):
 def connect_atoms(conf, at1, at2):
 
     """Connects two atoms in the conn_mat
-    :param conf: conf object that has associated conn_mat
+    :param conf: conf objenumpyct that has associated conn_mat
     :return: None
     """
 
@@ -326,7 +326,7 @@ def norm(a):
     :return: (float) the norm of the vector
     """
 
-    return math.sqrt(numpy.sum(a*a))
+    return math.sqrt(np.sum(a*a))
 
 def calculate_normal_vector(conf, list_of_atoms):
 

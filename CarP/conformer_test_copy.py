@@ -1,6 +1,56 @@
 import networkx as nx
+import numpy as np
+import math
+import matplotlib.pyplot as plt
+from itertools import zip_longest
 
 class ConformerTest:
+
+    def xyztograph(path):
+        file_open = open(path)
+        xyz_array = []
+
+        for line in file_open:
+            if '   ' in line:
+                line_list = line.split()
+                xyz_array.append(line_list)
+        
+        xyz_array = np.array(xyz_array)
+
+        distXH = 1.25
+        distXX = 1.65
+        
+        Nat = len(xyz_array[:,0])
+        Conn_Mat = nx.Graph()
+
+        for atom1 in range(Nat):
+            for atom2 in range(Nat):
+                atom1_type = xyz_array[atom1,0]
+                atom2_type = xyz_array[atom2,0]
+
+                delx = float(xyz_array[atom2,1]) - float(xyz_array[atom1,1])
+                dely = float(xyz_array[atom2,2]) - float(xyz_array[atom1,2])
+                delz = float(xyz_array[atom2,3]) - float(xyz_array[atom1,3])
+
+                distance = math.sqrt(delx**2 + dely**2 + delz**2)
+
+                if atom1_type == 'H' and atom2_type == 'H':
+                    continue
+                elif atom1_type == 'H' or atom2_type == 'H':
+                    if distance <= distXH:
+                        if (Conn_Mat.has_edge(f"{atom1_type}{atom1+1}", f"{atom2_type}{atom2+1}") == False and
+                            Conn_Mat.has_edge(f"{atom2_type}{atom2+1}", f"{atom1_type}{atom1+1}") == False
+                            ):
+                            Conn_Mat.add_edge(f"{atom1_type}{atom1+1}", f"{atom2_type}{atom2+1}")
+                
+                elif atom1_type != 'H' and atom2_type != 'H':
+                    if distance <= distXX:
+                        if (Conn_Mat.has_edge(f"{atom1_type}{atom1+1}", f"{atom2_type}{atom2+1}") == False and
+                            Conn_Mat.has_edge(f"{atom2_type}{atom2+1}", f"{atom1_type}{atom1+1}") == False
+                            ):
+                            Conn_Mat.add_edge(f"{atom1_type}{atom1+1}", f"{atom2_type}{atom2+1}")
+
+        return Conn_Mat
 
     @staticmethod
     def count_n(conn_mat, node, filter):
@@ -29,13 +79,16 @@ class ConformerTest:
                         ConformerTest.count_n(conn_mat, atom, 'H') == 1
                     ):
                         rd['C5'] = atom
+                        rd['C6'] = adj_at
                     elif (
                         ConformerTest.count_n(conn_mat, adj_at, 'H') == 0 and
                         ConformerTest.count_n(conn_mat, adj_at, 'O') == 2
                     ):
                         rd['C5'] = atom
+                        rd['C6'] = adj_at
                     elif ConformerTest.count_n(conn_mat, adj_at, 'H') == 3:
                         rd['C5'] = atom
+                        rd['C6'] = adj_at
 
         if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
@@ -63,15 +116,18 @@ class ConformerTest:
                         ConformerTest.count_n(conn_mat, atom, 'H') == 1
                     ):
                         rd['C5'] = atom
+                        rd['C6'] = adj_at
                     elif (
                         ConformerTest.count_n(conn_mat, adj_at, 'H') == 0 and
                         ConformerTest.count_n(conn_mat, adj_at, 'O') == 2
                     ):
                         rd['C5'] = atom
+                        rd['C6'] = adj_at
                     elif ConformerTest.count_n(conn_mat, adj_at, 'H') == 3:
                         rd['C5'] = atom
+                        rd['C6'] = adj_at
 
-        if sugar_basis.index(rd['C4']) == 0:
+        if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
 
         Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
@@ -101,13 +157,15 @@ class ConformerTest:
                 continue
 
             if oxygen_atoms == 1:
-                sugar_basis = list(nx.cycle_basis(conn_mat, oxygen_atom_list[0])[0])
+                sugar_basis_list = list(nx.cycle_basis(conn_mat, oxygen_atom_list[0]))
                 rd['O'] = oxygen_atom_list[0]
+                for sugar_basis in sugar_basis_list:
+                    if len(sugar_basis) == len(ring) and rd['O'] in sugar_basis:
 
-                if len(ring) == 6:
-                    rd = ConformerTest.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
-                elif len(ring) == 5:
-                    rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                        if len(ring) == 6:
+                            rd = ConformerTest.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                        elif len(ring) == 5:
+                            rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
             if oxygen_atoms == 3 and len(ring) >= 7:
                 for oxygen_atom in oxygen_atom_list:
@@ -133,7 +191,7 @@ class ConformerTest:
 
             rd_list.append(rd)
 
-        rd_list = [rd for rd in rd_list if rd != {}]
+        rd_list = [rd for rd in rd_list if len(rd.keys()) >= 5]
         return rd_list
     
     def glycosidic_link_check(conn_mat, rd, C1_list):
@@ -156,7 +214,7 @@ class ConformerTest:
                             if adj_at in C1_list:
                                 C1_count += 1
                         
-                        if C1_count >1:
+                        if C1_count >0:
                             glycosidic_link_list.append(f"C{ring_index}")
 
         return glycosidic_link_list
@@ -167,24 +225,18 @@ class ConformerTest:
             if atom in rd.values():
                 return rd
     
-    def sort_rings(rd_list, conn_mat):
-        sorted_list = []
-        C1_list = []
-        for rd in rd_list:
-            if len(rd) == 6:
-                C1_list.append(rd['C1'])
-            elif len(rd) == 5:
-                C1_list.append(rd['C2'])
-        
+    def find_red_end(C1_list, rd_list, conn_mat):
         for C1 in C1_list:
-
             ring_dict = ConformerTest.ring_dict_finder(C1, rd_list)
             
             for atom in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=C1):
 
-                if 'O' in atom:
-                    if ConformerTest.count_n(conn_mat=conn_mat, node=atom, filter='H') == 1:
-                        sorted_list.append(rd)
+                if 'C' not in atom and 'H' not in atom:
+                    if atom in ring_dict.values():
+                        continue
+                    
+                    if ConformerTest.count_n(conn_mat=conn_mat, node=atom, filter='H') >= 1:
+                        Red_End = rd_list.index(ring_dict)
                     else:
                         C1_count = 0
                         for adj_atom in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=atom):
@@ -192,63 +244,79 @@ class ConformerTest:
                                 C1_count += 1
                         
                         if C1_count == 2 and len(ConformerTest.glycosidic_link_check(conn_mat, ring_dict, C1_list)) > 1:
-                            pass
+                            Red_End = rd_list.index(ring_dict)
+        
+        return Red_End
+
+    def ring_connectivity_checker(rd1,rd2,conn_mat):
+
+        edge_check_list = []
+        atom1_list = list(range(1,len(rd1.keys())))
+        atom2_list = list(range(1,len(rd2.keys())))
+        for atom1_index,atom2_index in zip_longest(atom1_list,atom2_list):
+            if atom1_index == 5 or atom2_index == 5:
+                continue
+            
+            if len(rd1.keys()) == 7 and atom2_index is not None:
+                edge_check_list.append([rd1['C1'],rd2[f"C{atom2_index}"]])
+            elif len(rd1.keys()) == 6 and atom2_index is not None:
+                edge_check_list.append([rd1['C2'],rd2[f"C{atom2_index}"]])
+                edge_check_list.append([rd2['C1'],rd1[f"C{atom1_index}"]])
+        
+        connections = 0
+        for edge in edge_check_list:
+
+            if len(nx.shortest_path(conn_mat,edge[0],edge[1])) == 3:
+                connections += 1
+        
+        if connections > 0:
+            connected = True
+        else:
+            connected = False
+        
+        return connected
+
+    def ring_graph_maker(rd_list,conn_mat):
+
+        ring_graph = nx.Graph()
+
+        for rd1 in rd_list:
+            for rd2 in rd_list:
+                if rd1 != rd2:
+
+                    if (ConformerTest.ring_connectivity_checker(rd1=rd1, rd2=rd2, conn_mat=conn_mat) == True and
+                        ring_graph.has_edge(rd_list.index(rd1),rd_list.index(rd2)) == False and
+                        ring_graph.has_edge(rd_list.index(rd2),rd_list.index(rd1)) == False
+                        ):
+                        ring_graph.add_edge(rd_list.index(rd1),rd_list.index(rd2))
+        
+        return ring_graph
+    
+    def sort_rings(rd_list, conn_mat):
+        C1_list = []
+        for rd in rd_list:
+            if 'C1' in rd.keys():
+                C1_list.append(rd['C1'])
+            else:
+                C1_list.append(rd['C2'])
+
+        Red_End = ConformerTest.find_red_end(C1_list=C1_list,rd_list=rd_list,conn_mat=conn_mat)
+        ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list,conn_mat=conn_mat)
+        tree = nx.dfs_tree(ring_graph,Red_End)
+    
+        return tree
+
 if __name__ == "__main__":
     #This section is just for testing (Will not be in final code)
-    Furanose_conn_mat = nx.Graph()
-    Furanose_conn_mat.add_edge('C1', 'C2')
-    Furanose_conn_mat.add_edge('O12', 'C1')
-    Furanose_conn_mat.add_edge('O9', 'C5')
-    Furanose_conn_mat.add_edge('O10', 'C4')
-    Furanose_conn_mat.add_edge('O8', 'C6')
-    Furanose_conn_mat.add_edge('H24', 'O12')
-    Furanose_conn_mat.add_edge('H13', 'C1')
-    Furanose_conn_mat.add_edge('H15', 'C2')
-    Furanose_conn_mat.add_edge('H17', 'C4')
-    Furanose_conn_mat.add_edge('H18', 'C5')
-    Furanose_conn_mat.add_edge('H19', 'C6')
-    fcycles_in_conn_mat = nx.cycle_basis(Furanose_conn_mat)
+    xyz_file = input()
+    if '.xyz' in xyz_file:
+        conn_mat = ConformerTest.xyztograph(xyz_file)
+        cycles_in_graph = nx.cycle_basis(conn_mat)
 
-    Pyranose_conn_mat = nx.Graph()
-    nx.add_cycle(Pyranose_conn_mat, ['C2', 'C3', 'C4', 'C5', 'C6', 'O7'])
-    Pyranose_conn_mat.add_edge('C1', 'C2')
-    Pyranose_conn_mat.add_edge('O12', 'C1')
-    Pyranose_conn_mat.add_edge('O11', 'C3')
-    Pyranose_conn_mat.add_edge('O9', 'C5')
-    Pyranose_conn_mat.add_edge('O10', 'C4')    
-
-    Pyranose_conn_mat.add_edge('O8', 'C6')
-    Pyranose_conn_mat.add_edge('H24', 'O12')
-    Pyranose_conn_mat.add_edge('H13', 'C1')
-    Pyranose_conn_mat.add_edge('H14', 'C1')
-    Pyranose_conn_mat.add_edge('H15', 'C2')
-    Pyranose_conn_mat.add_edge('H16', 'C3')
-    Pyranose_conn_mat.add_edge('H17', 'C4')
-    Pyranose_conn_mat.add_edge('H18', 'C5')
-    Pyranose_conn_mat.add_edge('H19', 'C6')
-    pcycles_in_conn_mat = nx.cycle_basis(Pyranose_conn_mat)
-
-    Benzene_conn_mat = nx.conn_mat()
-    nx.add_cycle(Benzene_conn_mat, ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'])
-    bcycles_in_conn_mat = nx.cycle_basis(Benzene_conn_mat)
-
-    Fused_conn_mat = nx.conn_mat()
-    nx.add_cycle(Fused_conn_mat, ['C2', 'C3', 'C4', 'C5', 'C6', 'O7'])
-    nx.add_cycle(Fused_conn_mat, ['O7', 'C6', 'O32', 'C31', 'O9', 'C3', 'C2'])
-    nx.add_cycle(Fused_conn_mat, ['C6', 'C5', 'C4', 'C3', 'O9', 'C31', 'O32'])
-    Fused_conn_mat.add_edge('C1', 'C2')
-    Fused_conn_mat.add_edge('O12', 'C1')
-    Fused_conn_mat.add_edge('O18', 'C5')
-    Fused_conn_mat.add_edge('O10', 'C4')
-    Fused_conn_mat.add_edge('H24', 'O12')
-    Fused_conn_mat.add_edge('H13', 'C1')
-    Fused_conn_mat.add_edge('H14', 'C1')
-    Fused_conn_mat.add_edge('H15', 'C2')
-    Fused_conn_mat.add_edge('H16', 'C3')
-    Fused_conn_mat.add_edge('H17', 'C4')
-    Fused_conn_mat.add_edge('H18', 'C5')
-    Fused_conn_mat.add_edge('H19', 'C6')
-    fzcycles_in_conn_mat = nx.cycle_basis(Fused_conn_mat)
     
-    ring_dict_list = ConformerTest.sort_ring_atoms(cycles_in_conn_mat=fzcycles_in_conn_mat, conn_mat=Fused_conn_mat)
-    print(ring_dict_list)
+        ring_dict_list = ConformerTest.sort_ring_atoms(cycles_in_conn_mat=cycles_in_graph, conn_mat=conn_mat)
+        print(ring_dict_list)
+        ring_tree = ConformerTest.sort_rings(rd_list=ring_dict_list, conn_mat=conn_mat)
+        nx.draw(ring_tree, with_labels=True)
+        plt.show()
+        
