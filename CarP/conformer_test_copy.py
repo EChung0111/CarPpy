@@ -300,7 +300,7 @@ class ConformerTest:
                     ring_graph.add_edge(f"Ring {rd_list.index(rd1)}", f"Ring {rd_list.index(rd2)}", weight=1)
             
             if ConformerTest.amide_check(conn_mat=conn_mat,rd=rd1) == True:
-                ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}")
+                ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}", weight=2)
 
         return ring_graph
 
@@ -312,8 +312,13 @@ class ConformerTest:
         tree = nx.dfs_tree(ring_graph, red_end)
 
         glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in rd_list]
+        
+        dfs_ring_list = list(nx.dfs_preorder_nodes(ring_graph, red_end))
+        for node in dfs_ring_list:
+            if 'Amide' in node:
+                dfs_ring_list.remove(node)
 
-        return tree, glyco_list
+        return tree, glyco_list, dfs_ring_list
 
 if __name__ == "__main__":
     #This section is just for testing (Will not be in final code)
@@ -325,8 +330,9 @@ if __name__ == "__main__":
     
         ring_dict_list = ConformerTest.sort_ring_atoms(cycles_in_conn_mat=cycles_in_graph, conn_mat=conn_mat)
         print(ring_dict_list)
-        ring_tree, glyco_array = ConformerTest.sort_rings(rd_list=ring_dict_list, conn_mat=conn_mat)
+        ring_tree, glyco_array, dfs_ring_list = ConformerTest.sort_rings(rd_list=ring_dict_list, conn_mat=conn_mat)
         print(glyco_array)
+        print(dfs_ring_list)
         nx.draw(ring_tree, with_labels=True)
         plt.show()
         
