@@ -76,7 +76,7 @@ class ConformerTest:
 
         return rd
 
-    def sort_ring_atoms(self, cycles_in_graph, graph):
+    def sort_ring_atoms(self, cycles_in_graph, conn_mat):
         rd_list = []
 
         for ring in cycles_in_graph:
@@ -96,7 +96,7 @@ class ConformerTest:
                 continue
 
             if oxygen_atoms == 1:
-                sugar_basis = list(nx.cycle_basis(graph, oxygen_atom_list[0])[0])
+                sugar_basis = list(nx.cycle_basis(conn_mat, oxygen_atom_list[0])[0])
                 rd['O'] = oxygen_atom_list[0]
 
                 if len(ring) == 6:
@@ -106,7 +106,7 @@ class ConformerTest:
 
             if oxygen_atoms == 3 and len(ring) >= 7:
                 for oxygen_atom in oxygen_atom_list:
-                    test_basis = nx.minimum_cycle_basis(graph, oxygen_atom)
+                    test_basis = nx.minimum_cycle_basis(conn_mat, oxygen_atom)
 
                     for cycle in test_basis:
                         if len(cycle) == 6:
