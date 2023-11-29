@@ -6,6 +6,7 @@ from itertools import zip_longest
 
 class ConformerTest:
 
+    @staticmethod
     def xyztograph(path):
         file_open = open(path)
         xyz_array = []
@@ -139,7 +140,6 @@ class ConformerTest:
         return rd
 
     @staticmethod
-
     def sort_ring_atoms(cycles_in_conn_mat, conn_mat):
         rd_list = []
 
@@ -194,7 +194,8 @@ class ConformerTest:
         rd_list = [rd for rd in rd_list if len(rd.keys()) >= 5]
         return rd_list
     
-    def glycosidic_link_check(conn_mat, rd, C1_list):
+    @staticmethod
+    def glycosidic_link_check(conn_mat, rd, c1_list):
         glycosidic_link_list = []
 
         for ring_index in range(1, 7):
@@ -203,108 +204,87 @@ class ConformerTest:
 
             atom = rd[f"C{ring_index}"]
 
-            for HetAt in ConformerTest.adjacent_atoms(conn_mat, atom):
-                if 'C' not in HetAt and 'H' not in HetAt:
-                    adj_atom_list = ConformerTest.adjacent_atoms(conn_mat, HetAt)
+            for het_at in ConformerTest.adjacent_atoms(conn_mat, atom):
+                if 'C' not in het_at and 'H' not in het_at:
+                    adj_atom_list = ConformerTest.adjacent_atoms(conn_mat, het_at)
 
-                    if ConformerTest.count_n(conn_mat, HetAt, 'C') == 2 and rd['C5'] not in adj_atom_list:
-                        C1_count = 0
+                    if ConformerTest.count_n(conn_mat, het_at, 'C') == 2 and rd['C5'] not in adj_atom_list:
+                        c1_count = sum(1 for adj_at in adj_atom_list if adj_at in c1_list)
 
-                        for adj_at in adj_atom_list:
-                            if adj_at in C1_list:
-                                C1_count += 1
-                        
-                        if C1_count >0:
+                        if c1_count > 0:
                             glycosidic_link_list.append(f"C{ring_index}")
 
         return glycosidic_link_list
 
+    @staticmethod
     def ring_dict_finder(atom, rd_list):
-       
         for rd in rd_list:
             if atom in rd.values():
                 return rd
-    
-    def find_red_end(C1_list, rd_list, conn_mat):
-        for C1 in C1_list:
-            ring_dict = ConformerTest.ring_dict_finder(C1, rd_list)
-            
-            for atom in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=C1):
 
+    @staticmethod
+    def find_red_end(c1_list, rd_list, conn_mat):
+        for c1 in c1_list:
+            ring_dict = ConformerTest.ring_dict_finder(c1, rd_list)
+
+            for atom in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=c1):
                 if 'C' not in atom and 'H' not in atom:
                     if atom in ring_dict.values():
                         continue
-                    
+
                     if ConformerTest.count_n(conn_mat=conn_mat, node=atom, filter='H') >= 1:
-                        Red_End = rd_list.index(ring_dict)
+                        return rd_list.index(ring_dict)
                     else:
-                        C1_count = 0
-                        for adj_atom in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=atom):
-                            if adj_atom in C1_list:
-                                C1_count += 1
-                        
-                        if C1_count == 2 and len(ConformerTest.glycosidic_link_check(conn_mat, ring_dict, C1_list)) > 1:
-                            Red_End = rd_list.index(ring_dict)
-        
-        return Red_End
+                        c1_count = sum(1 for adj_atom in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=atom)
+                                       if adj_atom in c1_list)
 
-    def ring_connectivity_checker(rd1,rd2,conn_mat):
+                        if c1_count == 2 and len(ConformerTest.glycosidic_link_check(conn_mat, ring_dict, c1_list)) > 1:
+                            return rd_list.index(ring_dict)
 
+    @staticmethod
+    def ring_connectivity_checker(rd1, rd2, conn_mat):
         edge_check_list = []
-        atom1_list = list(range(1,len(rd1.keys())))
-        atom2_list = list(range(1,len(rd2.keys())))
-        for atom1_index,atom2_index in zip_longest(atom1_list,atom2_list):
+
+        atom1_list = list(range(1, len(rd1.keys())))
+        atom2_list = list(range(1, len(rd2.keys())))
+
+        for atom1_index, atom2_index in zip_longest(atom1_list, atom2_list):
             if atom1_index == 5 or atom2_index == 5:
                 continue
-            
+
             if len(rd1.keys()) == 7 and atom2_index is not None:
-                edge_check_list.append([rd1['C1'],rd2[f"C{atom2_index}"]])
+                edge_check_list.append([rd1['C1'], rd2[f"C{atom2_index}"]])
             elif len(rd1.keys()) == 6 and atom2_index is not None:
-                edge_check_list.append([rd1['C2'],rd2[f"C{atom2_index}"]])
-                edge_check_list.append([rd2['C1'],rd1[f"C{atom1_index}"]])
-        
-        connections = 0
-        for edge in edge_check_list:
+                edge_check_list.append([rd1['C2'], rd2[f"C{atom2_index}"]])
+                edge_check_list.append([rd2['C1'], rd1[f"C{atom1_index}"]])
 
-            if len(nx.shortest_path(conn_mat,edge[0],edge[1])) == 3:
-                connections += 1
-        
-        if connections > 0:
-            connected = True
-        else:
-            connected = False
-        
-        return connected
+        connections = sum(1 for edge in edge_check_list if len(nx.shortest_path(conn_mat, edge[0], edge[1])) == 3)
 
-    def ring_graph_maker(rd_list,conn_mat):
+        return connections > 0
 
+    @staticmethod
+    def ring_graph_maker(rd_list, conn_mat):
         ring_graph = nx.Graph()
 
         for rd1 in rd_list:
             for rd2 in rd_list:
-                if rd1 != rd2:
+                if rd1 != rd2 and ConformerTest.ring_connectivity_checker(rd1=rd1, rd2=rd2, conn_mat=conn_mat) \
+                        and not ring_graph.has_edge(rd_list.index(rd1), rd_list.index(rd2)) \
+                        and not ring_graph.has_edge(rd_list.index(rd2), rd_list.index(rd1)):
+                    ring_graph.add_edge(rd_list.index(rd1), rd_list.index(rd2))
 
-                    if (ConformerTest.ring_connectivity_checker(rd1=rd1, rd2=rd2, conn_mat=conn_mat) == True and
-                        ring_graph.has_edge(rd_list.index(rd1),rd_list.index(rd2)) == False and
-                        ring_graph.has_edge(rd_list.index(rd2),rd_list.index(rd1)) == False
-                        ):
-                        ring_graph.add_edge(rd_list.index(rd1),rd_list.index(rd2))
-        
         return ring_graph
-    
-    def sort_rings(rd_list, conn_mat):
-        C1_list = []
-        for rd in rd_list:
-            if 'C1' in rd.keys():
-                C1_list.append(rd['C1'])
-            else:
-                C1_list.append(rd['C2'])
 
-        Red_End = ConformerTest.find_red_end(C1_list=C1_list,rd_list=rd_list,conn_mat=conn_mat)
-        ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list,conn_mat=conn_mat)
-        tree = nx.dfs_tree(ring_graph,Red_End)
-    
-        return tree
+    @staticmethod
+    def sort_rings(rd_list, conn_mat):
+        c1_list = [rd['C1'] if 'C1' in rd else rd['C2'] for rd in rd_list]
+        red_end = ConformerTest.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
+        ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
+        tree = nx.dfs_tree(ring_graph, red_end)
+
+        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in rd_list]
+
+        return tree, glyco_list
 
 if __name__ == "__main__":
     #This section is just for testing (Will not be in final code)
@@ -316,7 +296,8 @@ if __name__ == "__main__":
     
         ring_dict_list = ConformerTest.sort_ring_atoms(cycles_in_conn_mat=cycles_in_graph, conn_mat=conn_mat)
         print(ring_dict_list)
-        ring_tree = ConformerTest.sort_rings(rd_list=ring_dict_list, conn_mat=conn_mat)
+        ring_tree, glyco_array = ConformerTest.sort_rings(rd_list=ring_dict_list, conn_mat=conn_mat)
+        print(glyco_array)
         nx.draw(ring_tree, with_labels=True)
         plt.show()
         
