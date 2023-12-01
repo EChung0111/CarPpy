@@ -326,6 +326,9 @@ class ConformerTest:
             
             if ConformerTest.amide_check(conn_mat=conn_mat,rd=rd1) == True:
                 ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}", weight=2)
+        
+        if ring_graph.number_of_edges() == 0:
+            ring_graph.add_node('Ring 0')
 
         return ring_graph
 
@@ -334,6 +337,7 @@ class ConformerTest:
         c1_list = [rd['C1'] if len(list(rd.values())) == 7 else rd['C2'] for rd in rd_list]
         red_end = ConformerTest.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
         ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
+        
         tree = nx.dfs_tree(ring_graph, red_end)
 
         glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in rd_list]
@@ -367,4 +371,3 @@ if __name__ == "__main__":
         print(dfs_ring_list)
         nx.draw(ring_tree, with_labels=True)
         plt.show()
-        
