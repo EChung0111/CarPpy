@@ -75,12 +75,13 @@ class ConformerTest:
             else:
                 for adj_at in ConformerTest.adjacent_atoms(conn_mat, atom):
                     if (
-                        ConformerTest.count_n(conn_mat, adj_at, 'H') == 2 and
+                        ConformerTest.count_n(conn_mat, adj_at, 'H') >= 1 and
                         ConformerTest.count_n(conn_mat, adj_at, 'O') == 1 and
                         ConformerTest.count_n(conn_mat, atom, 'H') == 1
                     ):
                         rd['C5'] = atom
                         rd['C6'] = adj_at
+                        
                     elif (
                         ConformerTest.count_n(conn_mat, adj_at, 'H') == 0 and
                         ConformerTest.count_n(conn_mat, adj_at, 'O') == 2
@@ -100,6 +101,19 @@ class ConformerTest:
         for atom_index, atom in enumerate(sugar_basis):
             rd[f"C{atom_index + 1}"] = atom
 
+        if (
+            ConformerTest.count_n(conn_mat=conn_mat, node=rd['C6'], filter='H') >= 1 and
+            ConformerTest.count_n(conn_mat=conn_mat, node=rd['C1'], filter='C') > 1):
+
+            rd_index = 6
+            while rd_index > 0:
+                rd[f"C{rd_index +1}"] = rd[f"C{rd_index}"]
+                rd_index -= 1
+            
+            for C2_adjaceent in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=rd['C2']):
+                if C2_adjaceent not in sugar_basis and 'C' in C2_adjaceent:
+                    rd['C1'] = C2_adjaceent
+
         return rd
 
     @staticmethod
@@ -112,7 +126,7 @@ class ConformerTest:
             else:
                 for adj_at in ConformerTest.adjacent_atoms(conn_mat, atom):
                     if (
-                        ConformerTest.count_n(conn_mat, adj_at, 'H') == 2 and
+                        ConformerTest.count_n(conn_mat, adj_at, 'H') >= 1 and
                         ConformerTest.count_n(conn_mat, adj_at, 'O') == 1 and
                         ConformerTest.count_n(conn_mat, atom, 'H') == 1
                     ):
@@ -195,17 +209,17 @@ class ConformerTest:
         return rd_list
     
     @staticmethod
-    def glycosidic_link_check(conn_mat, rd, c1_list):
+    def glycosidic_link_check(conn_mat, rd,  c1_list):
         glycosidic_link_list = []
 
-        for ring_index in range(1, 7):
+        for ring_index in range(1, len(list(rd.values()))):
             if ring_index == 5:
                 continue
 
             atom = rd[f"C{ring_index}"]
 
             for het_at in ConformerTest.adjacent_atoms(conn_mat, atom):
-                if 'C' not in het_at and 'H' not in het_at:
+                if 'C' not in het_at and 'H' not in het_at and het_at not in rd.values():
                     adj_atom_list = ConformerTest.adjacent_atoms(conn_mat, het_at)
 
                     if ConformerTest.count_n(conn_mat, het_at, 'C') == 2 and rd['C5'] not in adj_atom_list:
@@ -218,30 +232,41 @@ class ConformerTest:
     
     @staticmethod
     def amide_check(conn_mat, rd):
-        C2 = rd['C2']
-        HC2_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2, filter='H')
-        NC2_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2, filter='N')
-
-        for C2_adj_at in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=C2):
-            if 'N' in C2_adj_at:
-                HN_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2_adj_at, filter='H')
-                CN_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2_adj_at, filter='C')
-                
-                for N_adj_at in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=C2_adj_at):
-                    if 'C' in N_adj_at and N_adj_at != C2:
-                        OC_count = ConformerTest.count_n(conn_mat=conn_mat, node=N_adj_at, filter='O')
-                        CC_count = ConformerTest.count_n(conn_mat=conn_mat, node=N_adj_at, filter='C')
+        if len(list(rd.values())) == 7:
+            C2 = rd['C2']
+        elif len(list(rd.values())) == 8:
+            C2 = rd['C3']
+        else:
+            C2 == None
         
-                        if HC2_count == 1 and NC2_count == 1 and HN_count == 1 and CN_count == 2 and OC_count == 1 and CC_count == 2:
-                            amide = True
+        if C2 is not None:
+            HC2_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2, filter='H')
+            NC2_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2, filter='N')
 
-                        else:
-                            amide = False
-        if 'amide' not in locals():
-            amide = False
+            for C2_adj_at in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=C2):
+                if 'N' in C2_adj_at:
+                    HN_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2_adj_at, filter='H')
+                    CN_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2_adj_at, filter='C')
+                    
+                    for N_adj_at in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=C2_adj_at):
+                        if 'C' in N_adj_at and N_adj_at != C2:
+                            OC_count = ConformerTest.count_n(conn_mat=conn_mat, node=N_adj_at, filter='O')
+                            CC_count = ConformerTest.count_n(conn_mat=conn_mat, node=N_adj_at, filter='C')
+            
+                            if HC2_count == 1 and NC2_count == 1 and HN_count == 1 and CN_count == 2 and OC_count == 1 and CC_count == 2:
+                                amide = True
 
-        return amide
+                            else:
+                                amide = False
+            if 'amide' not in locals():
+                amide = False
 
+            return amide
+        
+        else:
+            amide = None
+            return amide
+        
     @staticmethod
     def ring_dict_finder(atom, rd_list):
         for rd in rd_list:
@@ -306,7 +331,7 @@ class ConformerTest:
 
     @staticmethod
     def sort_rings(rd_list, conn_mat):
-        c1_list = [rd['C1'] if 'C1' in rd else rd['C2'] for rd in rd_list]
+        c1_list = [rd['C1'] if len(list(rd.values())) == 7 else rd['C2'] for rd in rd_list]
         red_end = ConformerTest.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
         ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
         tree = nx.dfs_tree(ring_graph, red_end)
@@ -321,6 +346,9 @@ class ConformerTest:
                 rd_list_index = int(list(node.split())[-1])
                 dfs_ring_list[dfs_index] = rd_list[rd_list_index]
                 
+        if dfs_ring_list == []:
+            dfs_ring_list = rd_list
+            tree = ring_graph
 
         return tree, glyco_list, dfs_ring_list
 
