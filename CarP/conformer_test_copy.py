@@ -314,9 +314,13 @@ class ConformerTest:
         glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in rd_list]
         
         dfs_ring_list = list(nx.dfs_preorder_nodes(ring_graph, red_end))
-        for node in dfs_ring_list:
+        for dfs_index,node in enumerate(dfs_ring_list):
             if 'Amide' in node:
                 dfs_ring_list.remove(node)
+            else:
+                rd_list_index = int(list(node.split())[-1])
+                dfs_ring_list[dfs_index] = rd_list[rd_list_index]
+                
 
         return tree, glyco_list, dfs_ring_list
 
