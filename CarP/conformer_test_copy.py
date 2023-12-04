@@ -57,13 +57,18 @@ class ConformerTest:
     def count_n(conn_mat, node, filter):
         counter = 0
         for neighbor in conn_mat.neighbors(node):
-            if filter in neighbor:
+            if filter in neighbor and neighbor != node:
                 counter += 1
         return counter
 
     @staticmethod
     def adjacent_atoms(conn_mat, node):
-        return [neighbor for neighbor in conn_mat.neighbors(node)]
+        neighbor_list = [neighbor for neighbor in conn_mat.neighbors(node)]
+
+        for neighbor in neighbor_list:
+            if neighbor == node:
+                neighbor_list.remove(neighbor)
+        return neighbor_list
 
     @staticmethod
     def pyranose_basis(conn_mat, oxygen_atom, sugar_basis, rd):
@@ -88,6 +93,7 @@ class ConformerTest:
                     ):
                         rd['C5'] = atom
                         rd['C6'] = adj_at
+                        
                     elif ConformerTest.count_n(conn_mat, adj_at, 'H') == 3:
                         rd['C5'] = atom
                         rd['C6'] = adj_at
@@ -105,6 +111,7 @@ class ConformerTest:
             ConformerTest.count_n(conn_mat=conn_mat, node=rd['C6'], filter='H') >= 1 and
             ConformerTest.count_n(conn_mat=conn_mat, node=rd['C1'], filter='C') > 1):
 
+            adj_atom_list = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=rd['C1'])]
             rd_index = 6
             while rd_index > 0:
                 rd[f"C{rd_index +1}"] = rd[f"C{rd_index}"]
@@ -138,6 +145,7 @@ class ConformerTest:
                     ):
                         rd['C5'] = atom
                         rd['C6'] = adj_at
+                        
                     elif ConformerTest.count_n(conn_mat, adj_at, 'H') == 3:
                         rd['C5'] = atom
                         rd['C6'] = adj_at
@@ -302,12 +310,17 @@ class ConformerTest:
         for atom1_index, atom2_index in zip_longest(atom1_list, atom2_list):
             if atom1_index == 5 or atom2_index == 5:
                 continue
-
+            
+            
             if len(rd1.keys()) == 7 and atom2_index is not None:
                 edge_check_list.append([rd1['C1'], rd2[f"C{atom2_index}"]])
             elif len(rd1.keys()) == 6 and atom2_index is not None:
                 edge_check_list.append([rd1['C2'], rd2[f"C{atom2_index}"]])
-                edge_check_list.append([rd2['C1'], rd1[f"C{atom1_index}"]])
+                
+            if len(rd2.keys()) == 7 and atom1_index is not None:
+                edge_check_list.append([rd2['C1'], rd1[f"C{atom2_index}"]])
+            elif len(rd2.keys()) == 6 and atom1_index is not None:
+                edge_check_list.append([rd2['C2'], rd1[f"C{atom2_index}"]])
 
         connections = sum(1 for edge in edge_check_list if len(nx.shortest_path(conn_mat, edge[0], edge[1])) == 3)
 
@@ -323,6 +336,7 @@ class ConformerTest:
                         and not ring_graph.has_edge(f"Ring {rd_list.index(rd1)}", f"Ring {rd_list.index(rd2)}") \
                         and not ring_graph.has_edge(f"Ring {rd_list.index(rd2)}", f"Ring {rd_list.index(rd1)}"):
                     ring_graph.add_edge(f"Ring {rd_list.index(rd1)}", f"Ring {rd_list.index(rd2)}", weight=1)
+                    
             
             if ConformerTest.amide_check(conn_mat=conn_mat,rd=rd1) == True:
                 ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}", weight=2)
@@ -366,8 +380,10 @@ if __name__ == "__main__":
     
         ring_dict_list = ConformerTest.sort_ring_atoms(cycles_in_conn_mat=cycles_in_graph, conn_mat=conn_mat)
         print(ring_dict_list)
+        print()
         ring_tree, glyco_array, dfs_ring_list = ConformerTest.sort_rings(rd_list=ring_dict_list, conn_mat=conn_mat)
         print(glyco_array)
+        print()
         print(dfs_ring_list)
         nx.draw(ring_tree, with_labels=True)
         plt.show()
