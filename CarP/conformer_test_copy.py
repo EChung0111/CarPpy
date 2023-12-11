@@ -385,5 +385,5 @@ if __name__ == "__main__":
         print(glyco_array)
         print()
         print(dfs_ring_list)
-        nx.draw(ring_tree, with_labels=True)
+        nx.draw(ring_tree, with_labels=True, pos=nx.drawing.nx_agraph.graphviz_layout(ring_tree, prog="dot"))
         plt.show()
