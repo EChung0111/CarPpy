@@ -39,6 +39,19 @@ class ConformerTest:
 
         for atom_index, atom in enumerate(sugar_basis):
             rd[f"C{atom_index + 1}"] = atom
+        
+        if (
+            [self.atoms[rd['C6']]].count('H') >= 1 and
+            [self.atoms[rd['C1']]].count('C') > 1):
+
+            rd_index = 6
+            while rd_index > 0:
+                rd[f"C{rd_index +1}"] = rd[f"C{rd_index}"]
+                rd_index -= 1
+            
+            for C2_adjaceent in adjacent_atoms(self.atoms[rd['C2']]):
+                if C2_adjaceent not in sugar_basis and 'C' in C2_adjaceent:
+                    rd['C1'] = C2_adjaceent
 
         return rd
 
@@ -131,10 +144,10 @@ class ConformerTest:
 
         return rd_list
     
-    def glycosidic_link_check(self, conn_mat, rd, c1_list):
+    def glycosidic_link_check(self, rd, c1_list):
         glycosidic_link_list = []
 
-        for ring_index in range(1, 7):
+        for ring_index in range(1, len(list(rd.values()))):
             if ring_index == 5:
                 continue
 
@@ -142,7 +155,7 @@ class ConformerTest:
 
             for het_at in adjacent_atoms(self.atoms[atom]):
                 if 'C' not in het_at and 'H' not in het_at:
-                    adj_atom_list = ConformerTest.adjacent_atoms(conn_mat, het_at)
+                    adj_atom_list = adjacent_atoms(self.atoms[het_at])
 
                     if [self.atoms[het_at]].count('H') == 2 and rd['C5'] not in adj_atom_list:
                         c1_count = sum(1 for adj_at in adj_atom_list if adj_at in c1_list)
@@ -166,13 +179,13 @@ class ConformerTest:
                     if atom in ring_dict.values():
                         continue
 
-                    if ConformerTest.count_n(conn_mat=conn_mat, node=atom, filter='H') >= 1:
+                    if [self.atoms[atom]].count('H') >= 1:
                         return rd_list.index(ring_dict)
                     else:
-                        c1_count = sum(1 for adj_atom in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=atom)
+                        c1_count = sum(1 for adj_atom in adjacent_atoms(self.atoms(atom))
                                        if adj_atom in c1_list)
 
-                        if c1_count == 2 and len(ConformerTest.glycosidic_link_check(conn_mat, ring_dict, c1_list)) > 1:
+                        if c1_count == 2 and len(ConformerTest.glycosidic_link_check(rd=ring_dict, c1_list=c1_list)) > 1:
                             return rd_list.index(ring_dict)
     
     def ring_connectivity_checker(rd1, rd2, conn_mat):
@@ -195,6 +208,40 @@ class ConformerTest:
 
         return connections > 0
     
+    def amide_check(self, rd):
+
+        if len(list(rd.values())) == 7:
+            C2 = rd['C2']
+        elif len(list(rd.values())) == 8:
+            C2 = rd['C3']
+        else:
+            C2 == None
+        
+        if C2 is not None:
+            HC2_count = [self.atoms[C2]].count('H')
+            NC2_count = [self.atoms[C2]].count('N')
+
+            for C2_adj_at in adjacent_atoms(self.atoms[C2]):
+                if 'N' in C2_adj_at:
+                    HN_count = [self.atoms[C2_adj_at]].count('H')
+                    CN_count = [self.atoms[C2_adj_at]].count('C')
+                    
+                    for N_adj_at in adjacent_atoms(self.atoms[C2_adj_at]):
+                        if 'C' in N_adj_at and N_adj_at != C2:
+                            OC_count = [self.atoms[N_adj_at]].count('O')
+                            CC_count = [self.atoms[N_adj_at]].count('C')
+            
+                            if HC2_count == 1 and NC2_count == 1 and HN_count == 1 and CN_count == 2 and OC_count == 1 and CC_count == 2:
+                                amide = True
+
+                            else:
+                                amide = False
+
+            if 'amide' not in locals():
+                amide = False
+
+            return amide
+    
     def ring_graph_maker(rd_list, conn_mat):
         ring_graph = nx.Graph()
 
@@ -204,6 +251,12 @@ class ConformerTest:
                         and not ring_graph.has_edge(rd_list.index(rd1), rd_list.index(rd2)) \
                         and not ring_graph.has_edge(rd_list.index(rd2), rd_list.index(rd1)):
                     ring_graph.add_edge(rd_list.index(rd1), rd_list.index(rd2))
+        
+        if ConformerTest.amide_check(conn_mat=conn_mat,rd=rd1) == True:
+                ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}", weight=2)
+        
+        if ring_graph.number_of_edges() == 0:
+            ring_graph.add_node('Ring 0')
 
         return ring_graph
     
@@ -211,8 +264,18 @@ class ConformerTest:
         c1_list = [rd['C1'] if 'C1' in rd else rd['C2'] for rd in rd_list]
         red_end = ConformerTest.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
         ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
-        tree = nx.dfs_tree(ring_graph, red_end)
 
         glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in rd_list]
 
-        return tree, glyco_list
+        dfs_ring_list = list(nx.dfs_preorder_nodes(ring_graph, red_end))
+        for dfs_index,node in enumerate(dfs_ring_list):
+            if 'Amide' in node:
+                dfs_ring_list.remove(node)
+            else:
+                rd_list_index = int(list(node.split())[-1])
+                dfs_ring_list[dfs_index] = rd_list[rd_list_index]
+                
+        if dfs_ring_list == []:
+            dfs_ring_list = rd_list
+
+        return dfs_ring_list,glyco_list

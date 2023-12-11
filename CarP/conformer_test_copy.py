@@ -111,7 +111,6 @@ class ConformerTest:
             ConformerTest.count_n(conn_mat=conn_mat, node=rd['C6'], filter='H') >= 1 and
             ConformerTest.count_n(conn_mat=conn_mat, node=rd['C1'], filter='C') > 1):
 
-            adj_atom_list = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=rd['C1'])]
             rd_index = 6
             while rd_index > 0:
                 rd[f"C{rd_index +1}"] = rd[f"C{rd_index}"]
