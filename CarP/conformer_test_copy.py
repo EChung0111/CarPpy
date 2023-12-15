@@ -7,6 +7,23 @@ from itertools import zip_longest
 class ConformerTest:
 
     @staticmethod
+    def xyztoarray(path):
+        file_open = open(path)
+        xyz_array = []
+
+        for line in file_open:
+            if '   ' in line:
+                line_list = line.split()
+                xyz_array.append(line_list)
+        
+        xyz_array = np.array(xyz_array)
+
+        for rownum,row in enumerate(xyz_array):
+            xyz_array[rownum,0] = f"{xyz_array[rownum,0]}{rownum+1}"
+
+        return xyz_array
+
+    @staticmethod
     def xyztograph(path):
         file_open = open(path)
         xyz_array = []
@@ -214,7 +231,105 @@ class ConformerTest:
 
         rd_list = [rd for rd in rd_list if len(rd.keys()) >= 5]
         return rd_list
+
+    @staticmethod
+    def dihedral_angle(atom1, atom2, atom3, atom4, xyz_array):
+
+        atom1_index = list(xyz_array[:,0]).index(atom1)
+        atom2_index = list(xyz_array[:,0]).index(atom2)
+        atom3_index = list(xyz_array[:,0]).index(atom3)
+        atom4_index = list(xyz_array[:,0]).index(atom4)
+
+        atom1_coords = []
+        atom2_coords = []
+        atom3_coords = []
+        atom4_coords = []
+        
+        for c_index in range(1,4):
+            atom1_coords.append(float(xyz_array[atom1_index,c_index]))
+            atom2_coords.append(float(xyz_array[atom2_index,c_index]))
+            atom3_coords.append(float(xyz_array[atom3_index,c_index]))
+            atom4_coords.append(float(xyz_array[atom4_index,c_index]))
+        
+        vector_1 = np.array([coord2-coord1 for coord1,coord2 in zip(atom1_coords,atom2_coords)])
+        vector_2 = np.array([coord2-coord1 for coord1,coord2 in zip(atom2_coords,atom3_coords)])
+        vector_3 = np.array([coord2-coord1 for coord1,coord2 in zip(atom3_coords,atom4_coords)])
+
+        norm1 = np.cross(vector_1,vector_2)
+        norm1_mag = math.sqrt(np.sum([n1**2 for n1 in norm1]))
+        norm1 = np.array([n1/norm1_mag for n1 in norm1])
+
+        norm2 = np.cross(vector_2,vector_3)
+        norm2_mag = math.sqrt(np.sum([n2**2 for n2 in norm2]))
+        norm2 = np.array([n2/norm2_mag for n2 in norm2])
+
+        vector2_mag =  math.sqrt(np.sum([vcoord**2 for vcoord in vector_2]))
+        unit_vector_2 = np.array([vcoord/vector2_mag for vcoord in vector_2])
+        frame_vector = np.cross(norm1,unit_vector_2)
+
+        x =  np.dot(norm1,norm2)
+        y =  np.dot(frame_vector,norm2)
+
+        dihedral = math.atan2(y,x)
+
+        return dihedral
+
+    @staticmethod
+    def sugar_stero(rd, xyz_array):
+        if len(rd.values()) == 7:
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C1'], rd['C2'], rd['C6'], xyz_array)
+        elif len(rd.values()) > 7:
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C2'], rd['C3'], rd['C7'], xyz_array)
+        else:
+            dihedral_angle = None
+
+        print(dihedral_angle)
+
+        if dihedral_angle is not None and 0 > dihedral_angle:
+            sugar_type = 'D'
+        elif dihedral_angle is not None and dihedral_angle > 0:
+            sugar_type = "L"
+        else:
+            sugar_type = 'None'
+        
+        return sugar_type
     
+    @staticmethod
+    def glycosidic_link_type(rd, sugar_type, xyz_array, conn_mat):
+
+        if len(rd.values()) == 7:
+            
+            enumeric_H = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat, rd['C1']) if 'H' in adj_at and adj_at not in rd][0]
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C1'], rd['C2'], enumeric_H, xyz_array)
+        
+        elif len(rd.values()) > 7:
+
+            enumeric_H = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat, rd['C2']) if 'H' in adj_at and adj_at not in rd][0]
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C2'], rd['C3'], enumeric_H, xyz_array)
+       
+        else:
+            dihedral_angle = None
+
+        if dihedral_angle is not None and 0 > dihedral_angle:
+            if sugar_type == 'D':
+                link_type = 'B'
+            elif sugar_type == "L":
+                link_type = 'A'
+            else:
+                link_type = "None"
+            
+        elif dihedral_angle is not None and dihedral_angle > 0:
+            if sugar_type == 'D':
+                link_type = 'A'
+            elif sugar_type == "L":
+                link_type = 'B'
+            else:
+                link_type = "None"
+        else:
+            link_type = "None"
+        
+        return link_type
+        
     @staticmethod
     def glycosidic_link_check(conn_mat, rd,  c1_list):
         glycosidic_link_list = []
@@ -323,8 +438,8 @@ class ConformerTest:
 
         connections = sum(1 for edge in edge_check_list if len(nx.shortest_path(conn_mat, edge[0], edge[1])) == 3)
 
-        return connections > 0
-
+        return connections > 0        
+       
     @staticmethod
     def ring_graph_maker(rd_list, conn_mat):
         ring_graph = nx.Graph()
@@ -369,21 +484,41 @@ class ConformerTest:
 
         return tree, glyco_list, dfs_ring_list
 
+    @staticmethod
+    def ring_stereo_compiler(xyz_array, dfs_list, conn_mat):
+
+        sugar_type_list = []
+        glyco_type_list = []
+
+        for rd in dfs_list:
+            sugar_type = ConformerTest.sugar_stero(rd, xyz_array)
+            link_type = ConformerTest.glycosidic_link_type(rd, sugar_type, xyz_array, conn_mat)
+            sugar_type_list.append(sugar_type)
+            glyco_type_list.append(link_type)
+        
+        return sugar_type_list,glyco_type_list
+
 if __name__ == "__main__":
     #This section is just for testing (Will not be in final code)
     xyz_file = input()
     if '.xyz' in xyz_file:
         conn_mat = ConformerTest.xyztograph(xyz_file)
+        xyz_array = ConformerTest.xyztoarray(xyz_file)
         cycles_in_graph = nx.cycle_basis(conn_mat)
 
     
         ring_dict_list = ConformerTest.sort_ring_atoms(cycles_in_conn_mat=cycles_in_graph, conn_mat=conn_mat)
-        print(ring_dict_list)
-        print()
+
         ring_tree, glyco_array, dfs_ring_list = ConformerTest.sort_rings(rd_list=ring_dict_list, conn_mat=conn_mat)
+        sugar_type_list, link_type_list = ConformerTest.ring_stereo_compiler(xyz_array=xyz_array, dfs_list=dfs_ring_list, conn_mat=conn_mat)
+        
         print(glyco_array)
         print()
+        print(sugar_type_list)
+        print(link_type_list)
+        print()
         print(dfs_ring_list)
+        
         pos=nx.drawing.nx_agraph.graphviz_layout(ring_tree, prog="dot")
         flipped_pos = {node: (-x,-y) for (node, (x,y)) in pos.items()}
         nx.draw(ring_tree, with_labels=True, pos=flipped_pos)
