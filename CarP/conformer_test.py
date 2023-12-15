@@ -265,8 +265,6 @@ class ConformerTest:
         red_end = ConformerTest.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
         ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
 
-        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in rd_list]
-
         dfs_ring_list = list(nx.dfs_preorder_nodes(ring_graph, red_end))
         for dfs_index,node in enumerate(dfs_ring_list):
             if 'Amide' in node:
@@ -278,4 +276,5 @@ class ConformerTest:
         if dfs_ring_list == []:
             dfs_ring_list = rd_list
 
+        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in dfs_ring_list]
         return dfs_ring_list,glyco_list

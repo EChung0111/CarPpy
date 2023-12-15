@@ -353,8 +353,6 @@ class ConformerTest:
         
         tree = nx.dfs_tree(ring_graph, red_end)
 
-        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in rd_list]
-        
         dfs_ring_list = list(nx.dfs_preorder_nodes(ring_graph, red_end))
         for dfs_index,node in enumerate(dfs_ring_list):
             if 'Amide' in node:
@@ -366,6 +364,8 @@ class ConformerTest:
         if dfs_ring_list == []:
             dfs_ring_list = rd_list
             tree = ring_graph
+
+        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in dfs_ring_list]
 
         return tree, glyco_list, dfs_ring_list
 
@@ -388,3 +388,4 @@ if __name__ == "__main__":
         flipped_pos = {node: (-x,-y) for (node, (x,y)) in pos.items()}
         nx.draw(ring_tree, with_labels=True, pos=flipped_pos)
         plt.show()
+ 
