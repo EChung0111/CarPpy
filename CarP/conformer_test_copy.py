@@ -3,6 +3,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from itertools import zip_longest
+import utilities
 
 class ConformerTest:
 
@@ -277,9 +278,9 @@ class ConformerTest:
     @staticmethod
     def sugar_stero(rd, xyz_array):
         if len(rd.values()) == 7:
-            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C1'], rd['C2'], rd['C6'], xyz_array)
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C5'], rd['C4'], rd['C6'], xyz_array)
         elif len(rd.values()) > 7:
-            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C2'], rd['C3'], rd['C7'], xyz_array)
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C6'], rd['C5'], rd['C7'], xyz_array)
         else:
             dihedral_angle = None
 
@@ -479,6 +480,7 @@ class ConformerTest:
             tree = ring_graph
 
         branch_end_list = []
+        branch_len_list = []
         new_dfs_ring_list = []
 
         for rd in dfs_ring_list:
@@ -487,9 +489,15 @@ class ConformerTest:
             neighbor_list = [rn for rn in ring_graph.neighbors(node)]
             if len(neighbor_list) == 1 and node != red_end:
                 branch_end_list.append(rd)
+                branch_len_list.append(len(nx.shortest_path(ring_graph, red_end, node)))
 
-        branch_end_list.reverse()
-        
+        branch_array = []
+        for branch_len,branch_end in zip(branch_len_list,branch_end_list):
+            branch_array.append([branch_len,branch_end])
+        branch_array = np.array(branch_array)
+        branch_array = branch_array[branch_array[:,0].argsort()[::-1]]
+        branch_end_list = branch_array[:,1].tolist()
+
         for branch_end in branch_end_list:
             branch_node = f"Ring {rd_list.index(branch_end)}"
             branch = nx.shortest_path(ring_graph,red_end,branch_node)
