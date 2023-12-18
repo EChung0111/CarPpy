@@ -478,9 +478,31 @@ class ConformerTest:
             dfs_ring_list = rd_list
             tree = ring_graph
 
-        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in dfs_ring_list]
+        branch_end_list = []
+        new_dfs_ring_list = []
 
-        return tree, glyco_list, dfs_ring_list
+        for rd in dfs_ring_list:
+            node_index = rd_list.index(rd)
+            node = f"Ring {node_index}"
+            neighbor_list = [rn for rn in ring_graph.neighbors(node)]
+            if len(neighbor_list) == 1 and node != red_end:
+                branch_end_list.append(rd)
+
+        branch_end_list.reverse()
+        
+        for branch_end in branch_end_list:
+            branch_node = f"Ring {rd_list.index(branch_end)}"
+            branch = nx.shortest_path(ring_graph,red_end,branch_node)
+            for node in branch:
+                ring_dict_index = int(list(node.split())[-1])
+                rd = rd_list[ring_dict_index]
+
+                if rd not in new_dfs_ring_list:
+                    new_dfs_ring_list.append(rd)
+
+        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in new_dfs_ring_list]
+
+        return tree, glyco_list, new_dfs_ring_list
 
     @staticmethod
     def ring_stereo_compiler(xyz_array, dfs_list, conn_mat):
