@@ -283,8 +283,6 @@ class ConformerTest:
         else:
             dihedral_angle = None
 
-        print(dihedral_angle)
-
         if dihedral_angle is not None and 0 > dihedral_angle:
             sugar_type = 'D'
         elif dihedral_angle is not None and dihedral_angle > 0:
