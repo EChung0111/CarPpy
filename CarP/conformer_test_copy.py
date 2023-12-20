@@ -358,7 +358,7 @@ class ConformerTest:
         elif len(list(rd.values())) == 8:
             C2 = rd['C3']
         else:
-            C2 == None
+            C2 = None
         
         if C2 is not None:
             HC2_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2, filter='H')
