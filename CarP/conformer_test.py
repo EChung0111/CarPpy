@@ -2,6 +2,7 @@ import numpy as np
 import networkx as nx
 from utilities import adjacent_atoms
 from itertools import zip_longest
+import math
 
 class ConformerTest:
 
@@ -215,7 +216,7 @@ class ConformerTest:
         elif len(list(rd.values())) == 8:
             C2 = rd['C3']
         else:
-            C2 == None
+            C2 = None
         
         if C2 is not None:
             HC2_count = [self.atoms[C2]].count('H')
