@@ -278,3 +278,111 @@ class ConformerTest:
 
         glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in dfs_ring_list]
         return dfs_ring_list,glyco_list
+    
+    def dihedral_angle(atom1, atom2, atom3, atom4, conf):
+
+        atom1_index = list(conf[:, 0]).index(atom1)
+        atom2_index = list(conf[:, 0]).index(atom2)
+        atom3_index = list(conf[:, 0]).index(atom3)
+        atom4_index = list(conf[:, 0]).index(atom4)
+
+        atom1_coords = []
+        atom2_coords = []
+        atom3_coords = []
+        atom4_coords = []
+
+        for c_index in range(1, 4):
+            atom1_coords.append(float(conf[atom1_index, c_index]))
+            atom2_coords.append(float(conf[atom2_index, c_index]))
+            atom3_coords.append(float(conf[atom3_index, c_index]))
+            atom4_coords.append(float(conf[atom4_index, c_index]))
+
+        vector_1 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom1_coords, atom2_coords)])
+        vector_2 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom2_coords, atom3_coords)])
+        vector_3 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom3_coords, atom4_coords)])
+
+        norm1 = np.cross(vector_1, vector_2)
+        norm1_mag = math.sqrt(np.sum([n1 ** 2 for n1 in norm1]))
+        norm1 = np.array([n1 / norm1_mag for n1 in norm1])
+
+        norm2 = np.cross(vector_2, vector_3)
+        norm2_mag = math.sqrt(np.sum([n2 ** 2 for n2 in norm2]))
+        norm2 = np.array([n2 / norm2_mag for n2 in norm2])
+
+        vector2_mag = math.sqrt(np.sum([vcoord ** 2 for vcoord in vector_2]))
+        unit_vector_2 = np.array([vcoord / vector2_mag for vcoord in vector_2])
+        frame_vector = np.cross(norm1, unit_vector_2)
+
+        x = np.dot(norm1, norm2)
+        y = np.dot(frame_vector, norm2)
+
+        dihedral = math.atan2(y, x)
+
+        return dihedral
+    def sugar_stero(rd, conf):
+        if len(rd.values()) == 7:
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C5'], rd['C4'], rd['C6'], conf)
+        elif len(rd.values()) > 7:
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C6'], rd['C5'], rd['C7'], conf)
+        else:
+            dihedral_angle = None
+
+        if dihedral_angle is not None and 0 > dihedral_angle:
+            sugar_type = 'D'
+        elif dihedral_angle is not None and dihedral_angle > 0:
+            sugar_type = "L"
+        else:
+            sugar_type = 'None'
+
+        return sugar_type
+    
+    def glycosidic_link_type(rd, sugar_type, conf, conn_mat):
+
+        if len(rd.values()) == 7:
+
+            enumeric_H = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat, rd['C1']) if
+                          'H' in adj_at and adj_at not in rd][0]
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C1'], rd['C2'], enumeric_H, conf)
+
+        elif len(rd.values()) > 7:
+
+            enumeric_H = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat, rd['C2']) if
+                          'H' in adj_at and adj_at not in rd][0]
+            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C2'], rd['C3'], enumeric_H, conf)
+
+        else:
+            dihedral_angle = None
+
+        if dihedral_angle is not None and 0 > dihedral_angle:
+            if sugar_type == 'D':
+                link_type = 'B'
+            elif sugar_type == "L":
+                link_type = 'A'
+            else:
+                link_type = "None"
+
+        elif dihedral_angle is not None and dihedral_angle > 0:
+            if sugar_type == 'D':
+                link_type = 'A'
+            elif sugar_type == "L":
+                link_type = 'B'
+            else:
+                link_type = "None"
+        else:
+            link_type = "None"
+
+        return link_type
+    def ring_stereo_compiler(self, conf, dfs_list, conn_mat):
+
+        sugar_type_list = []
+        glyco_type_list = []
+
+        for rd in dfs_list:
+            sugar_type = ConformerTest.sugar_stero(rd, conf)
+            link_type = ConformerTest.glycosidic_link_type(rd, sugar_type, conf, conn_mat)
+            sugar_type_list.append(sugar_type)
+            glyco_type_list.append(link_type)
+
+        return sugar_type_list, glyco_type_list
+    
+    
