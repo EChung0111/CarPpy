@@ -277,8 +277,36 @@ class ConformerTest:
         if dfs_ring_list == []:
             dfs_ring_list = rd_list
 
-        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in dfs_ring_list]
-        return dfs_ring_list,glyco_list
+        branch_end_list = []
+        branch_len_list = []
+        new_dfs_ring_list = []
+
+        for rd in dfs_ring_list:
+            node_index = rd_list.index(rd)
+            node = f"Ring {node_index}"
+            neighbor_list = [rn for rn in ring_graph.neighbors(node)]
+            if len(neighbor_list) == 1 and node != red_end:
+                branch_end_list.append(rd)
+                branch_len_list.append(len(nx.shortest_path(ring_graph, red_end, node)))
+
+        branch_array = []
+        for branch_len, branch_end in zip(branch_len_list, branch_end_list):
+            branch_array.append([branch_len, branch_end])
+        branch_array = np.array(branch_array)
+        branch_array = branch_array[branch_array[:, 0].argsort()[::-1]]
+        branch_end_list = branch_array[:, 1].tolist()
+
+        for branch_end in branch_end_list:
+            branch_node = f"Ring {rd_list.index(branch_end)}"
+            branch = nx.shortest_path(ring_graph, red_end, branch_node)
+            for node in branch:
+                ring_dict_index = int(list(node.split())[-1])
+                rd = rd_list[ring_dict_index]
+
+                if rd not in new_dfs_ring_list:
+                    new_dfs_ring_list.append(rd)
+
+        return dfs_ring_list
     
     def dihedral_angle(atom1, atom2, atom3, atom4, conf):
 
@@ -385,5 +413,3 @@ class ConformerTest:
             glyco_type_list.append(link_type)
 
         return sugar_type_list, glyco_type_list
-    
-    
