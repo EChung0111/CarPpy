@@ -332,6 +332,31 @@ class ConformerTest:
         return link_type
 
     @staticmethod
+    def glyco_finder(conn_mat, rd1, rd2):
+
+        if ConformerTest.ring_connectivity_checker(rd1,rd2,conn_mat):
+
+            glyco_carbon_list  = []
+            for index1 in range(1,8):
+
+                if f"C{index1}" in rd1.keys():
+                    atom_1 = rd1[f"C{index1}"]
+
+                    for index2 in range(1,8):
+
+                        if f"C{index2}" in rd2.keys():
+                            atom_2 = rd2[f"C{index2}"]
+                            if nx.shortest_path_length(conn_mat,atom_1,atom_2) == 2:
+
+                                glyco_carbon_list.append([index2,index1])
+
+        if len(glyco_carbon_list) == 1:
+            glyco_carbon = glyco_carbon_list[0]
+        else:
+            glyco_carbon = None
+
+        return glyco_carbon
+    @staticmethod
     def glycosidic_link_check(conn_mat, rd, c1_list):
         glycosidic_link_list = []
 
@@ -485,7 +510,7 @@ class ConformerTest:
         new_dfs_ring_list = []
 
         for rd in dfs_ring_list:
-            node_index = rd_list.index(rd)
+            node_index = dfs_ring_list.index(rd)
             node = f"Ring {node_index}"
             neighbor_list = [rn for rn in ring_graph.neighbors(node)]
             if len(neighbor_list) == 1 and node != red_end:
@@ -500,7 +525,7 @@ class ConformerTest:
         branch_end_list = branch_array[:, 1].tolist()
 
         for branch_end in branch_end_list:
-            branch_node = f"Ring {rd_list.index(branch_end)}"
+            branch_node = f"Ring {dfs_ring_list.index(branch_end)}"
             branch = nx.shortest_path(ring_graph, red_end, branch_node)
             for node in branch:
                 ring_dict_index = int(list(node.split())[-1])
@@ -511,6 +536,15 @@ class ConformerTest:
 
         glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in
                       new_dfs_ring_list]
+
+        label_dict = {}
+        for rd_index,rd in enumerate(new_dfs_ring_list):
+            node_label = f"Ring {rd_index}"
+            old_index = rd_list.index(rd)
+
+            label_dict[f"Ring {old_index}"] = node_label
+
+        tree = nx.relabel_nodes(tree, label_dict)
 
         return tree, glyco_list, new_dfs_ring_list
 
@@ -528,6 +562,34 @@ class ConformerTest:
 
         return sugar_type_list, glyco_type_list
 
+    @staticmethod
+    def graph_drawer(conn_mat, dfs_graph, glyco_type_list, ring_list):
+
+        edge_labes = {}
+
+        pos = nx.drawing.nx_agraph.graphviz_layout(ring_tree, prog="dot")
+        pos = {node: (-x, -y) for (node, (x, y)) in pos.items()}
+
+        nx.draw(ring_tree, with_labels=False, pos=pos)
+
+        for edge in nx.dfs_edges(dfs_graph):
+
+            start_node = edge[0]
+            start_node_index = int((start_node.split())[-1])
+            start_node_dict = ring_list[start_node_index]
+
+            end_node = edge[1]
+            end_node_index = int((end_node.split())[-1])
+            end_node_dict = ring_list[end_node_index]
+
+            glyco_carbon = ConformerTest.glyco_finder(conn_mat, start_node_dict, end_node_dict)
+            glyco_stero = glyco_type_list[end_node_index]
+
+            if glyco_carbon is not None:
+                edge_labes[edge] = f"{glyco_stero}{glyco_carbon[0]}-{glyco_carbon[1]}"
+
+        nx.draw_networkx_edge_labels(ring_tree, pos, edge_labels=edge_labes)
+        plt.show()
 
 if __name__ == "__main__":
     # This section is just for testing (Will not be in final code)
@@ -551,7 +613,4 @@ if __name__ == "__main__":
         print()
         print(dfs_ring_list)
 
-        pos = nx.drawing.nx_agraph.graphviz_layout(ring_tree, prog="dot")
-        flipped_pos = {node: (-x, -y) for (node, (x, y)) in pos.items()}
-        nx.draw(ring_tree, with_labels=True, pos=flipped_pos)
-        plt.show()
+        ConformerTest.graph_drawer(conn_mat, ring_tree, link_type_list, dfs_ring_list)

@@ -189,7 +189,7 @@ class ConformerTest:
                         if c1_count == 2 and len(ConformerTest.glycosidic_link_check(rd=ring_dict, c1_list=c1_list)) > 1:
                             return rd_list.index(ring_dict)
     
-    def ring_connectivity_checker(rd1, rd2, conn_mat):
+    def ring_connectivity_checker(self, rd1, rd2, conn_mat):
         edge_check_list = []
 
         atom1_list = list(range(1, len(rd1.keys())))
@@ -243,7 +243,7 @@ class ConformerTest:
 
             return amide
     
-    def ring_graph_maker(rd_list, conn_mat):
+    def ring_graph_maker(self, rd_list, conn_mat):
         ring_graph = nx.Graph()
 
         for rd1 in rd_list:
@@ -261,7 +261,7 @@ class ConformerTest:
 
         return ring_graph
     
-    def sort_rings(rd_list, conn_mat):
+    def sort_rings(self, rd_list, conn_mat):
         c1_list = [rd['C1'] if 'C1' in rd else rd['C2'] for rd in rd_list]
         red_end = ConformerTest.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
         ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
@@ -288,7 +288,6 @@ class ConformerTest:
             if len(neighbor_list) == 1 and node != red_end:
                 branch_end_list.append(rd)
                 branch_len_list.append(len(nx.shortest_path(ring_graph, red_end, node)))
-
         branch_array = []
         for branch_len, branch_end in zip(branch_len_list, branch_end_list):
             branch_array.append([branch_len, branch_end])
@@ -299,7 +298,7 @@ class ConformerTest:
         for branch_end in branch_end_list:
             branch_node = f"Ring {rd_list.index(branch_end)}"
             branch = nx.shortest_path(ring_graph, red_end, branch_node)
-            for node in branch:
+            for node in branch  :
                 ring_dict_index = int(list(node.split())[-1])
                 rd = rd_list[ring_dict_index]
 
@@ -308,7 +307,7 @@ class ConformerTest:
 
         return dfs_ring_list
     
-    def dihedral_angle(atom1, atom2, atom3, atom4, conf):
+    def dihedral_angle(self, atom1, atom2, atom3, atom4, conf):
 
         atom1_index = list(conf[:, 0]).index(atom1)
         atom2_index = list(conf[:, 0]).index(atom2)
@@ -348,7 +347,7 @@ class ConformerTest:
         dihedral = math.atan2(y, x)
 
         return dihedral
-    def sugar_stero(rd, conf):
+    def sugar_stero(self, rd, conf):
         if len(rd.values()) == 7:
             dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C5'], rd['C4'], rd['C6'], conf)
         elif len(rd.values()) > 7:
@@ -365,7 +364,7 @@ class ConformerTest:
 
         return sugar_type
     
-    def glycosidic_link_type(rd, sugar_type, conf, conn_mat):
+    def glycosidic_link_type(self, rd, sugar_type, conf, conn_mat):
 
         if len(rd.values()) == 7:
 
