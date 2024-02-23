@@ -326,6 +326,10 @@ class ConformerTest:
                 link_type = 'B'
             else:
                 link_type = "None"
+
+        elif dihedral_angle is not None and dihedral_angle == 0:
+            link_type = 'C'
+
         else:
             link_type = "None"
 
@@ -588,8 +592,11 @@ class ConformerTest:
             if glyco_carbon is not None:
                 edge_labes[edge] = f"{glyco_stero}{glyco_carbon[0]}-{glyco_carbon[1]}"
 
-        nx.draw_networkx_edge_labels(ring_tree, pos, edge_labels=edge_labes)
-        plt.show()
+        fig, ax = plt.subplots()
+        nx.draw_networkx_edge_labels(ring_tree, pos, edge_labels=edge_labes, ax=ax)
+
+        return fig, ax
+
 
 if __name__ == "__main__":
     # This section is just for testing (Will not be in final code)
