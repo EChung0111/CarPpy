@@ -198,6 +198,7 @@ class ConformerTest:
             if oxygen_atoms == 1:
                 sugar_basis_list = list(nx.cycle_basis(conn_mat, oxygen_atom_list[0]))
                 rd['O'] = oxygen_atom_list[0]
+                print(sugar_basis_list)
                 for sugar_basis in sugar_basis_list:
                     if len(sugar_basis) == len(ring) and rd['O'] in sugar_basis:
 
@@ -524,31 +525,37 @@ class ConformerTest:
         branch_array = []
         for branch_len, branch_end in zip(branch_len_list, branch_end_list):
             branch_array.append([branch_len, branch_end])
+
         branch_array = np.array(branch_array)
-        branch_array = branch_array[branch_array[:, 0].argsort()[::-1]]
-        branch_end_list = branch_array[:, 1].tolist()
 
-        for branch_end in branch_end_list:
-            branch_node = f"Ring {dfs_ring_list.index(branch_end)}"
-            branch = nx.shortest_path(ring_graph, red_end, branch_node)
-            for node in branch:
-                ring_dict_index = int(list(node.split())[-1])
-                rd = rd_list[ring_dict_index]
+        if branch_array.ndim == 2:
+            branch_array = branch_array[branch_array[:, 0].argsort()[::-1]]
+            branch_end_list = branch_array[:, 1].tolist()
 
-                if rd not in new_dfs_ring_list:
-                    new_dfs_ring_list.append(rd)
+        if branch_array.ndim != 0:
+            for branch_end in branch_end_list:
+                branch_node = f"Ring {dfs_ring_list.index(branch_end)}"
+                branch = nx.shortest_path(ring_graph, red_end, branch_node)
+                for node in branch:
+                    ring_dict_index = int(list(node.split())[-1])
+                    rd = rd_list[ring_dict_index]
 
-        glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in
-                      new_dfs_ring_list]
+                    if rd not in new_dfs_ring_list:
+                        new_dfs_ring_list.append(rd)
 
-        label_dict = {}
-        for rd_index,rd in enumerate(new_dfs_ring_list):
-            node_label = f"Ring {rd_index}"
-            old_index = rd_list.index(rd)
+            glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in new_dfs_ring_list]
 
-            label_dict[f"Ring {old_index}"] = node_label
+            label_dict = {}
+            for rd_index,rd in enumerate(new_dfs_ring_list):
+                node_label = f"Ring {rd_index}"
+                old_index = rd_list.index(rd)
 
-        tree = nx.relabel_nodes(tree, label_dict)
+                label_dict[f"Ring {old_index}"] = node_label
+
+            tree = nx.relabel_nodes(tree, label_dict)
+
+        new_dfs_ring_list = rd_list
+        glyco_list = []
 
         return tree, glyco_list, new_dfs_ring_list
 

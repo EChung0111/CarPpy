@@ -69,7 +69,7 @@ def clashcheck(conf, cutoff=1.2):
     else:
         return True
 
-def adjacent_atoms(conn_manumpyt, at):
+def adjacent_atoms(conn_mat, at):
 
     """returns all adjacent atoms to a specific atom in a conformation
     :param conn_mat: the connectivity matrix

@@ -412,3 +412,10 @@ class ConformerTest:
             glyco_type_list.append(link_type)
 
         return sugar_type_list, glyco_type_list
+
+    @property
+    def __class__(self):
+        return super().__class__
+
+    def __new__(cls):
+        return super().__new__(cls)
