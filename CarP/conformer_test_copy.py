@@ -119,35 +119,35 @@ class ConformerTest:
                         rd['C5'] = atom
                         rd['C6'] = adj_at
 
-        if sugar_basis.index(rd['C5']) == 0:
-            sugar_basis.reverse()
+        if 'C5' in rd.keys():
+            if sugar_basis.index(rd['C5']) == 0:
+                sugar_basis.reverse()
 
-        Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
-        sugar_basis.remove(Carb_Oxygen)
+            Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
+            sugar_basis.remove(Carb_Oxygen)
 
-        for atom_index, atom in enumerate(sugar_basis):
-            rd[f"C{atom_index + 1}"] = atom
+            for atom_index, atom in enumerate(sugar_basis):
+                rd[f"C{atom_index + 1}"] = atom
 
-        if (
-                ConformerTest.count_n(conn_mat=conn_mat, node=rd['C6'], filter='H') >= 1 and
-                ConformerTest.count_n(conn_mat=conn_mat, node=rd['C1'], filter='C') > 1):
+            if (
+                    ConformerTest.count_n(conn_mat=conn_mat, node=rd['C6'], filter='H') >= 1 and
+                    ConformerTest.count_n(conn_mat=conn_mat, node=rd['C1'], filter='C') > 1):
 
-            rd_index = 6
-            while rd_index > 0:
-                rd[f"C{rd_index + 1}"] = rd[f"C{rd_index}"]
-                rd_index -= 1
+                rd_index = 6
+                while rd_index > 0:
+                    rd[f"C{rd_index + 1}"] = rd[f"C{rd_index}"]
+                    rd_index -= 1
 
-            for C2_adjaceent in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=rd['C2']):
-                if C2_adjaceent not in sugar_basis and 'C' in C2_adjaceent:
-                    rd['C1'] = C2_adjaceent
-        O_count = 0
-        for value in rd.values():
-            if 'O' in value:
-                O_count += 1
+                for C2_adjaceent in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=rd['C2']):
+                    if C2_adjaceent not in sugar_basis and 'C' in C2_adjaceent:
+                        rd['C1'] = C2_adjaceent
+            O_count = 0
+            for value in rd.values():
+                if 'O' in value:
+                    O_count += 1
 
-        if O_count == 1:
-            return rd
-
+            if O_count == 1:
+                return rd
 
     @staticmethod
     def furanose_basis(conn_mat, oxygen_atom, sugar_basis, rd):
@@ -217,7 +217,16 @@ class ConformerTest:
                 sugar_basis_list = list(nx.cycle_basis(conn_mat, oxygen_atom_list[0]))
                 rd['O'] = oxygen_atom_list[0]
 
+
                 for sugar_basis in sugar_basis_list:
+                    if len(sugar_basis) < 5:
+                        continue
+
+                    if type(rd) is not dict:
+                        continue
+
+                    if 'O' not in rd.keys():
+                        continue
 
                     if len(sugar_basis) == len(ring) and rd['O'] in sugar_basis:
 
@@ -302,10 +311,8 @@ class ConformerTest:
                                 if oxygen_atom_counter == 1:
                                     rd['O'] = oxygen_atom_cycle_list[0]
                                     sugar_basis = list(cycle)
-                                    print(sugar_basis)
 
                                     rd = ConformerTest.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
-                                    print("TEST 1",rd)
 
                             elif len(cycle) == 5:
                                 oxygen_atom_cycle_list = [cycle_atom for cycle_atom in cycle if cycle_atom == 'O']
@@ -317,10 +324,10 @@ class ConformerTest:
 
                                     rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
-            print("TEST 2",rd)
             rd_list.append(rd)
-
+        print("TEST 3",rd_list)
         rd_list = [rd for rd in rd_list if len(rd.keys()) >= 5]
+        print("TEST 4",rd_list)
         return rd_list
 
     @staticmethod
