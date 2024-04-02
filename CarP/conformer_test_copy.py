@@ -100,11 +100,13 @@ class ConformerTest:
 
             else:
                 for adj_at in ConformerTest.adjacent_atoms(conn_mat, atom):
+
                     if (
                             ConformerTest.count_n(conn_mat, adj_at, 'H') > 1 and
                             ConformerTest.count_n(conn_mat, adj_at, 'O') == 1 and
                             ConformerTest.count_n(conn_mat, atom, 'H') == 1
                     ):
+
                         rd['C5'] = atom
                         rd['C6'] = adj_at
 
@@ -213,10 +215,13 @@ class ConformerTest:
             if oxygen_atoms == 0:
                 continue
 
+            if len(ring) < 5:
+                continue
+
             if oxygen_atoms == 1:
+
                 sugar_basis_list = list(nx.cycle_basis(conn_mat, oxygen_atom_list[0]))
                 rd['O'] = oxygen_atom_list[0]
-
 
                 for sugar_basis in sugar_basis_list:
                     if len(sugar_basis) < 5:
@@ -236,7 +241,43 @@ class ConformerTest:
                         elif len(ring) == 5:
                             rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
+                    elif len(sugar_basis) != len(ring) and rd['O'] in sugar_basis:
+                        cycle = ring
+
+                        new_cycle = []
+
+                        oxygen_atom = rd['O']
+                        if oxygen_atom not in cycle:
+                            continue
+
+                        oxygen_index = cycle.index(oxygen_atom)
+                        new_cycle.append(oxygen_atom)
+
+                        index = oxygen_index + 1
+                        cycle_len = len(cycle)
+
+                        if 'O' not in cycle[0]:
+                            while index != oxygen_index:
+
+                                if index != cycle_len:
+                                    new_cycle.append(cycle[index])
+                                    index += 1
+                                else:
+                                    index = 0
+                                    new_cycle.append(cycle[index])
+                                    index += 1
+
+                        cycle = new_cycle
+                        sugar_basis = cycle
+
+                        if len(cycle) == 6:
+                            rd = ConformerTest.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
+
+                        elif len(cycle) == 5:
+                            rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
+
             if oxygen_atoms > 1:
+
                 if len(ring) >= 6:
                     for oxygen_atom in oxygen_atom_list:
                         test_basis = nx.minimum_cycle_basis(conn_mat, oxygen_atom)
@@ -311,7 +352,6 @@ class ConformerTest:
                                 if oxygen_atom_counter == 1:
                                     rd['O'] = oxygen_atom_cycle_list[0]
                                     sugar_basis = list(cycle)
-
                                     rd = ConformerTest.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
                             elif len(cycle) == 5:
@@ -325,9 +365,9 @@ class ConformerTest:
                                     rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
             rd_list.append(rd)
-        print("TEST 3",rd_list)
+
+        rd_list = [rd for rd in rd_list if rd is not None]
         rd_list = [rd for rd in rd_list if len(rd.keys()) >= 5]
-        print("TEST 4",rd_list)
         return rd_list
 
     @staticmethod
