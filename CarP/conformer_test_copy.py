@@ -524,7 +524,7 @@ class ConformerTest:
 
     @staticmethod
     def amide_check(conn_mat, rd):
-        global amide
+
         if len(list(rd.values())) == 7:
             C2 = rd['C2']
         elif len(list(rd.values())) == 8:

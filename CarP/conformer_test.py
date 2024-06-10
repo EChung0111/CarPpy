@@ -34,6 +34,7 @@ class ConformerTest:
 
         if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
+        sugar_basis = set(sugar_basis)
 
         Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
         sugar_basis.remove(Carb_Oxygen)
@@ -81,6 +82,7 @@ class ConformerTest:
 
         if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
+        sugar_basis = set(sugar_basis)
 
         Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
         sugar_basis.remove(Carb_Oxygen)
