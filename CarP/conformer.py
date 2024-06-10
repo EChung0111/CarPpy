@@ -23,6 +23,7 @@ import networkx as nx
 from operator import itemgetter, attrgetter
 import matplotlib.pyplot as plt
 import py3Dmol as p3D
+from itertools import zip_longest
 
 class Conformer():
 
@@ -615,10 +616,10 @@ class Conformer():
                     if len(sugar_basis) == len(ring) and rd['O'] in sugar_basis:
 
                         if len(ring) == 6:
-                            rd = ConformerTest.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = Conformer.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
                         elif len(ring) == 5:
-                            rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = Conformer.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
                     elif len(sugar_basis) != len(ring) and rd['O'] in sugar_basis:
                         cycle = ring
@@ -650,10 +651,10 @@ class Conformer():
                         sugar_basis = cycle
 
                         if len(cycle) == 6:
-                            rd = ConformerTest.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = Conformer.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
                         elif len(cycle) == 5:
-                            rd = ConformerTest.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = Conformer.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
 
             if oxygen_atoms > 1 and len(ring) >= 7:
                 for oxygen_atom in oxygen_atom_list:
@@ -714,7 +715,7 @@ class Conformer():
 
     def find_red_end(self, c1_list, rd_list, conn_mat):
         for c1 in c1_list:
-            ring_dict = ConformerTest.ring_dict_finder(c1, rd_list)
+            ring_dict = Conformer.ring_dict_finder(c1, rd_list)
 
             for atom in adjacent_atoms(self.atoms[c1]):
                 if 'C' not in atom and 'H' not in atom:
@@ -728,7 +729,7 @@ class Conformer():
                                        if adj_atom in c1_list)
 
                         if c1_count == 2 and len(
-                                ConformerTest.glycosidic_link_check(rd=ring_dict, c1_list=c1_list)) > 1:
+                                Conformer.glycosidic_link_check(rd=ring_dict, c1_list=c1_list)) > 1:
                             return rd_list.index(ring_dict)
 
     def ring_connectivity_checker(self, rd1, rd2, conn_mat):
@@ -790,12 +791,12 @@ class Conformer():
 
         for rd1 in rd_list:
             for rd2 in rd_list:
-                if rd1 != rd2 and ConformerTest.ring_connectivity_checker(rd1=rd1, rd2=rd2, conn_mat=conn_mat) \
+                if rd1 != rd2 and Conformer.ring_connectivity_checker(rd1=rd1, rd2=rd2, conn_mat=conn_mat) \
                         and not ring_graph.has_edge(rd_list.index(rd1), rd_list.index(rd2)) \
                         and not ring_graph.has_edge(rd_list.index(rd2), rd_list.index(rd1)):
                     ring_graph.add_edge(rd_list.index(rd1), rd_list.index(rd2))
 
-        if ConformerTest.amide_check(conn_mat=conn_mat, rd=rd1) == True:
+        if Conformer.amide_check(conn_mat=conn_mat, rd=rd1) == True:
             ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}", weight=2)
 
         if ring_graph.number_of_edges() == 0:
@@ -805,8 +806,8 @@ class Conformer():
 
     def sort_rings(self, rd_list, conn_mat):
         c1_list = [rd['C1'] if 'C1' in rd else rd['C2'] for rd in rd_list]
-        red_end = ConformerTest.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
-        ring_graph = ConformerTest.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
+        red_end = Conformer.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
+        ring_graph = Conformer.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
 
         dfs_ring_list = list(nx.dfs_preorder_nodes(ring_graph, red_end))
         for dfs_index, node in enumerate(dfs_ring_list):
@@ -892,9 +893,9 @@ class Conformer():
 
     def sugar_stero(self, rd, conf):
         if len(rd.values()) == 7:
-            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C5'], rd['C4'], rd['C6'], conf)
+            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C5'], rd['C4'], rd['C6'], conf)
         elif len(rd.values()) > 7:
-            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C6'], rd['C5'], rd['C7'], conf)
+            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C6'], rd['C5'], rd['C7'], conf)
         else:
             dihedral_angle = None
 
@@ -911,15 +912,15 @@ class Conformer():
 
         if len(rd.values()) == 7:
 
-            enumeric_H = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat, rd['C1']) if
+            enumeric_H = [adj_at for adj_at in Conformer.adjacent_atoms(conn_mat, rd['C1']) if
                           'H' in adj_at and adj_at not in rd][0]
-            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C1'], rd['C2'], enumeric_H, conf)
+            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C1'], rd['C2'], enumeric_H, conf)
 
         elif len(rd.values()) > 7:
 
-            enumeric_H = [adj_at for adj_at in ConformerTest.adjacent_atoms(conn_mat, rd['C2']) if
+            enumeric_H = [adj_at for adj_at in Conformer.adjacent_atoms(conn_mat, rd['C2']) if
                           'H' in adj_at and adj_at not in rd][0]
-            dihedral_angle = ConformerTest.dihedral_angle(rd['O'], rd['C2'], rd['C3'], enumeric_H, conf)
+            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C2'], rd['C3'], enumeric_H, conf)
 
         else:
             dihedral_angle = None
@@ -950,8 +951,8 @@ class Conformer():
         glyco_type_list = []
 
         for rd in dfs_list:
-            sugar_type = ConformerTest.sugar_stero(rd, conf)
-            link_type = ConformerTest.glycosidic_link_type(rd, sugar_type, conf, conn_mat)
+            sugar_type = Conformer.sugar_stero(rd, conf)
+            link_type = Conformer.glycosidic_link_type(rd, sugar_type, conf, conn_mat)
             sugar_type_list.append(sugar_type)
             glyco_type_list.append(link_type)
 
