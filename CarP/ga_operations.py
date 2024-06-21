@@ -1,10 +1,6 @@
 import math
 from . import rmsd, utilities
 import numpy as np
-import sys, copy
-from scipy import interpolate
-from scipy.linalg import expm
-from optparse import OptionParser
 
 """
 These functions are all genetic algorithm operations. Each operation modifies existing conformer objects.
@@ -147,7 +143,3 @@ def cross_over(conf1, conf2):
 
     conf2.set_glycosidic(bond, phi1, psi1)
     conf1.set_glycosidic(bond, phi2, psi2)
-
-
-
-
