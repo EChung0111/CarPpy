@@ -520,7 +520,12 @@ class Conformer():
 
         if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
-        sugar_basis = set(sugar_basis)
+        sugar_basis_no_rep = []
+        for at in sugar_basis:
+            if at not in sugar_basis_no_rep:
+                sugar_basis_no_rep.append(at)
+
+        sugar_basis = sugar_basis_no_rep
 
         Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
         sugar_basis.remove(Carb_Oxygen)
@@ -569,7 +574,13 @@ class Conformer():
 
         if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
-        sugar_basis = set(sugar_basis)
+
+        sugar_basis_no_rep = []
+        for at in sugar_basis:
+            if at not in sugar_basis_no_rep:
+                sugar_basis_no_rep.append(at)
+
+        sugar_basis = sugar_basis_no_rep
 
         Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
         sugar_basis.remove(Carb_Oxygen)
