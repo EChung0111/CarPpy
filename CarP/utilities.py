@@ -232,14 +232,14 @@ def protecting_group_dihedrals(conf, atom, pg_type, PG_atoms):
 
                 if len(adj_atoms2) == 3 and 'O' in adj_atoms2_names: #NHCO-CH3 or NHCOH-CHH3 
 
-                    for at2, atn2 in zip(adj_atoms2, adj_atoms_names2):
+                    for at2, atn2 in zip(adj_atoms2, adj_atoms2_names):
 
                         if atn2 == 'C' and at not in dih1: 
                            dih2 = [dih1[1], dih1[2], dih1[3], at]
 
                         if atn2 == 'O': 
                             adj_atoms3 = adjacent_atoms(conf.conf_conn, at2)
-                            if len(and_atoms3) == 2:
+                            if len(adj_atoms3) == 2:
                                 if   adj_atoms3[0] == 'H': 
                                     dih3 = [ dih1[2], dih1[3], at, adj_atoms3[0]]
                                 elif adj_atoms3[1] == 'H': 
