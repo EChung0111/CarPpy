@@ -956,6 +956,43 @@ class Conformer():
 
         return link_type
 
+    def find_pg(self, dfs_list, conn_mat):
+        pg_list = []
+
+        for ring in dfs_list:
+            pg_dict = {}
+
+            if len(ring.values()) == 7:
+                pg_root = ring['C6']
+                root_adj = adjacent_atoms(at=pg_root,conn_mat=conn_mat)
+
+                for adj_at in root_adj:
+                    if 'O' in adj_at:
+                        pg_O_adj = [at for at in adjacent_atoms(at=adj_at,conn_mat=conn_mat) if at  != ring['C6']]
+                        OC_count = adj_at.count('C')
+                        OH_count = pg_O_adj.count('H')
+
+                        pg_dict['O'] = adj_at
+                        if OC_count == 2:
+                            pg_dict['Ac'] = pg_O_adj[0]
+
+            elif len(ring.values()) > 7:
+                pg_root = ring['C7']
+                root_adj = adjacent_atoms(at=pg_root, conn_mat=conn_mat)
+
+                for adj_at in root_adj:
+                    if 'O' in adj_at:
+                        pg_O_adj = [at for at in adjacent_atoms(at=adj_at, conn_mat=conn_mat) if at != ring['C7']]
+                        OC_count = adj_at.count('C')
+                        OH_count = pg_O_adj.count('H')
+
+                        pg_dict['O'] = adj_at
+                        if OC_count == 2:
+                            pg_dict['Ac'] = pg_O_adj[0]
+
+            pg_list.append(pg_dict)
+        return pg_list
+
     def ring_stereo_compiler(self, conf, dfs_list, conn_mat):
 
         sugar_type_list = []
@@ -1175,7 +1212,6 @@ class Conformer():
         Xsc = self.IR[:,0]* scaling_factor ; IRsc = self.IR[:,1]*scale_t
         ir_theo = ax.plot(Xsc, IRsc+shift, color='0.25', linewidth=2)
         ax.fill_between(Xsc, np.linspace(shift, shift, len(IRsc)), IRsc+shift, color='0.5', alpha=0.5)
-
 
         if normal_modes == True:
             for l in range(len(self.Freq)):

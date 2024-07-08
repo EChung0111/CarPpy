@@ -252,8 +252,7 @@ def protecting_group_dihedrals(conf, atom, pg_type, PG_atoms):
 def determine_carried_atoms(conf, at1, at2):
 
     """Find all atoms necessary to be carried over during rotation
-    of an atom 2
-
+    of an atom
     :param at1: (list) the xyz coordinates of an atom
     :param at2: (list) the xyz coordinates of another atom
     :param conn_matt: the connectivity matrix of a conformer
@@ -274,7 +273,7 @@ def determine_carried_atoms(conf, at1, at2):
 
     #   2. Determine the connected atoms:
     for subgraph in networkx.connected_components(cm):
-        if at2 in subgraph: 
+        if at2 in subgraph:
             #print('subgraph:',subgraph)
             carried_atoms = [ at for at in subgraph ]
     if broke_bond : connect_atoms(conf, at1, at2)
@@ -503,8 +502,7 @@ def set_dihedral(conf, list_of_atoms, new_dih, incr = False,  axis_pos = "bond",
     #   Reverse if the angle is less than zero, so it rotates in
     #   right direction.
     #   Also, I move the midpoint of the bond to the center for
-    #   the rotation step and then move the atom back.
-
+    #   the rotation step and then move the atom back.KL kl;h
     rot = expm(np.cross(np.eye(3), normalized_axor*rot_angle))
 
     if axis_pos == "bond":
@@ -1104,8 +1102,6 @@ def rfac(espec, tspec, start=1000, stop=1800, w_incr=1.0, shift_min=-10, shift_m
     ye = ypendry(espec,d1_espec,VI)
     yt = ypendry(tspec,d1_tspec,VI)
 
-
-
   min_pendry = [1.E100,0]
   min_r1     = [1.E100,0]
   min_r2     = [1.E100,0]
@@ -1166,7 +1162,6 @@ def rfac(espec, tspec, start=1000, stop=1800, w_incr=1.0, shift_min=-10, shift_m
       if (r_zj < min_zj[0]):
         min_zj=[r_zj,shift]
 
-
 # find minimal r-factor and write it out
    #sys.stdout.write("\nMinimal r-factors:\n")
   if "pendry" in r:
@@ -1174,6 +1169,7 @@ def rfac(espec, tspec, start=1000, stop=1800, w_incr=1.0, shift_min=-10, shift_m
        #print  (min_pendry[1], min_pendry[0])
        #I'm adding a return statement
     return min_pendry[0]
+
   if "R1" in r:
     sys.stdout.write("minimal r-factor: Delta = %8.5f, R1 R-factor = %7.5f \n" % ( min_r1[1], min_r1[0]))
   if "R2" in r:
