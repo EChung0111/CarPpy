@@ -764,7 +764,6 @@ class Conformer():
         return connections > 0
 
     def amide_check(self, rd):
-
         if len(list(rd.values())) == 7:
             C2 = rd['C2']
         elif len(list(rd.values())) == 8:

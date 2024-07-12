@@ -208,6 +208,7 @@ def rmsd_qcp(conformation1, conformation2, rotation_matrix = False):
         rot=[row1,row2,row3];
 
         np_rotmat = np.array(rot)
+
         return rmsd, np_rotmat
 
 

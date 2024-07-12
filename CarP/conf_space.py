@@ -912,7 +912,6 @@ class Space(list):
             for n, e in zip(range(0, angles+1), self[0].graph.edges): pass
             ax.set_title(self[0].graph.edges[e]['linker_type'])
 
-
             vmin = 0.0  ;
             E = [] ; phi = [] ; psi = [] ; P = []
             for conf in self:
@@ -923,8 +922,7 @@ class Space(list):
                     P.append(reduce_pucker(conf.graph.nodes[color]['pucker']))
 
             if flip_order == True: 
-                phi.reverse() ; psi.reverse() ; E.reverse() 
-
+                phi.reverse() ; psi.reverse() ; E.reverse()
 
             if color == 'E':
                 plot = ax.scatter(phi, psi, 50, E, cmap=cmap, vmin=vmin, vmax=vmax, edgecolors='k', linewidth=0.5)
