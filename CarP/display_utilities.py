@@ -106,7 +106,6 @@ def make_plots(conf_space_object, index=0, bar=True, scatter=True):
 		plt.legend(loc=2)
 		plt.show()
 
-
 def display_table(index,molecule_ids,molecule_names,rmsd_all,rmsd_no_H,pendry):
 	""" Prints into terminal and saves as .txt a table displaying each conformer and the associated value rmsd, rmsd without H and pendry R factor
 
@@ -143,8 +142,3 @@ def display_table(index,molecule_ids,molecule_names,rmsd_all,rmsd_no_H,pendry):
 	#table.set_cols_align(["l", "r", "r", "r", "l"])
 	table.add_rows(index_vs_all)
 	print (table.draw())
-
-
-
-
-
