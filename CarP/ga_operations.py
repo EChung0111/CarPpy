@@ -120,7 +120,7 @@ def draw_random_pucker(prob_model=None):
         if n < J: 
             pucker = i
             return puckers[pucker][utilities.draw_random_int(top=len(puckers[pucker]))]
- z
+
 def cross_over(conf1, conf2):
 
     """Swaps angle measures of two conformers

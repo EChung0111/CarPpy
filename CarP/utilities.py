@@ -1159,6 +1159,8 @@ def rfac(espec, tspec, start=1000, stop=1800, w_incr=1.0, shift_min=-10, shift_m
       # calculate reduced Zanazzi-Jona R-factor r=r/0.027
       r_zj = integrate(integrand_dense,incr)/(0.027*integrate(abs(s_espec),w_incr))
       sys.stdout.write("red. ZJ R-factor: %f, shift %f\n" % (r_zj,shift))
+
+
       if (r_zj < min_zj[0]):
         min_zj=[r_zj,shift]
 

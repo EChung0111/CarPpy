@@ -209,8 +209,7 @@ def rmsd_qcp(conformation1, conformation2, rotation_matrix = False):
 
         np_rotmat = np.array(rot)
 
-        return rmsd, np_rotmat
-
+    return rmsd, np_rotmat
 
 def test():
     """ This function was just to test the rmsd function. Ignore this. This should just be removed

@@ -717,6 +717,7 @@ class Conformer():
                         if c1_count > 0:
                             glycosidic_link_list.append(f"C{ring_index}")
 
+
         return glycosidic_link_list
 
     def ring_dict_finder(atom, rd_list):
@@ -886,6 +887,14 @@ class Conformer():
         norm1_mag = math.sqrt(np.sum([n1 ** 2 for n1 in norm1]))
         norm1 = np.array([n1 / norm1_mag for n1 in norm1])
 
+        vector_1 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom1_coords, atom2_coords)])
+        vector_2 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom2_coords, atom3_coords)])
+        vector_3 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom3_coords, atom4_coords)])
+
+        norm1 = np.cross(vector_1, vector_2)
+        norm1_mag = math.sqrt(np.sum([n1 ** 2 for n1 in norm1]))
+        norm1 = np.array([n1 / norm1_mag for n1 in norm1])
+
         norm2 = np.cross(vector_2, vector_3)
         norm2_mag = math.sqrt(np.sum([n2 ** 2 for n2 in norm2]))
         norm2 = np.array([n2 / norm2_mag for n2 in norm2])
@@ -974,6 +983,7 @@ class Conformer():
                         pg_dict['O'] = adj_at
                         if OC_count == 2:
                             pg_dict['Ac'] = pg_O_adj[0]
+
 
             elif len(ring.values()) > 7:
                 pg_root = ring['C7']
@@ -1118,7 +1128,7 @@ class Conformer():
                 self.topol = m.topol
                 return 0  
 
-            elif conf_links == m_links and self.anomer == m.anomer: 
+            elif conf_links == m_links and self.anomer == m.anomer:
                 atc = 0 #atom counter
                 acm = np.argwhere(np.abs(mat) == 1) #absolute connectivity matrix
                 for at in acm:
@@ -1232,6 +1242,7 @@ class Conformer():
 
         """Stores the following in each conformer obj the name of the conformer it is being rotated to match, the index of that conformer and the rotation matrix.
         The rotation matrix is then multiplied to the existing xyz matrix and the vibrations matrix. Those rotated matrices are also saved.
+
 
         :param conf_name: (string) name of the conformer this conformer has been rotated to
         :param conf_index: (int) index of the conformer rotated to, in the list of conformers of the conformer space
