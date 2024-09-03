@@ -3,8 +3,11 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from itertools import zip_longest
-import sys
 import os
+import PIL
+
+from scipy.stats import rdist
+
 
 class ConformerTest:
 
@@ -202,15 +205,15 @@ class ConformerTest:
     @staticmethod
     def sugar_type_checker(conn_mat,rd,xyz_array):
 
-        # Bit Order: Ring Size, C6, O2, O3, O4, Amide, O6
-        sugar_dict = {'Tal':1111101, 'TalNac':1111111, 'TalA':1111102, '6dTal':1111100, '6dTalNac':1111110,
-                      'Man':1111001, 'ManNac':1111011, 'ManA':1111002, 'Rha':1111000, 'RhaNac':1111010,
-                      'Iod':1110101, 'IodNac':1110111, 'IodA':1110102,
-                      'Alt':1110001, 'AltNac':1110011, 'AltA':1110002, '6dAlt':1101100, '6dAltNac':1101110,
-                      'Glu':1100101, 'GluNac':1100111, 'GluA':1100102, '6dGul':1100100,
-                      'All':1100001, 'AllNac':1100011, 'AllA':1100002,
-                      'Gal':1101101, 'GalNac':1101111, 'GalA':1101102, 'Fuc':1110000, 'FucNac':1110010,
-                      'Glc':1101001, 'GlcNac':1101011, 'GlcA':1101002, 'Qui':1101000, 'QuiNac':1101010, 'Xyl':1101003}
+        # Bit Order: Ring Size, C6, O2, O3, O4, Amide, O6, Amine
+        sugar_dict = {'Tal':11111010, 'TalNac':11111110, 'TalA':11111020, 'TalN':11111011,'6dTal':11111000, '6dTalNac':11111100,
+                      'Man':11110010, 'ManNac':11110110, 'ManA':11110020, 'ManN':11110011, 'Rha':11110000, 'RhaNac':11110100,
+                      'Ido':11101010, 'IdoNac':11101110, 'IdoA':11101020, 'IdoN':11101011,
+                      'Alt':11100010, 'AltNac':11100110, 'AltA':11100020, 'AltN':11100011, '6dAlt':11011011, '6dAltNac':11011100,
+                      'Gul':11001010, 'GulNac':11001110, 'GulA':11001020, 'GulN':11001011, '6dGul':11001000,
+                      'All':11000010, 'AllNac':11000110, 'AllA':11000020, 'AllN':11000011,
+                      'Gal':11011010, 'GalNac':11011110, 'GalA':11011020, 'GalN':11011011, 'Fuc':11100000, 'FucNac':11100100,
+                      'Glc':11010010, 'GlcNac':11010110, 'GlcA':11010020, 'GlcN':11010011, 'Qui':11010000, 'QuiNac':11010100, 'Xyl':11010030}
 
         if len(rd.keys()) >=7:
 
@@ -223,6 +226,7 @@ class ConformerTest:
             O4_Dihedral = ConformerTest.dihedral_angle(rd['C3'],rd['C4'],rd['C5'],O4,xyz_array)
 
             amide_check = ConformerTest.amide_check(conn_mat, rd)
+            amine_check = ConformerTest.amine_check(conn_mat, rd)
 
             C5H = ConformerTest.count_n(conn_mat, rd['C5'], 'H')
 
@@ -232,7 +236,7 @@ class ConformerTest:
                 O6_num = None
 
             sugar_bit = '11'
-            for value in [O2_Dihedral, O3_Dihedral, O4_Dihedral, amide_check, O6_num]:
+            for value in [O2_Dihedral, O3_Dihedral, O4_Dihedral, amide_check, O6_num, amine_check]:
                 if type(value) == float:
                     if value < 0:
                         sugar_bit += '0'
@@ -562,26 +566,36 @@ class ConformerTest:
 
         return glyco_carbon
     @staticmethod
-    def glycosidic_link_check(conn_mat, rd, c1_list):
+    def glycosidic_link_check(conn_mat, c1_list, edge, rd_list):
         glycosidic_link_list = []
 
-        for ring_index in range(1, len(list(rd.values()))):
+        node_1 = edge[0]
+        node_2 = edge[1]
+
+        rd1_index = int(node_1.split(' ')[-1])
+        rd2_index = int(node_2.split(' ')[-1])
+
+        rd1 = rd_list[rd1_index]
+        rd2 = rd_list[rd2_index]
+
+        for ring_index in range(1, len(list(rd1.values()))):
             if ring_index == 5:
                 continue
 
-            atom = rd[f"C{ring_index}"]
+            atom = rd1[f"C{ring_index}"]
 
             for het_at in ConformerTest.adjacent_atoms(conn_mat, atom):
-                if 'C' not in het_at and 'H' not in het_at and het_at not in rd.values():
+                if 'C' not in het_at and 'H' not in het_at and het_at not in rd1.values():
                     adj_atom_list = ConformerTest.adjacent_atoms(conn_mat, het_at)
 
-                    if ConformerTest.count_n(conn_mat, het_at, 'C') == 2 and rd['C5'] not in adj_atom_list:
+                    if ConformerTest.count_n(conn_mat, het_at, 'C') == 2 and rd1['C5'] not in adj_atom_list:
                         c1_count = sum(1 for adj_at in adj_atom_list if adj_at in c1_list)
 
-                        if c1_count > 0:
-                            glycosidic_link_list.append(f"C{ring_index}")
+                        for c1_atom in ConformerTest.adjacent_atoms(conn_mat, het_at):
+                            if c1_atom in c1_list and c1_atom in rd2.values():
 
-        return glycosidic_link_list
+                                if c1_count > 0:
+                                    return f"C{ring_index}"
 
     @staticmethod
     def amide_check(conn_mat, rd):
@@ -615,6 +629,39 @@ class ConformerTest:
                 amide = False
 
             return amide
+
+        else:
+            amide = False
+            return amide
+
+    def amine_check(conn_mat, rd):
+
+        if len(list(rd.values())) == 7:
+            C2 = rd['C2']
+        elif len(list(rd.values())) == 8:
+            C2 = rd['C3']
+        else:
+            C2 = None
+
+        if C2 is not None:
+            HC2_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2, filter='H')
+            NC2_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2, filter='N')
+
+            for C2_adj_at in ConformerTest.adjacent_atoms(conn_mat=conn_mat, node=C2):
+                if 'N' in C2_adj_at:
+                    HN_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2_adj_at, filter='H')
+                    CN_count = ConformerTest.count_n(conn_mat=conn_mat, node=C2_adj_at, filter='C')
+
+                    if HN_count >= 1 and CN_count == 1:
+                        amine = True
+
+                    else:
+                        amine = False
+
+            if 'amide' not in locals():
+                amine = False
+
+            return amine
 
         else:
             amide = False
@@ -681,8 +728,6 @@ class ConformerTest:
                         and not ring_graph.has_edge(f"Ring {rd_list.index(rd1)}", f"Ring {rd_list.index(rd2)}") \
                         and not ring_graph.has_edge(f"Ring {rd_list.index(rd2)}", f"Ring {rd_list.index(rd1)}"):
                     ring_graph.add_edge(f"Ring {rd_list.index(rd1)}", f"Ring {rd_list.index(rd2)}", weight=1)
-            if ConformerTest.amide_check(conn_mat=conn_mat, rd=rd1) == True:
-                ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}", weight=2)
 
         if ring_graph.number_of_edges() == 0:
             ring_graph.add_node('Ring 0')
@@ -710,55 +755,13 @@ class ConformerTest:
 
         branch_end_list = []
         branch_len_list = []
-        new_dfs_ring_list = []
 
-        for rd in dfs_ring_list:
-            node_index = dfs_ring_list.index(rd)
-            node = f"Ring {node_index}"
-            neighbor_list = [rn for rn in ring_graph.neighbors(node)]
-            if len(neighbor_list) == 1 and node != red_end:
-                branch_end_list.append(rd)
-                branch_len_list.append(len(nx.shortest_path(ring_graph, red_end, node)))
-
-        if len(branch_end_list) != 1:
-            branch_array = []
-            for branch_len, branch_end in zip(branch_len_list, branch_end_list):
-                branch_array.append([branch_len, branch_end])
-
-            branch_array = np.array(branch_array)
-
-            if branch_array.ndim == 2:
-                branch_array = branch_array[branch_array[:, 0].argsort()[::-1]]
-                branch_end_list = branch_array[:, 1].tolist()
-
-            if branch_array.ndim != 0:
-                for branch_end in branch_end_list:
-                    branch_node = f"Ring {dfs_ring_list.index(branch_end)}"
-                    branch = nx.shortest_path(ring_graph, red_end, branch_node)
-                    for node in branch:
-                        ring_dict_index = int(list(node.split())[-1])
-                        rd = rd_list[ring_dict_index]
-
-                        if rd not in new_dfs_ring_list:
-                            new_dfs_ring_list.append(rd)
-
-                glyco_list = [ConformerTest.glycosidic_link_check(conn_mat=conn_mat, rd=rd, c1_list=c1_list) for rd in new_dfs_ring_list]
-
-                label_dict = {}
-                for rd_index,rd in enumerate(new_dfs_ring_list):
-                    node_label = f"Ring {rd_index}"
-                    old_index = rd_list.index(rd)
-
-                    label_dict[f"Ring {old_index}"] = node_label
-
-                tree = nx.relabel_nodes(tree, label_dict)
-
-            new_dfs_ring_list = rd_list
-        else:
-            new_dfs_ring_list = dfs_ring_list
         glyco_list = []
+        for edge in nx.dfs_edges(tree):
+            link = ConformerTest.glycosidic_link_check(conn_mat, c1_list, edge, rd_list)
+            glyco_list.append(link)
 
-        return tree, glyco_list, new_dfs_ring_list
+        return tree, glyco_list, dfs_ring_list
 
     @staticmethod
     def ring_stereo_compiler(xyz_array, dfs_list, conn_mat):
@@ -858,13 +861,116 @@ class ConformerTest:
             pg_list.append(pg_dict)
         return pg_list
 
+    @staticmethod
+    def snfg(tree,dfs_list,glyco_list,stero_list,sugar_list, rd_list, node_size:float = 3, edge_length:float = 5):
+
+        snfg_graph = nx.Graph()
+
+        sugar_dict = {'Tal': 11111010, 'TalNac': 11111110, 'TalA': 11111020, 'TalN': 11111011, '6dTal': 11111000,
+                      '6dTalNac': 11111100,
+                      'Man': 11110010, 'ManNac': 11110110, 'ManA': 11110020, 'ManN': 11110011, 'Rha': 11110000,
+                      'RhaNac': 11110100,
+                      'Ido': 11101010, 'IdoNac': 11101110, 'IdoA': 11101020, 'IdoN': 11101011,
+                      'Alt': 11100010, 'AltNac': 11100110, 'AltA': 11100020, 'AltN': 11100011, '6dAlt': 11011011,
+                      '6dAltNac': 11011100,
+                      'Gul': 11001010, 'GulNac': 11001110, 'GulA': 11001020, 'GulN': 11001011, '6dGul': 11001000,
+                      'All': 11000010, 'AllNac': 11000110, 'AllA': 11000020, 'AllN': 11000011,
+                      'Gal': 11011010, 'GalNac': 11011110, 'GalA': 11011020, 'GalN': 11011011, 'Fuc': 11100000,
+                      'FucNac': 11100100,
+                      'Glc': 11010010, 'GlcNac': 11010110, 'GlcA': 11010020, 'GlcN': 11010011, 'Qui': 11010000,
+                      'QuiNac': 11010100, 'Xyl': 11010030}
+
+        current_dir = os.path.abspath('')
+        string_list = current_dir.split('CarPpy')
+        image_dir = os.path.join(string_list[0], 'CarPpy', 'CarP', 'snfg')
+
+        image_dict = {}
+        for key in sugar_dict:
+            image = os.path.join(image_dir,f"{key}.png")
+            image_dict[key] = image
+
+        images = {k: PIL.Image.open(fname) for k, fname in image_dict.items()}
+
+        covered_nodes = []
+        dfs_edges = list(nx.dfs_edges(tree))
+
+        for index, node in enumerate(sugar_list):
+            if node in images.keys():
+                snfg_graph.add_node(f"{node} {index}", image=images[node])
+            else:
+                snfg_graph.add_node(f"{node} {index}")
+
+
+        pos = {}
+
+        root_node = dfs_edges[0][0]
+        pos[f"{sugar_list[0]} 0"] = [0,0]
+        covered_nodes.append(root_node)
+
+        for link,edge in zip(glyco_list,dfs_edges):
+            node = edge[-1]
+            prev_node = edge[0]
+            if node not in covered_nodes:
+                covered_nodes.append(node)
+
+                rd2_index = int(node.split(' ')[-1])
+                rd2 = rd_list[rd2_index]
+
+                rd1_index = int(prev_node.split(' ')[-1])
+                rd1 = rd_list[rd1_index]
+
+                dfs2_index = dfs_list.index(rd2)
+                dfs1_index = dfs_list.index(rd1)
+
+                snfg_graph.add_edge(f"{sugar_list[dfs1_index]} {dfs1_index}", f"{sugar_list[dfs2_index]} {dfs2_index}")
+                prev_coords = pos[f"{sugar_list[dfs1_index]} {dfs1_index}"]
+                if len(sugar_list) <= 3:
+                    if link == 'C4':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length,prev_coords[1]]
+                    elif link == 'C6':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] + math.sqrt(3)*edge_length/2]
+                    elif link == 'C3':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] - math.sqrt(3)*edge_length/2]
+                    elif link == 'C2':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0], prev_coords[1] - edge_length]
+                else:
+                    if link == 'C4' or link == 'C2':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length,prev_coords[1]]
+                    elif link == 'C6':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] + math.sqrt(3)*edge_length/2]
+                    elif link == 'C3':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] - math.sqrt(3)*edge_length/2]
+
+        fig, ax = plt.subplots(1,1)
+        nx.draw(snfg_graph, pos=pos, ax=ax, with_labels=False, width=50*node_size/(len(sugar_list)*edge_length**1.5), node_size=0)
+
+        tr_figure = ax.transData.transform
+        tr_axes = fig.transFigure.inverted().transform
+
+        icon_size = (ax.get_xlim()[1] - ax.get_xlim()[0]) * (0.4*node_size/(len(sugar_list)*edge_length**1.5))
+        icon_center = icon_size / 2.0
+
+        for n in snfg_graph.nodes:
+            xf, yf = tr_figure(pos[n])
+            xa, ya = tr_axes((xf, yf))
+            # get overlapped axes and plot icon
+            a = plt.axes([xa - icon_center, ya - icon_center, icon_size, icon_size])
+            print(snfg_graph.nodes[n]['image'])
+
+            if 'image' in snfg_graph.nodes[n].keys():
+                a.imshow(snfg_graph.nodes[n]["image"])
+
+            a.axis("off")
+
+        return fig,ax
+
 if __name__ == "__main__":
     # This section is just for testing (Will not be in final code)
 
     working_dir = os.path.abspath('')
     for file in ConformerTest.get_files(working_dir):
 
-        if 'Fuc_a14a_conf_0009.xyz' in file:
+        if 'Fuc_bn16a_conf_0022.xyz' in file:
             conn_mat = ConformerTest.xyztograph(file)
             xyz_array = ConformerTest.xyztoarray(file)
             cycles_in_graph = nx.cycle_basis(conn_mat)
@@ -895,3 +1001,6 @@ if __name__ == "__main__":
                 sugar_list.append(sugar)
 
             print('Sugars:',sugar_list)
+
+            fig, ax = ConformerTest.snfg(tree=ring_tree, sugar_list=sugar_list, dfs_list=dfs_ring_list, glyco_list=glyco_array, stero_list=link_type_list, rd_list=ring_dict_list)
+            fig.savefig('glycan.png',bbox_inches='tight',dpi=300)
