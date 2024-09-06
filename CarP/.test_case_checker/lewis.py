@@ -900,7 +900,6 @@ class ConformerTest:
             else:
                 snfg_graph.add_node(f"{node} {index}")
 
-
         pos = {}
 
         root_node = dfs_edges[0][0]
