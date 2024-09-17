@@ -18,6 +18,9 @@
 import numpy as np
 import re, os
 from subprocess import Popen, PIPE
+
+from nltk.sem.chat80 import continent
+
 from .utilities import *
 import networkx as nx
 from operator import itemgetter, attrgetter

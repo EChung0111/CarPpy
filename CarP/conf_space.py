@@ -84,7 +84,7 @@ class Space(list):
 
         return self.__getitem(slice(i,j))
 
-    def load_dir(self, path, software='g16', carb = True, sort_atoms = False, determine_PGs = False, distXX=1.65, distXH=1.25):
+    def load_dir(self, path, software='g16', carb = True, sort_atoms = False, determine_PGs = False, distXX=1.65, distXH=1.25, conf_n=None):
         """Loads a directory with data files to be processed. The path is just the name of the directory, the function will handle the presence of multiple directories within it.
 
         :param path: (string) this is the path to the directory with all the conformer data. This directory should be filled with other directories with the intended name of the conformer and it's .xyz and input.log files
@@ -122,7 +122,39 @@ class Space(list):
                                     conf = Conformer('/'.join([path, dirname]))
                                     loaded = conf.load_log(software="xyz")
 
-                                else: continue 
+                                elif software == 'crest':
+
+                                    file_line_list = []
+                                    with open('/'.join([self.path, "crest_conformers.xyz"]), 'r') as file:
+                                        for line in file:
+                                            file_line_list.append(line)
+
+                                        line_1 = file_line_list[0]
+
+                                        conf_array = []
+                                        conf_line_list = []
+
+                                        for line_num, line in enumerate(file_line_list):
+
+                                            if line == line_1 and line_num != 0:
+                                                conf_array.append(conf_line_list)
+                                                conf_line_list = [line]
+
+                                            else:
+                                                conf_line_list.append(line)
+
+                                        for conf_num, conf in enumerate(conf_array):
+
+                                            os.mkdir(os.path.join(self.path, f"conf_{conf_num}"))
+                                            with open(os.path.join(self.path, f"conf_{conf_num}", 'geometry1.xyz'),
+                                                      'w') as file:
+                                                for line in conf:
+                                                    file.write(line)
+                                    if conf_n is not None:
+                                        conf = Conformer('/'.join([path, dirname, f"conf_{conf_n}"]))
+                                        loaded = conf.load_log(software="xyz")
+
+                                else: continue
 
                                 if loaded: 
 
@@ -946,4 +978,3 @@ class Space(list):
                 fig.savefig('/'.join([output, 'dihedrals_'+str(angles)+'.pdf']), dpi=200, transparent=True)
             else:
                 fig.savefig('/'.join([self.path, 'dihedrals_'+str(angles)+'.pdf']), dpi=200, transparent=True)
- 

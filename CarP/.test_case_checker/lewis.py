@@ -947,7 +947,7 @@ class ConformerTest:
         tr_axes = fig.transFigure.inverted().transform
 
         icon_size = (ax.get_xlim()[1] - ax.get_xlim()[0]) * (0.4*node_size/(len(sugar_list)*edge_length**1.5))
-        icon_center = icon_size / 2.0
+        icon_center = icon_size/2.0
 
         for n in snfg_graph.nodes:
             xf, yf = tr_figure(pos[n])
