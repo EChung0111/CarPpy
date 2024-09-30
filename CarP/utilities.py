@@ -366,8 +366,38 @@ def measure_angle(conf, list_of_atoms):
 
     return angle*180.0/np.pi, axor
 
-def set_angle(conf, list_of_atoms, new_ang):
 
+def set_distance(conf, list_of_atoms, new_distance):
+    """Set a new distance between two atoms
+    :param list_of_atoms: (list) list of two atoms
+    :param new_distance: value of bond distance to be set
+    """
+
+    if len(list_of_atoms) != 2:
+        raise ValueError("The position needs to be defined by 2 integers")
+
+    at1 = list_of_atoms[0]
+    at2 = list_of_atoms[1]
+
+    xyz = conf.xyz
+
+    # Identify displacement vector:
+
+    displacement_vector = xyz[at2, :] - xyz[at1, :]
+    norm_vector = np.sqrt(np.sum(displacement_vector ** 2))
+    normalized_vector = displacement_vector / norm_vector
+
+    old_distance = CarP.measure_distance(conf, [at1, at2])
+    translation = normalized_vector * (new_distance - old_distance)
+
+    carried_atoms = CarP.determine_carried_atoms(conf, at1, at2)
+
+    for at in carried_atoms:
+        xyz[at, :] = xyz[at, :] + translation
+
+    # return xyz
+
+def set_angle(conf, list_of_atoms, new_ang):
     """Set a new angle between three atoms
     :param list_of_atoms: (list) list of three atoms
     :param new_ang: value of dihedral angle (in degrees) to be set
@@ -379,30 +409,43 @@ def set_angle(conf, list_of_atoms, new_ang):
         raise ValueError("The position needs to be defined by 4 integers")
 
     at1 = list_of_atoms[0]
-    at2 = list_of_atoms[1] #midpoint
+    at2 = list_of_atoms[1]  # midpoint
     at3 = list_of_atoms[2]
-    #xyz = copy.copy(conf.xyz)
+    # xyz = copy.copy(conf.xyz)
     xyz = conf.xyz
 
     #   Determine the axis of rotation:
 
     old_ang, axor = measure_angle(conf, [at1, at2, at3])
-    norm_axor = np.sqrt(np.sum(axor**2))
-    normalized_axor = axor/norm_axor
+    norm_axor = np.sqrt(np.sum(axor ** 2))
+    normalized_axor = axor / norm_axor
 
     #   Each carried_atom is rotated by euler-rodrigues formula:
     #   Also, I move the midpoint of the bond to the mid atom
     #   the rotation step and then move the atom back.
 
-    rot_angle = np.pi*(new_ang - old_ang)/180.
+    rot_angle = np.pi * (new_ang - old_ang) / 180.
     translation = xyz[at2, :]
 
-    #apply rotations to at3.
-    rot = expm(np.cross(np.eye(3), normalized_axor*(rot_angle)))
-    xyz[at3, :] = np.dot(rot, xyz[at3, :]-translation)
-    xyz[at3, :] = xyz[at3, :]+translation
+    # apply rotations to at3.
+    rot = expm(np.cross(np.eye(3), normalized_axor * (rot_angle)))
 
-    #return xyz
+    # xyz[at3, :] = np.dot(rot, xyz[at3, :]-translation)
+    # xyz[at3, :] = xyz[at3, :]+translation
+
+    # translation = np.array([x for x in xyz[list_of_atoms[2], :]])
+    # translation = (xyz[list_of_atoms[1], :]+xyz[list_of_atoms[2], :])/2
+
+    carried_atoms = determine_carried_atoms(conf, at2, at3)
+
+    for at in carried_atoms:
+        # print("atom #:", at)
+        # print("original xyz:", xyz[at, :])
+        xyz[at, :] = np.dot(rot, xyz[at, :] - translation)
+        xyz[at, :] = xyz[at, :] + translation
+        # print("new xyz:", xyz[at, :])
+
+    # return xyz
 
 def measure_dihedral(conf, list_of_atoms):
 
