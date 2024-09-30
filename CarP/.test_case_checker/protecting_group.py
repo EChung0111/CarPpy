@@ -1141,10 +1141,6 @@ if __name__ == "__main__":
 
                     xyz_array[atom_index] = row
 
-            print(coords)
-            print()
-            print(xyz_array)
-
             Natoms = len(list(xyz_array[:, 0]))
             with open('new_geom.xyz','w') as file:
                 file.write(str(Natoms)+"\n\n")
