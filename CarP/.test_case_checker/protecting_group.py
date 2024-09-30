@@ -560,7 +560,7 @@ class ConformerTest:
         rotation_matrix = ConformerTest.rotation_matrix(unit_vector_2, rad)
 
         nodes = list(nx.dfs_preorder_nodes(conn_mat, atom4))
-        bad_nodes = [atom3]
+        bad_nodes = [atom1,atom2,atom3]
         pred = nx.dfs_predecessors(conn_mat, atom4)
 
         carried_atoms = []

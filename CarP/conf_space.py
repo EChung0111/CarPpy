@@ -102,7 +102,7 @@ class Space(list):
             for dirname in dirs:
                 for ifiles in os.walk(path+'/'+dirname):
                     for filename in ifiles[2]:
-                        if filename.endswith('.log') or (filename.endswith('.xyz') and software == 'xyz'):
+                        if filename.endswith('.log') or filename.endswith('.xyz'):
 
                             loaded = False
                             for line in open('/'.join([path, dirname, filename]), 'r').readlines()[-10:]:
@@ -111,6 +111,11 @@ class Space(list):
 
                                     conf = Conformer('/'.join([path, dirname]))
                                     loaded = conf.load_log(software="g16")
+
+                                elif software == 'orca':
+
+                                    conf = Conformer('/'.join([path, dirname]))
+                                    loaded = conf.load_log(software="orca")
 
                                 elif software == 'fhiaims' and re.search('Have a nice day.', line):
 
@@ -150,6 +155,7 @@ class Space(list):
                                                       'w') as file:
                                                 for line in conf:
                                                     file.write(line)
+
                                     if conf_n is not None:
                                         conf = Conformer('/'.join([path, dirname, f"conf_{conf_n}"]))
                                         loaded = conf.load_log(software="xyz")
