@@ -1,5 +1,9 @@
 import math
-import rmsd
+
+from jupyterlab.semver import CARET
+
+import CarP
+import CarP.rmsd as rmsd
 import numpy as np
 import networkx
 import sys, copy
@@ -623,7 +627,7 @@ def ring_dihedrals(conf, ring_number):
 
     return(theta)
 
-def set_ring_pucker(conf, ring_number, pucker):
+def set_ring_pucker(conf, ring_number, pucker, rd_list):
 
     """ Edits the ring pucker by assigning a new angle to the C2, C4 and O angles. This is based on the ring puckering model proposed in Puckering Coordinates of Monocyclic Rings by Triangular Decomposition Anthony D. Hill and Peter J. Reilly
     :param conf: a conformer object
@@ -644,7 +648,7 @@ def set_ring_pucker(conf, ring_number, pucker):
     else:
         error("neither existing topology nor list of 3 dihedral angles are provided")
 
-    ra = conf.graph.nodes[ring_number]['ring_atoms']
+    ra = rd_list[ring_number]
 
     #xyz_backup = copy.copy(conf.xyz)
 
@@ -705,7 +709,7 @@ def set_ring_pucker(conf, ring_number, pucker):
 
         op_atoms_adj = adjacent_atoms(conf.conn_mat, ra[oa]) ;
 
-        if oa == 'C1' and conf.anomer == 'carbocation': #sp2 C1
+        if oa == 'C1': #sp2 C1
            #print(conf.atoms[op_atoms_adj[0]])
             anomeric_h = copy.copy(op_atoms_adj[0])
             set_dihedral(conf, [ra['C2'], ra['O'], ra['C1'], anomeric_h],   179.)
@@ -722,8 +726,8 @@ def set_ring_pucker(conf, ring_number, pucker):
             elif conf.anomer == 'alpha' and conf.graph.nodes[ring_number]['absconf'] == 'L':
                op_atoms.reverse()
         else:
-  
-            if conf.graph.nodes[ring_number]['absconf'] == 'D':
+
+            if conf.sugar_stero(rd_list[ring_number]) == 'D':
                op_atoms.reverse()
 
         for step in range(3):
@@ -765,7 +769,7 @@ def set_ring_pucker(conf, ring_number, pucker):
 
     for n, rat in zip([0,1,2],['C1', 'C3', 'C5']):
 
-        if rat == 'C1' and conf.anomer == 'carbocation': #sp2 C1
+        if rat == 'C1': #sp2 C1
             set_angle(conf, [ra['C2'], ra['C1'], anomeric_h], 120.)
             continue
 

@@ -19,11 +19,8 @@ import numpy as np
 import re, os
 from subprocess import Popen, PIPE
 
-from nltk.sem.chat80 import continent
-
 from .utilities import *
 import networkx as nx
-from operator import itemgetter, attrgetter
 import matplotlib.pyplot as plt
 import py3Dmol as p3D
 from itertools import zip_longest
@@ -463,7 +460,7 @@ class Conformer():
         for f, i in zip(self.Freq, self.Ints):  IR += i*np.exp(-0.5*((X-f)/int(broaden))**2)
         self.IR=np.vstack((X, IR)).T #tspec
 
-    def connectivity_matrix(self, distXX, distXH):
+    def connectivity_matrix(self, distXX=1.65, distXH=1.15):
 
         """ Creates a connectivity matrix of the molecule. A connectivity matrix holds the information of which atoms are bonded and to what. 
 
@@ -476,51 +473,70 @@ class Conformer():
 
         for at1 in range(Nat):
             for at2 in range(Nat):
-                
+
                 dist = get_distance(self.xyz[at1], self.xyz[at2])
+
                 if at1 == at2: pass
+
                 elif (self.atoms[at1] == 'H' or self.atoms[at2] == 'H') and dist < distXH: 
                     self.conn_mat[at1,at2] = 1; self.conn_mat[at2,at1] = 1 
                 elif (self.atoms[at1] != 'H' and self.atoms[at2] != 'H') and dist < distXX:
-                    self.conn_mat[at1,at2] = 1; self.conn_mat[at2,at1] = 1   
+                    self.conn_mat[at1,at2] = 1; self.conn_mat[at2,at1] = 1
 
         #Remove bifurcated Hs:
         for at1 in range(Nat):
             if self.atoms[at1] == 'H' and np.sum(self.conn_mat[at1,:]) > 1:
 
-                    at2list = np.where(self.conn_mat[at1,:] == 1) 
-                    at2dist = [ round(get_distance(self.xyz[at1], self.xyz[at2x]), 3) for at2x in at2list[0]]
-                    at2 = at2list[0][at2dist.index(min(at2dist))]
-                    for at2x in at2list[0]: 
+                    at2list = np.where(self.conn_mat[at1,:] == 1)
+                    at2list = at2list[0].tolist()
+
+                    at2dist = [ round(get_distance(self.xyz[at1], self.xyz[at2x]), 3) for at2x in at2list]
+                    for at,dist in zip(at2list, at2dist):
+                        if self.atoms[at] == 'H':
+                            at2list.remove(at)
+                            at2dist.remove(dist)
+
+                    at2 = at2list[at2dist.index(min(at2dist))]
+                    for at2x in at2list:
                         if at2x != at2: 
                             print('remove', self._id, at2x, at1, at2)
                             self.conn_mat[at1, at2x] = 0 ; self.conn_mat[at2x, at1] = 0
 
         cm = nx.graph.Graph(self.conn_mat)
         self.Nmols = nx.number_connected_components(cm)
+        return cm
 
     def pyranose_basis(self, rd, sugar_basis):
         adj_atom_O = adjacent_atoms(self.conn_mat, rd['O'])
 
         for atom in adj_atom_O:
-            if self.atoms[atom].count('H') == 2 or [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count(
+            if self.atoms[atom].count('H') == 2 or [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count(
                     'H') == 2:
                 rd['C5'] = atom
+
             elif (
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('H') > 1 and
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('O') == 1
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('O') == 1
             ):
                 rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
             elif (
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('H') == 0 and
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('O') == 2
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('H') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('O') == 2
             ):
                 rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
             elif (
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('O') == 0 and
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('H') == 3
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('O') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('H') == 3
             ):
                 rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
 
         if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
@@ -531,24 +547,25 @@ class Conformer():
 
         sugar_basis = sugar_basis_no_rep
 
-        Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
+        Carb_Oxygen = [atom for atom in sugar_basis if 'O' in self.atoms[atom]][0]
         sugar_basis.remove(Carb_Oxygen)
 
         for atom_index, atom in enumerate(sugar_basis):
             rd[f"C{atom_index + 1}"] = atom
 
-        if (
-                [self.atoms[rd['C6']]].count('H') >= 1 and
-                [self.atoms[rd['C1']]].count('C') > 1):
+        if 'C6' in rd.keys():
+            if (
+                    [self.atoms[rd['C6']]].count('H') >= 1 and
+                    [self.atoms[rd['C1']]].count('C') > 1):
 
-            rd_index = 6
-            while rd_index > 0:
-                rd[f"C{rd_index + 1}"] = rd[f"C{rd_index}"]
-                rd_index -= 1
+                rd_index = 6
+                while rd_index > 0:
+                    rd[f"C{rd_index + 1}"] = rd[f"C{rd_index}"]
+                    rd_index -= 1
 
-            for C2_adjaceent in adjacent_atoms(self.atoms[rd['C2']]):
-                if C2_adjaceent not in sugar_basis and 'C' in C2_adjaceent:
-                    rd['C1'] = C2_adjaceent
+                for C2_adjaceent in adjacent_atoms(self.atoms[rd['C2']]):
+                    if C2_adjaceent not in sugar_basis and 'C' in C2_adjaceent:
+                        rd['C1'] = C2_adjaceent
 
         return rd
 
@@ -556,25 +573,34 @@ class Conformer():
         adj_atom_O = adjacent_atoms(self.conn_mat, rd['O'])
 
         for atom in adj_atom_O:
-            if self.atoms[atom].count('H') == 2 or [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count(
+            if self.atoms[atom].count('H') == 2 or [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count(
                     'H') == 2:
                 rd['C5'] = atom
             elif (
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('H') == 2 and
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('O') == 1 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('H') == 2 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('O') == 1 and
                     atom.count('H') == 1
             ):
                 rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
             elif (
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('H') == 0 and
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('O') == 2
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('H') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('O') == 2
             ):
                 rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
             elif (
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('O') == 0 and
-                    [self.atoms[adj_at] for adj_at in adjacent_atoms(atom)].count('H') == 3
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('O') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('H') == 3
             ):
                 rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
 
         if sugar_basis.index(rd['C5']) == 0:
             sugar_basis.reverse()
@@ -594,11 +620,13 @@ class Conformer():
 
         return rd
 
-    def sort_ring_atoms(self, cycles_in_graph, conn_mat):
+    def sort_ring_atoms(self, cycles_in_graph, conn_mat, conf):
+
         rd_list = []
 
         for ring in cycles_in_graph:
-            if 5 <= len(ring) <= 7:
+
+            if not (5 <= len(ring) <= 7):
                 continue
 
             rd = {}
@@ -606,6 +634,7 @@ class Conformer():
             oxygen_atom_list = []
 
             for at in ring:
+
                 if self.atoms[at] == 'O':
                     oxygen_atoms += 1
                     oxygen_atom_list.append(at)
@@ -631,10 +660,10 @@ class Conformer():
                     if len(sugar_basis) == len(ring) and rd['O'] in sugar_basis:
 
                         if len(ring) == 6:
-                            rd = Conformer.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = Conformer.pyranose_basis(conf, rd = rd, sugar_basis = sugar_basis)
 
                         elif len(ring) == 5:
-                            rd = Conformer.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = Conformer.furanose_basis(conf, rd, sugar_basis)
 
                     elif len(sugar_basis) != len(ring) and rd['O'] in sugar_basis:
                         cycle = ring
@@ -651,7 +680,7 @@ class Conformer():
                         index = oxygen_index + 1
                         cycle_len = len(cycle)
 
-                        if 'O' not in cycle[0]:
+                        if 'O' != self.atoms[cycle[0]]:
                             while index != oxygen_index:
 
                                 if index != cycle_len:
@@ -662,14 +691,15 @@ class Conformer():
                                     new_cycle.append(cycle[index])
                                     index += 1
 
-                        cycle = new_cycle
+                            cycle = new_cycle
+
                         sugar_basis = cycle
 
                         if len(cycle) == 6:
-                            rd = Conformer.pyranose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = self.pyranose_basis(rd, sugar_basis)
 
                         elif len(cycle) == 5:
-                            rd = Conformer.furanose_basis(conn_mat, rd['O'], sugar_basis, rd)
+                            rd = self.furanose_basis(rd, sugar_basis)
 
             if oxygen_atoms > 1 and len(ring) >= 7:
                 for oxygen_atom in oxygen_atom_list:
@@ -857,6 +887,8 @@ class Conformer():
         if ring_graph.number_of_edges() == 0:
             ring_graph.add_node('Ring 0')
 
+        self.graph = ring_graph
+
         return ring_graph
 
     def sort_rings(self, rd_list, conn_mat):
@@ -929,17 +961,16 @@ class Conformer():
 
         return dihedral
 
-    def sugar_stero(self, rd, conf):
+    def sugar_stero(conf,rd):
         if len(rd.values()) == 7:
-            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C5'], rd['C4'], rd['C6'], conf)
-        elif len(rd.values()) > 7:
-            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C6'], rd['C5'], rd['C7'], conf)
+            dihedral_angle = measure_dihedral(conf, [rd['O'], rd['C5'], rd['C4'], rd['C6']])
+
         else:
             dihedral_angle = None
 
-        if dihedral_angle is not None and 0 > dihedral_angle:
+        if dihedral_angle[0] is not None and 0 < dihedral_angle[0]:
             sugar_type = 'D'
-        elif dihedral_angle is not None and dihedral_angle > 0:
+        elif dihedral_angle[0] is not None and dihedral_angle[0] < 0:
             sugar_type = "L"
         else:
             sugar_type = 'None'
@@ -991,32 +1022,42 @@ class Conformer():
 
             if len(ring.values()) == 7:
                 pg_root = ring['C6']
-                root_adj = adjacent_atoms(at=pg_root,conn_mat=conn_mat)
+                root_adj = [at for at in adjacent_atoms(self.conn_mat,pg_root)]
 
                 for adj_at in root_adj:
-                    if 'O' in adj_at:
-                        pg_O_adj = [at for at in adjacent_atoms(at=adj_at,conn_mat=conn_mat) if at  != ring['C6']]
-                        OC_count = adj_at.count('C')
-                        OH_count = pg_O_adj.count('H')
+                    if 'O' in self.atoms[adj_at]:
+                        pg_O_adj = [at for at in adjacent_atoms(self.conn_mat,adj_at) if at  != ring['C6']]
+                        OC_count = [self.atoms[ajat] for ajat in adjacent_atoms(self.conn_mat,adj_at)].count('C')
+                        OH_count = [self.atoms[ajat] for ajat in adjacent_atoms(self.conn_mat,adj_at)].count('H')
 
+                        pg_dict['C5'] = ring['C5']
+                        pg_dict['C6'] = ring['C6']
                         pg_dict['O'] = adj_at
-                        if OC_count == 2:
-                            pg_dict['Ac'] = pg_O_adj[0]
 
+                        if OC_count == 2:
+                            pg_dict['R'] = pg_O_adj[0]
+
+                        elif OH_count == 1 and OC_count == 1:
+                            pg_dict['H'] = pg_O_adj[0]
 
             elif len(ring.values()) > 7:
                 pg_root = ring['C7']
-                root_adj = adjacent_atoms(at=pg_root, conn_mat=conn_mat)
+                root_adj = adjacent_atoms(conn_mat=conn_mat, at=pg_root)
 
                 for adj_at in root_adj:
                     if 'O' in adj_at:
-                        pg_O_adj = [at for at in adjacent_atoms(at=adj_at, conn_mat=conn_mat) if at != ring['C7']]
-                        OC_count = adj_at.count('C')
-                        OH_count = pg_O_adj.count('H')
+                        pg_O_adj = [at for at in adjacent_atoms(conn_mat=conn_mat,at=adj_at) if at != ring['C7']]
+                        OC_count = [self.atoms[at] for at in adjacent_atoms(conn_mat, adj_at)].count('C')
+                        OH_count = [self.atoms[at] for at in adjacent_atoms(conn_mat, adj_at)].count('H')
 
+                        pg_dict['C5'] = ring['C6']
+                        pg_dict['C6'] = ring['C7']
                         pg_dict['O'] = adj_at
                         if OC_count == 2:
-                            pg_dict['Ac'] = pg_O_adj[0]
+                            pg_dict['R'] = pg_O_adj[0]
+
+                        elif OH_count == 1 and OC_count == 1:
+                            pg_dict['H'] = pg_O_adj[0]
 
             pg_list.append(pg_dict)
         return pg_list
