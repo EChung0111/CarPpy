@@ -446,7 +446,7 @@ class Conformer():
 
         return ' '
 
-    def gaussian_broadening(self, broaden, resolution=1):
+    def gaussian_broadening(self, broaden=1, resolution=1):
  
         """ Performs gaussian broadening on IR spectrum
         generates attribute self.IR - np.array with dimmension 4000/resolution consisting gaussian-boraden spectrum
@@ -1404,7 +1404,9 @@ class Conformer():
         import matplotlib.pyplot as plt
         from matplotlib.ticker import NullFormatter
 
-        fig, ax = plt.subplots(1, figsize=(10,3))
+        fig, ax = plt.subplots(1, figsize=(math.ceil(10*(xmax-xmin)/(1500)),3))
+
+        self.gaussian_broadening(resolution=0.001,broaden=2)
 
         #left, width = 0.02, 0.98 ; bottom, height = 0.15, 0.8
         #ax  = [left, bottom, width, height ]
@@ -1422,7 +1424,8 @@ class Conformer():
         ax.set_xticklabels([int(x) for x in xticks], fontsize=10)
         ax.set_xlim(xmin-exten, xmax+exten+10)
 
-        shift = 0.05 ;         incr = (self.IR[-1,0] - self.IR[0,0])/(len(self.IR)-1)
+        shift = 0.05
+        incr = (self.IR[-1,0] - self.IR[0,0])/(len(self.IR)-1)
         scale_t  =  1/np.amax(self.IR[int(xmin/incr):int(xmax/incr)+100,1])
 
         if plot_exp == True:
@@ -1443,7 +1446,7 @@ class Conformer():
                 ax.fill_between(exp_data[split_wn:,0], exp_data[split_wn:,1]*scale_expH+shift, np.linspace(shift,shift, len(exp_data[split_wn:,1])), color='r', alpha=0.5)
 
         Xsc = self.IR[:,0]* scaling_factor ; IRsc = self.IR[:,1]*scale_t
-        ir_theo = ax.plot(Xsc, IRsc+shift, color='0.25', linewidth=2)
+        ir_theo = ax.plot(Xsc, IRsc+shift, color='k', linewidth=0.5)
         ax.fill_between(Xsc, np.linspace(shift, shift, len(IRsc)), IRsc+shift, color='0.5', alpha=0.5)
 
         if normal_modes == True:
@@ -1455,7 +1458,7 @@ class Conformer():
         #output_path =  os.path.join(current_path, self.path, self._id+'.png')
         #print(output_path + self._id+'.png')
         if save_fig == True:  
-            plt.savefig('/'.join([self.path,'ir_plot.pdf']) , dpi=300)
+            plt.savefig('/'.join([self.path,'ir_plot.png']) , dpi=500)
 
         if save_dat == True:
             with open('/'.join([self.path, 'ir_harm.dat']),'w') as out:
