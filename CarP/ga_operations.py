@@ -87,12 +87,13 @@ def modify_pg(conf, ring_number, PG = 'all'):
                 break
     else: 
         for n, dih in enumerate(conf.graph.nodes[ring_number][PG]['dih_atoms']):
-            utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+            pass
 
-def modify_ring(conf, ring, prob_model = None):
+
+def modify_ring(conf, ring, rd_list, prob_model = None):
 
     pucker = draw_random_pucker(prob_model)
-    utilities.set_ring_pucker(conf, ring, pucker)
+    utilities.set_ring_pucker(conf, ring, pucker, rd_list)
 
 def draw_random_pucker(prob_model=None):
 
