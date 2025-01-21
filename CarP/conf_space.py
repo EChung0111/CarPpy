@@ -546,7 +546,7 @@ class Space(list):
 
     def calculate_ccs(self, params = None, method = 'pa', accuracy = 1):
         """ Calculates the collision cross section for each conformer. The parameters passed should generally just remain as their defaults values
-
+f
         :param methond: (string) pa or ehss, methods of calculation
         :param accuracy: dont change the default, return a value converged within 1%
         """
@@ -556,7 +556,6 @@ class Space(list):
         """Performs gaussian broadening for the set
         """
 
-        #checks if self.ir_resolution exists in the object, it would only exist if load_exp is called
         #works when no load_exp is called, need to test with load_exp
         if hasattr(self, 'self.ir_resolution'):
             for conf in self: conf.gaussian_broadening(broaden, resolution=self.ir_resolution)

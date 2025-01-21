@@ -627,58 +627,59 @@ def ring_dihedrals(conf, ring_number):
 
     return(theta)
 
-def set_ring_pucker(conf, ring_number, pucker, rd_list):
-
+def set_ring_pucker(conf, ring_number, pucker):
     """ Edits the ring pucker by assigning a new angle to the C2, C4 and O angles. This is based on the ring puckering model proposed in Puckering Coordinates of Monocyclic Rings by Triangular Decomposition Anthony D. Hill and Peter J. Reilly
     :param conf: a conformer object
     :param ring_number: (int) selects which ring of the conformer, an index to select the graph node
     :param ring_pucker: (list) or (string) this is the ring puckering angles. Either a list with 3 numbers or a string that defines the intended topology which is looked up in the topol_dict
     """
 
-    #ring_pucker is either a string or a list of 3 numbers
-    #check if it's a string
+    # ring_pucker is either a string or a list of 3 numbers
+    # check if it's a string
 
-    if type(pucker) is str: new_theta  = ring_pucker_dict(pucker)
+    if type(pucker) is str:
+        new_theta = ring_pucker_dict(pucker)
 
-    #checks if it is a list with 3 numbers
+    # checks if it is a list with 3 numbers
 
     elif (type(pucker) is list or type(pucker) is np.ndarray) and len(pucker) == 3:
-        new_theta  = pucker
+        new_theta = pucker
 
     else:
         error("neither existing topology nor list of 3 dihedral angles are provided")
 
-    ra = rd_list[ring_number]
+    ra = conf.graph.nodes[ring_number]['ring_atoms']
 
-    #xyz_backup = copy.copy(conf.xyz)
+    # xyz_backup = copy.copy(conf.xyz)
 
-    #print("ring atoms:",ra)
+    # print("ring atoms:",ra)
 
-    #break the ring bonds
-    #Flip, Twist, Tilt:
-    #1. Move the even carbons according to the theta angles
-    #2. Twist the odd carbons to be perpendical to the plane formed by even atoms
-    #3. Tilt the odd atoms to form the ring.
+    # break the ring bonds
+    # Flip, Twist, Tilt:
+    # 1. Move the even carbons according to the theta angles
+    # 2. Twist the odd carbons to be perpendical to the plane formed by even atoms
+    # 3. Tilt the odd atoms to form the ring.
 
     dih_atoms = [
-         [ra['C5'],ra['C3'],ra['C1'],ra['C2']],
-         [ra['C1'],ra['C5'],ra['C3'],ra['C4']],
-         [ra['C3'],ra['C1'],ra['C5'],ra['O' ]]]
-    dih_atoms2= [
-         [ra['C4'],ra['C2'],ra['O' ],ra['C1']],
-         [ra['O' ],ra['C4'],ra['C2'],ra['C3']],
-         [ra['C2'],ra['O' ],ra['C4'],ra['C5']]]
+        [ra['C5'], ra['C3'], ra['C1'], ra['C2']],
+        [ra['C1'], ra['C5'], ra['C3'], ra['C4']],
+        [ra['C3'], ra['C1'], ra['C5'], ra['O']]]
+    dih_atoms2 = [
+        [ra['C4'], ra['C2'], ra['O'], ra['C1']],
+        [ra['O'], ra['C4'], ra['C2'], ra['C3']],
+        [ra['C2'], ra['O'], ra['C4'], ra['C5']]]
 
-    #at  => any atom
-    #rat => atom in a ring
+    # at  => any atom
+    # rat => atom in a ring
 
-    #1. Flap:
-    #print("Step 1: Flap")
+    # 1. Flap:
+    # print("Step 1: Flap")
 
-    adj_atoms = [] ; old_theta = []
+    adj_atoms = [];
+    old_theta = []
     for rat in ['C1', 'C3', 'C5']:
         adj_atoms.append(adjacent_atoms(conf.conn_mat, ra[rat]))
-        #print(adj_atoms[-1])
+        # print(adj_atoms[-1])
         for at in adj_atoms[-1]:
             disconnect_atoms(conf, ra[rat], at)
 
@@ -686,102 +687,109 @@ def set_ring_pucker(conf, ring_number, pucker, rd_list):
         connect_atoms(conf, ra[rat1], ra[rat2])
 
     for n in range(3):
-        old  = measure_dihedral( conf, dih_atoms[n])[0]
-        if   old < 180.0 and old > 0.0      : old =  180.0 - old
-        elif old > 180.0                    : old = -180.0 + old
-        elif old < 0.0   and old > -180.0   : old = -180.0 - old
+        old = measure_dihedral(conf, dih_atoms[n])[0]
+        if old < 180.0 and old > 0.0:
+            old = 180.0 - old
+        elif old > 180.0:
+            old = -180.0 + old
+        elif old < 0.0 and old > -180.0:
+            old = -180.0 - old
         old_theta.append(old)
-        set_dihedral(conf, dih_atoms[n], 180.0-new_theta[n])
+        set_dihedral(conf, dih_atoms[n], 180.0 - new_theta[n])
 
     for n, rat in enumerate(['C1', 'C3', 'C5']):
         for at in adj_atoms[n]:
             connect_atoms(conf, ra[rat], at)
 
-    #print("Step 2: Twist")
+    # print("Step 2: Twist")
     ring_order = ['C1', 'C2', 'C3', 'C4', 'C5', 'O', 'C1']
-    for i in range(len(ring_order)-1):
-        disconnect_atoms(conf, ra[ring_order[i]],  ra[ring_order[i+1]])
+    for i in range(len(ring_order) - 1):
+        disconnect_atoms(conf, ra[ring_order[i]], ra[ring_order[i + 1]])
 
     plane_even_vec = calculate_normal_vector(conf, [ra['O'], ra['C2'], ra['C4']])
-    norm_ep = plane_even_vec /  np.sqrt(np.sum(plane_even_vec**2))
-   
+    norm_ep = plane_even_vec / np.sqrt(np.sum(plane_even_vec ** 2))
+
     for n, oa in enumerate(['C1', 'C3', 'C5']):
 
-        op_atoms_adj = adjacent_atoms(conf.conn_mat, ra[oa]) ;
+        op_atoms_adj = adjacent_atoms(conf.conn_mat, ra[oa]);
 
-        if oa == 'C1': #sp2 C1
-           #print(conf.atoms[op_atoms_adj[0]])
+        if oa == 'C1' and conf.anomer == 'carbocation':  # sp2 C1
+            # print(conf.atoms[op_atoms_adj[0]])
             anomeric_h = copy.copy(op_atoms_adj[0])
-            set_dihedral(conf, [ra['C2'], ra['O'], ra['C1'], anomeric_h],   179.)
-            #set_dihedral(conf, [ra['C2'], ra['O'], ra['C1'], anomeric_h],   179.) #No idea why I need to do it twice
+            set_dihedral(conf, [ra['C2'], ra['O'], ra['C1'], anomeric_h], 179.)
+            # set_dihedral(conf, [ra['C2'], ra['O'], ra['C1'], anomeric_h],   179.) #No idea why I need to do it twice
             continue
 
         if conf.atoms[op_atoms_adj[0]] == 'H':
             op_atoms = [op_atoms_adj[0], ra[oa], op_atoms_adj[1]]
-        else: 
+        else:
             op_atoms = [op_atoms_adj[1], ra[oa], op_atoms_adj[0]]
         if oa == 'C1':
-            if   conf.anomer == 'beta'  and conf.graph.nodes[ring_number]['absconf'] == 'D':
-               op_atoms.reverse()
+            if conf.anomer == 'beta' and conf.graph.nodes[ring_number]['absconf'] == 'D':
+                op_atoms.reverse()
             elif conf.anomer == 'alpha' and conf.graph.nodes[ring_number]['absconf'] == 'L':
-               op_atoms.reverse()
+                op_atoms.reverse()
         else:
 
-            if conf.sugar_stero(rd_list[ring_number]) == 'D':
-               op_atoms.reverse()
+            if conf.graph.nodes[ring_number]['absconf'] == 'D':
+                op_atoms.reverse()
 
         for step in range(3):
-            #Calculate the deviation from pi/2:
+            # Calculate the deviation from pi/2:
             plane_odd_vec = calculate_normal_vector(conf, op_atoms)
-            norm_op = plane_odd_vec / np.sqrt(np.sum(plane_odd_vec**2))
-            dot_product = np.dot(norm_ep, norm_op) ; rot_angle =  np.pi/2 - np.arccos(dot_product)
-            #print(rot_angle)
+            norm_op = plane_odd_vec / np.sqrt(np.sum(plane_odd_vec ** 2))
+            dot_product = np.dot(norm_ep, norm_op);
+            rot_angle = np.pi / 2 - np.arccos(dot_product)
+            # print(rot_angle)
             if rot_angle < 0.005: rot_angle = 0.0
             axor = np.cross(norm_ep, norm_op)
-            rot = expm(np.cross(np.eye(3), axor*rot_angle)) ; translation = conf.xyz[op_atoms[1], :]
+            rot = expm(np.cross(np.eye(3), axor * rot_angle));
+            translation = conf.xyz[op_atoms[1], :]
 
-            #Determine which atoms should be dragged along with the bond:
-            carried_atoms = determine_carried_atoms(conf, ra['O'], op_atoms[1]) #Bond with 'O' is zeroed anyway.
+            # Determine which atoms should be dragged along with the bond:
+            carried_atoms = determine_carried_atoms(conf, ra['O'], op_atoms[1])  # Bond with 'O' is zeroed anyway.
             carried_atoms.remove(op_atoms[1])
-            #rotate the atoms:
+            # rotate the atoms:
             for at in carried_atoms:
-                conf.xyz[at, :] = np.dot(rot, conf.xyz[at, :]-translation)
-                conf.xyz[at, :] = conf.xyz[at, :]+translation
+                conf.xyz[at, :] = np.dot(rot, conf.xyz[at, :] - translation)
+                conf.xyz[at, :] = conf.xyz[at, :] + translation
 
-      #1. Get the axis between the farthest atom in the even plane (C2, C4, O)  and the group that is being adjusted
-      #2. Use this axis to rotate the normal of the plane by 90.0 degrees.
-        axor = conf.xyz[op_atoms[1],:] - conf.xyz[dih_atoms2[n][0],:]
-        naxor = axor / np.sqrt(np.sum(axor**2))
-        rot_mat = expm(np.cross(np.eye(3), naxor*np.pi/2))
+        # 1. Get the axis between the farthest atom in the even plane (C2, C4, O)  and the group that is being adjusted
+        # 2. Use this axis to rotate the normal of the plane by 90.0 degrees.
+        axor = conf.xyz[op_atoms[1], :] - conf.xyz[dih_atoms2[n][0], :]
+        naxor = axor / np.sqrt(np.sum(axor ** 2))
+        rot_mat = expm(np.cross(np.eye(3), naxor * np.pi / 2))
         norm_ep_perp = np.dot(rot_mat, norm_ep)
 
-      # Now, calculate the angle between the rotate even plane and the group and calculate the matrix to adjust it to 180.0
-        dot_product = np.dot(norm_ep_perp, norm_op) ; rot_angle =  np.pi - np.arccos(dot_product)
+        # Now, calculate the angle between the rotate even plane and the group and calculate the matrix to adjust it to 180.0
+        dot_product = np.dot(norm_ep_perp, norm_op);
+        rot_angle = np.pi - np.arccos(dot_product)
         axor = np.cross(norm_ep_perp, norm_op)
-        rot = expm(np.cross(np.eye(3), axor*rot_angle)) ; translation = conf.xyz[op_atoms[1],:]
-      #Do the rotation on all atoms
+        rot = expm(np.cross(np.eye(3), axor * rot_angle));
+        translation = conf.xyz[op_atoms[1], :]
+        # Do the rotation on all atoms
         for at in carried_atoms:
-            conf.xyz[at, :] = np.dot(rot, conf.xyz[at, :]-translation)
-            conf.xyz[at, :] = conf.xyz[at, :]+translation
+            conf.xyz[at, :] = np.dot(rot, conf.xyz[at, :] - translation)
+            conf.xyz[at, :] = conf.xyz[at, :] + translation
 
-    #3. Tilt:
-    #print("Step 3: Tilt")
+    # 3. Tilt:
+    # print("Step 3: Tilt")
 
-    for n, rat in zip([0,1,2],['C1', 'C3', 'C5']):
+    for n, rat in zip([0, 1, 2], ['C1', 'C3', 'C5']):
 
-        if rat == 'C1': #sp2 C1
+        if rat == 'C1' and conf.anomer == 'carbocation':  # sp2 C1
             set_angle(conf, [ra['C2'], ra['C1'], anomeric_h], 120.)
             continue
 
-        N1 = (n+3)%3
-        N2 = (n+2)%3
-        differ =  (new_theta[N1] - old_theta[N1])/2 + (new_theta[N2] - old_theta[N2])/2
-        if abs(differ) < 1.0 or abs(differ) > 359.0 : continue
-        set_dihedral(conf, dih_atoms2[n], differ, incr = True, axis_pos="term")
+        N1 = (n + 3) % 3
+        N2 = (n + 2) % 3
+        differ = (new_theta[N1] - old_theta[N1]) / 2 + (new_theta[N2] - old_theta[N2]) / 2
+        if abs(differ) < 1.0 or abs(differ) > 359.0: continue
+        set_dihedral(conf, dih_atoms2[n], differ, incr=True, axis_pos="term")
 
     # Reconnect:
-    for i in range(len(ring_order)-1):
-        connect_atoms(conf, ra[ring_order[i]],  ra[ring_order[i+1]])
+    for i in range(len(ring_order) - 1):
+        connect_atoms(conf, ra[ring_order[i]], ra[ring_order[i + 1]])
 
 def ring_canon(theta, norm = 'l2'):
 

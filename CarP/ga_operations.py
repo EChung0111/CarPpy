@@ -93,7 +93,8 @@ def modify_pg(conf, ring_number, PG = 'all'):
 def modify_ring(conf, ring, rd_list, prob_model = None):
 
     pucker = draw_random_pucker(prob_model)
-    utilities.set_ring_pucker(conf, ring, pucker, rd_list)
+    print(pucker,'\n')
+    utilities.set_ring_pucker(conf, ring, pucker)
 
 def draw_random_pucker(prob_model=None):
 

@@ -19,6 +19,8 @@ import numpy as np
 import re, os
 from subprocess import Popen, PIPE
 
+from networkx.classes import nodes
+
 from .utilities import *
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -881,11 +883,16 @@ class Conformer():
                         and not ring_graph.has_edge(rd_list.index(rd2), rd_list.index(rd1)):
                     ring_graph.add_edge(rd_list.index(rd1), rd_list.index(rd2))
 
-        if Conformer.amide_check(conn_mat=conn_mat, rd=rd1) == True:
-            ring_graph.add_edge(f"Amide {rd_list.index(rd1)}", f"Ring {rd_list.index(rd1)}", weight=2)
-
         if ring_graph.number_of_edges() == 0:
-            ring_graph.add_node('Ring 0')
+            ring_graph.add_node(0)
+
+        attribnute_dict = {}
+        for node, rd in enumerate(rd_list):
+            attribnute_dict[node] = rd
+
+
+        nx.set_node_attributes(ring_graph, attribnute_dict,'ring_atoms')
+        print(ring_graph.nodes[0]['ring_atoms'])
 
         self.graph = ring_graph
 
@@ -961,9 +968,9 @@ class Conformer():
 
         return dihedral
 
-    def sugar_stero(conf,rd):
+    def sugar_stero(self,rd):
         if len(rd.values()) == 7:
-            dihedral_angle = measure_dihedral(conf, [rd['O'], rd['C5'], rd['C4'], rd['C6']])
+            dihedral_angle = measure_dihedral(self, [rd['O'], rd['C5'], rd['C4'], rd['C6']])
 
         else:
             dihedral_angle = None
@@ -975,44 +982,46 @@ class Conformer():
         else:
             sugar_type = 'None'
 
-        return sugar_type
+        self.stero = sugar_type 
 
-    def glycosidic_link_type(self, rd, sugar_type, conf, conn_mat):
+    def glycosidic_link_type(self, rd):
 
+        sugar_type = self.stero
+        conn_mat = self.conn_mat
         if len(rd.values()) == 7:
 
-            enumeric_H = [adj_at for adj_at in Conformer.adjacent_atoms(conn_mat, rd['C1']) if
-                          'H' in adj_at and adj_at not in rd][0]
-            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C1'], rd['C2'], enumeric_H, conf)
+            enumeric_H = [adj_at for adj_at in adjacent_atoms(conn_mat, rd['C1']) if
+                          'H' in self.atoms[adj_at] and adj_at not in rd][0]
+            dihedral_angle = measure_dihedral(self, [rd['O'], rd['C1'], rd['C2'], enumeric_H])[0]
 
         elif len(rd.values()) > 7:
 
-            enumeric_H = [adj_at for adj_at in Conformer.adjacent_atoms(conn_mat, rd['C2']) if
-                          'H' in adj_at and adj_at not in rd][0]
-            dihedral_angle = Conformer.dihedral_angle(rd['O'], rd['C2'], rd['C3'], enumeric_H, conf)
+            enumeric_H = [adj_at for adj_at in adjacent_atoms(conn_mat, rd['C2']) if
+                          'H' in self.atoms[adj_at] and adj_at not in rd][0]
+            dihedral_angle = measure_dihedral(self, [rd['O'], rd['C2'], rd['C3'], enumeric_H])[0]
 
         else:
             dihedral_angle = None
 
         if dihedral_angle is not None and 0 > dihedral_angle:
             if sugar_type == 'D':
-                link_type = 'B'
+                link_type = 'beta'
             elif sugar_type == "L":
-                link_type = 'A'
+                link_type = 'alpha'
             else:
                 link_type = "None"
 
         elif dihedral_angle is not None and dihedral_angle > 0:
             if sugar_type == 'D':
-                link_type = 'A'
+                link_type = 'alpha'
             elif sugar_type == "L":
-                link_type = 'B'
+                link_type = 'beta'
             else:
                 link_type = "None"
         else:
             link_type = "None"
 
-        return link_type
+        self.anomer = link_type
 
     def find_pg(self, dfs_list, conn_mat):
         pg_list = []
@@ -1349,7 +1358,7 @@ class Conformer():
             mat = self.conn_mat - m.conn_mat #difference in connectivity
 
             if not np.any(mat) and conf_links == m_links and self.anomer == m.anomer : 
-                self.topol = m.topol
+                self.topol = m.topolf
                 return 0  
 
             elif conf_links == m_links and self.anomer == m.anomer:
