@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarP.display_utilities &mdash; CarPpy 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            CarPpy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">CarPpy</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">CarPpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">CarP.display_utilities</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for CarP.display_utilities</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span> <span class="c1">#this is for heatmaps</span>
+<span class="kn">import</span> <span class="nn">texttable</span> <span class="k">as</span> <span class="nn">tx</span> <span class="c1">#this is for commandline table output</span>
+<span class="kn">import</span> <span class="nn">sys</span> <span class="c1">#this is for changing the form of output to write to files</span>
+
+<div class="viewcode-block" id="generate_heatmap">
+<a class="viewcode-back" href="../../CarP.html#CarP.display_utilities.generate_heatmap">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_heatmap</span><span class="p">(</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span> 
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;	Returns a heatmap of the 2D matrix</span>
+
+<span class="sd">	:param matrix: (list) 2D list </span>
+<span class="sd">	:param max_value: a number for a max cutoff value to be represented in the heatmap</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">numpy_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+	<span class="c1">#print(numpy_matrix.ndim)</span>
+	<span class="c1">#print(numpy_matrix.shape)</span>
+	<span class="k">with</span> <span class="n">sns</span><span class="o">.</span><span class="n">axes_style</span><span class="p">(</span><span class="s2">&quot;white&quot;</span><span class="p">):</span>
+		<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span> <span class="c1">#change size of figure here</span>
+		<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">numpy_matrix</span><span class="p">,</span><span class="n">linewidths</span><span class="o">=</span><span class="mf">.2</span> <span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">max_value</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<span class="c1">#? maybe make this built into the conf_space objects, saves making a copy and some functions</span>
+<div class="viewcode-block" id="return_2d_lists">
+<a class="viewcode-back" href="../../CarP.html#CarP.display_utilities.return_2d_lists">[docs]</a>
+<span class="k">def</span> <span class="nf">return_2d_lists</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">):</span> 
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Returns 3 different 2D lists calculating rmsd, rmsd without considering H atoms and pendry R factor</span>
+
+<span class="sd">	:param conf_space_object: an initialized conformer space, this should be a list of conformer objects containing molecule data</span>
+<span class="sd">	:return: (list) 3 different 2D lists</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">rmsd_all_atoms</span><span class="o">=</span><span class="p">[]</span>
+	<span class="n">rmsd_no_hydrogen</span><span class="o">=</span><span class="p">[]</span>
+	<span class="n">pendry_all</span><span class="o">=</span><span class="p">[]</span>
+	<span class="k">for</span> <span class="n">d1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">)):</span>
+		<span class="n">rmsd_all_atoms</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+		<span class="n">rmsd_no_hydrogen</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+		<span class="n">pendry_all</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+		<span class="k">for</span> <span class="n">d2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">)):</span>
+			<span class="n">rmsd_all_atoms</span><span class="p">[</span><span class="n">d1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calculate_rmsd</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">d1</span><span class="p">],</span> <span class="n">conf_space_object</span><span class="p">[</span><span class="n">d2</span><span class="p">]))</span>
+			<span class="n">rmsd_no_hydrogen</span><span class="p">[</span><span class="n">d1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calculate_rmsd</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">d1</span><span class="p">],</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">d2</span><span class="p">],</span><span class="s1">&#39;H&#39;</span><span class="p">))</span>
+			<span class="n">pendry_all</span><span class="p">[</span><span class="n">d1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rfac</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">d1</span><span class="p">]</span><span class="o">.</span><span class="n">IR</span><span class="p">,</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">d2</span><span class="p">]</span><span class="o">.</span><span class="n">IR</span><span class="p">))</span> <span class="c1">#this one takes forever</span>
+	<span class="k">return</span> <span class="n">rmsd_all_atoms</span><span class="p">,</span> <span class="n">rmsd_no_hydrogen</span><span class="p">,</span> <span class="n">pendry_all</span></div>
+
+
+<div class="viewcode-block" id="make_plots">
+<a class="viewcode-back" href="../../CarP.html#CarP.display_utilities.make_plots">[docs]</a>
+<span class="k">def</span> <span class="nf">make_plots</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scatter</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> 
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Displays plots</span>
+<span class="sd">+</span>
+<span class="sd">	:param conf_space_object: an initialized conformer space, this should be a list of conformer objects containing molecule data</span>
+<span class="sd">	:param index: (int) identifies which conformer in the list of conformers, the default is the first conformer at index 0 </span>
+<span class="sd">	:param bar: (bool) specifies if bar plots should be generated, this is a triple bar plot (rmsd, rmsd without H, pendry factor); default set to TRUE</span>
+<span class="sd">	:param scatter: (bool) specifies if scatterplot should be generated, there will be 3 things plotted (rmsd, rmsd without H, pendry factor); default set to TRUE</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1">#!!! CHECK IF INDEX IS WITHIN RANGE</span>
+	<span class="n">molecule_ids</span><span class="o">=</span><span class="p">[]</span> <span class="p">;</span> <span class="n">molecule_names</span><span class="o">=</span><span class="p">[]</span> <span class="p">;</span> <span class="n">rmsd_all</span><span class="o">=</span><span class="p">[]</span> <span class="p">;</span> <span class="n">rmsd_no_H</span><span class="o">=</span><span class="p">[]</span> <span class="p">;</span> <span class="n">pendry</span><span class="o">=</span><span class="p">[]</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">)):</span>
+		<span class="n">molecule_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">molecule_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+		<span class="n">rmsd_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calculate_rmsd</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">index</span><span class="p">],</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+		<span class="n">rmsd_no_H</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calculate_rmsd</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">index</span><span class="p">],</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;H&#39;</span><span class="p">))</span>
+		<span class="n">pendry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rfac</span><span class="p">(</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">IR</span><span class="p">,</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">IR</span><span class="p">))</span>
+		<span class="c1">#the pendry function prints 2 numbers, I&#39;m only returning the second right now. </span>
+        <span class="c1">#I&#39;m not sure what the first represents but the second is more comparable in magnitude to the rmsd values.</span>
+	
+	<span class="c1">#outputs the table</span>
+	<span class="n">display_table</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">molecule_ids</span><span class="p">,</span><span class="n">molecule_names</span><span class="p">,</span><span class="n">rmsd_all</span><span class="p">,</span><span class="n">rmsd_no_H</span><span class="p">,</span><span class="n">pendry</span><span class="p">)</span>
+
+	<span class="c1">#check to make bar</span>
+	<span class="k">if</span> <span class="n">bar</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+		<span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">molecule_ids</span><span class="p">))</span>  <span class="c1"># the x locations for the groups</span>
+		<span class="c1">#print(ind)</span>
+		<span class="n">width</span> <span class="o">=</span> <span class="mf">0.35</span>  <span class="c1"># the width of the bars</span>
+		<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+		<span class="n">rects1</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span> <span class="o">-</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">rmsd_all</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;rmsd hydrogens&#39;</span><span class="p">)</span>
+		<span class="n">rects2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">rmsd_no_H</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;rmsd without hydrogens&#39;</span><span class="p">)</span>
+		<span class="c1">#rects3 = ax.bar(ind + width, pendry, width, label=&#39;pendry&#39;)</span>
+		<span class="c1">#Add some text for labels, title and custom x-axis tick labels, etc.</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">)</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">((</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">_id</span><span class="o">+</span><span class="s1">&#39; compared to all&#39;</span><span class="p">))</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">molecule_ids</span><span class="p">)</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+		<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+		<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">((</span><span class="n">conf_space_object</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">_id</span><span class="o">+</span><span class="s1">&#39;rmsd.png&#39;</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span> <span class="c1">#? specifiy file name using the specified index</span>
+	
+	<span class="c1">#check to make scatter</span>
+	<span class="k">if</span> <span class="n">scatter</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+		<span class="n">d1</span> <span class="o">=</span> <span class="p">(</span><span class="n">rmsd_all</span><span class="p">,</span> <span class="n">pendry</span><span class="p">)</span>
+		<span class="n">d2</span> <span class="o">=</span> <span class="p">(</span><span class="n">rmsd_all</span><span class="p">,</span> <span class="n">rmsd_all</span><span class="p">)</span>
+		<span class="n">d3</span> <span class="o">=</span> <span class="p">(</span><span class="n">rmsd_all</span><span class="p">,</span> <span class="n">rmsd_no_H</span><span class="p">)</span>
+		<span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">d3</span><span class="p">)</span>
+		<span class="n">colors</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span>
+		<span class="n">groups</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;pendry&quot;</span><span class="p">,</span> <span class="s2">&quot;rmsd_all&quot;</span><span class="p">,</span> <span class="s2">&quot;rmsd_no_H&quot;</span><span class="p">)</span>
+
+		<span class="c1"># Create plot</span>
+		<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+		<span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+		<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
+			<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+			<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+			<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;y=</span><span class="si">%.6f</span><span class="s2">x+(</span><span class="si">%.6f</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+			<span class="n">line_name</span> <span class="o">=</span> <span class="s2">&quot;y=</span><span class="si">%.6f</span><span class="s2">x+(</span><span class="si">%.6f</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">c</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">line_name</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Matplot scatter plot&#39;</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="display_table">
+<a class="viewcode-back" href="../../CarP.html#CarP.display_utilities.display_table">[docs]</a>
+<span class="k">def</span> <span class="nf">display_table</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">molecule_ids</span><span class="p">,</span><span class="n">molecule_names</span><span class="p">,</span><span class="n">rmsd_all</span><span class="p">,</span><span class="n">rmsd_no_H</span><span class="p">,</span><span class="n">pendry</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; Prints into terminal and saves as .txt a table displaying each conformer and the associated value rmsd, rmsd without H and pendry R factor</span>
+
+<span class="sd">	:param index: (int) all the values are calculated comparing all conformers to one conformer which is sepcified by this index</span>
+<span class="sd">	:param molecule_ids: (list) the list of molecule id number</span>
+<span class="sd">	:param molecule_names: (list) the lost of molecule names</span>
+<span class="sd">	:param rmsd_all: (list) list of rmsd values</span>
+<span class="sd">	:param rmsd_no_H: (list) list of rmsd values without H</span>
+<span class="sd">	:param pendry: (list) list of all pendry values</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">index_vs_all</span><span class="o">=</span><span class="p">[]</span> <span class="c1">#comparing every conformer to the conformer specified by index</span>
+	<span class="n">index_vs_all</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s2">&quot;index&quot;</span><span class="p">,(</span><span class="s2">&quot;comparing molecules to &quot;</span><span class="o">+</span><span class="n">molecule_names</span><span class="p">[</span><span class="n">index</span><span class="p">]),</span><span class="s2">&quot;rmsd&quot;</span><span class="p">,</span><span class="s2">&quot;rmsd hydrogens removed&quot;</span><span class="p">,</span><span class="s2">&quot;pendry&quot;</span><span class="p">])</span>
+	<span class="c1">#? maybe make this csv writing thing a separate function</span>
+	<span class="c1">#i need to clear the file i&#39;m appending to so that i dont keep the old values</span>
+	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;rmsd.csv&#39;</span><span class="p">,</span><span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+		<span class="n">file</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">molecule_ids</span><span class="p">)):</span>
+		<span class="n">temp</span><span class="o">=</span><span class="p">[]</span>
+		<span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">molecule_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+		<span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rmsd_all</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+		<span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rmsd_no_H</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+		<span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pendry</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
+		<span class="n">index_vs_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+		<span class="c1">#Writing this as a csv</span>
+		<span class="n">original_output</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="c1">#save ref of original output to reset later</span>
+		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;rmsd.csv&#39;</span><span class="p">,</span><span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">file</span> <span class="c1">#set output to the file</span>
+			<span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">molecule_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rmsd_all</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rmsd_no_H</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pendry</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">original_output</span> <span class="c1">#reset output stream        </span>
+	<span class="n">table</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">Texttable</span><span class="p">()</span>
+	<span class="c1">#table.header([&quot;comparing molecules to&quot;,&quot;rmsd&quot;,&quot;rmsd hydrogens removed&quot;]) #idk why this not working, got it from https://pypi.org/project/texttable/ documentation</span>
+	<span class="n">table</span><span class="o">.</span><span class="n">set_cols_dtype</span><span class="p">([</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">,</span><span class="s1">&#39;f&#39;</span><span class="p">,</span><span class="s1">&#39;f&#39;</span><span class="p">,</span><span class="s1">&#39;f&#39;</span><span class="p">])</span> <span class="c1">#identifies the type of each item in the matrix</span>
+	<span class="c1">#table.set_cols_align([&quot;l&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;, &quot;l&quot;])</span>
+	<span class="n">table</span><span class="o">.</span><span class="n">add_rows</span><span class="p">(</span><span class="n">index_vs_all</span><span class="p">)</span>
+	<span class="nb">print</span> <span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">draw</span><span class="p">())</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Eugene Chung, Shonel Rahim, Murat Yaman, Mateusz Marianski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
