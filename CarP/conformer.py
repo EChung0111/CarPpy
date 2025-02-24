@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 import py3Dmol as p3D
 from itertools import zip_longest
 import PIL
+p
 
 class Conformer():
 
@@ -512,10 +513,10 @@ class Conformer():
         adj_atom_O = adjacent_atoms(self.conn_mat, rd['O'])
 
         """
-        Creates the ring dictionary for a 6 membered sugar ring
+        Creates the ring dictionary for a 6 membered sugar ring.
 
-        :param rd: (dict) dictionary of ring atoms with just the ring oxygen
-        :param sugar_basis: (list) list of atoms in the sugar ring in order
+        :param rd: (dict) dictionary of ring atoms with just the ring oxygen.
+        :param sugar_basis: (list) list of atoms in the sugar ring in order.
         """
 
         for atom in adj_atom_O:
@@ -582,10 +583,10 @@ class Conformer():
         adj_atom_O = adjacent_atoms(self.conn_mat, rd['O'])
 
         """
-        Creates the ring dictionary for a 5 membered sugar ring
+        Creates the ring dictionary for a 5 membered sugar ring.
         
-        :param rd: (dict) dictionary of ring atoms with just the ring oxygen
-        :param sugar_basis: (list) list of atoms in the sugar ring in order
+        :param rd: (dict) dictionary of ring atoms with just the ring oxygen........
+        :param sugar_basis: (list) list of atoms in the sugar ring in order.
         """
 
         for atom in adj_atom_O:
@@ -641,7 +642,7 @@ class Conformer():
         """
         Creates the dictionary of ring atoms for each sugar ring in the molecule.
 
-        :param cycles_in_graph: (list) list of cycles in the molecule
+        :param cycles_in_graph: (list) list of cycles in the molecule.
         """
 
         rd_list = []
@@ -757,10 +758,11 @@ class Conformer():
     def glycosidic_link_check(self, conn_mat, edge, c1_list, rd_list):
 
         """
-        Finds which carbon in the ring has a glycosidic linkage
-        :param c1_list: (list) list of C1 atoms in the molecule
-        :param rd_list: (list) list of dictionaries for rings
-        :param edge: (tuple) tuple of 2 nodes in the ring graph
+        Finds which carbon in the ring has a glycosidic linkage.
+
+        :param c1_list: (list) list of C1 atoms in the molecule.
+        :param rd_list: (list) list of dictionaries for rings.
+        :param edge: (tuple) tuple of 2 nodes in the ring graph.
         """
 
         glycosidic_link_list = []
@@ -803,9 +805,10 @@ class Conformer():
     def find_red_end(self, c1_list, rd_list, conn_mat):
 
         """
-        Finds the reducing end of the carbohydrate
-        :param c1_list: (list) list of C1 atoms in the molecule
-        :param rd_list: (list) list of dictionaries for rings
+        Finds the reducing end of the carbohydrate.
+
+        :param c1_list: (list) list of C1 atoms in the molecule.
+        :param rd_list: (list) list of dictionaries for rings.
         """
 
         for c1 in c1_list:
@@ -829,9 +832,10 @@ class Conformer():
     def ring_connectivity_checker(self, rd1, rd2, conn_mat):
 
         """
-        Checks to see if 2 rings are adjacent
-        :param rd1: (dict) dictionary of ring atoms for ring 1
-        :param rd2: (dict) dictionary of ring atoms for ring 2
+        Checks to see if 2 rings are adjacent.
+
+        :param rd1: (dict) dictionary of ring atoms for ring 1.
+        :param rd2: (dict) dictionary of ring atoms for ring 2.
         """
 
         edge_check_list = []
@@ -856,8 +860,9 @@ class Conformer():
     def amide_check(self, rd):
 
         """
-        Checks to see if there is an amide in the ring
-        :param rd: (dict) dictionary of ring atoms
+        Checks to see if there is an amide in the ring.
+
+        :param rd: (dict) dictionary of ring atoms.
         """
 
         if len(list(rd.values())) == 7:
@@ -895,8 +900,9 @@ class Conformer():
     def amine_check(self,conn_mat, rd):
 
         """
-        Checks to see if there is an amine in the ring
-        :param rd: (dict) dictionary of ring atoms
+        Checks to see if there is an amine in the ring.
+
+        :param rd: (dict) dictionary of ring atoms.
         """
 
         if len(list(rd.values())) == 7:
@@ -929,8 +935,9 @@ class Conformer():
     def ring_graph_maker(self, rd_list, conn_mat):
 
         """
-        Creates a nextworkx graph where each node is a ring in the molecule
-        :param rd_list: (list) list of dictionaries for rings
+        Creates a nextworkx graph where each node is a ring in the molecule.
+
+        :param rd_list: (list) list of dictionaries for rings.
         """
         ring_graph = nx.Graph()
 
@@ -959,8 +966,9 @@ class Conformer():
     def sort_rings(self, rd_list, conn_mat):
 
         """
-        Sorts all sugar rings in the molecule using the networkx dfs algorithm
-        :param rd_list: (list) list of dictionaries for rings
+        Sorts all sugar rings in the molecule using the networkx dfs algorithm.
+
+        :param rd_list: (list) list of dictionaries for rings.
         """
 
         c1_list = [rd['C1'] if 'C1' in rd else rd['C2'] for rd in rd_list]
@@ -1035,8 +1043,9 @@ class Conformer():
     def sugar_stero(self,rd):
 
         """
-        Finds the stereo isomer for a sugar ring
-        :param rd: (dict) dictionary of ring atoms
+        Finds the stereo isomer for a sugar ring.
+
+        :param rd: (dict) dictionary of ring atoms.
         """
 
         if len(rd.values()) == 7:
@@ -1057,8 +1066,9 @@ class Conformer():
     def glycosidic_link_type(self, rd):
 
         """
-        Finds the anomer for a sugar ring
-        :param rd: (dict) dictionary of ring atoms
+        Finds the anomer for a sugar ring.
+
+        :param rd: (dict) dictionary of ring atoms.
         """
 
         sugar_type = self.stero
@@ -1101,8 +1111,9 @@ class Conformer():
     def find_pg(self, dfs_list, conn_mat):
 
         """
-        Checks to see if there is a protecting group in each ring
-        :param dfs_list: (list) sorted list of dictionaries for rings
+        Checks to see if there is a protecting group in each ring.
+
+        :param dfs_list: (list) sorted list of dictionaries for rings.
         """
 
         pg_list = []
@@ -1168,8 +1179,9 @@ class Conformer():
     def sugar_type_checker(rd,xyz_array,conn_mat):
 
         """
-        Identifies what type of sugar each ring is
-        :param rd: (dict) dictionary of ring atoms
+        Identifies what type of sugar each ring is.
+
+        :param rd: (dict) dictionary of ring atoms.
         """
 
         # Bit Order: Ring Size, C6, O2, O3, O4, Amide, O6, Amine
@@ -1237,13 +1249,14 @@ class Conformer():
 
 
         """
-        Generates athe snfg diagram for a carbohydrate
-        :param tree: (Graph) tree of all ring atomsa
-        :param dfs_list: (list) sorted list of dictionaries for rings
-        :param glyco_list: (list) list of all anomers in the molecule
-        :param sugar_list: (list) list of all sugar types in the molecule
-        :param node_size: (float) size of the nodes in the diagram
-        :param edge_length: (float) length of edges in the diagram
+        Generates athe snfg diagram for a carbohydrate,
+
+        :param tree: (Graph) tree of all ring atomsa,
+        :param dfs_list: (list) sorted list of dictionaries for rings,
+        :param glyco_list: (list) list of all anomers in the molecule,
+        :param sugar_list: (list) list of all sugar types in the molecule,
+        :param node_size: (float) size of the nodes in the diagram,
+        :param edge_length: (float) length of edges in the diagram,
         """
 
         snfg_graph = nx.Graph()
