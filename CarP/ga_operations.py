@@ -1,10 +1,6 @@
 import math
 from . import rmsd, utilities
 import numpy as np
-import sys, copy
-from scipy import interpolate
-from scipy.linalg import expm
-from optparse import OptionParser
 
 """
 These functions are all genetic algorithm operations. Each operation modifies existing conformer objects.
@@ -91,11 +87,13 @@ def modify_pg(conf, ring_number, PG = 'all'):
                 break
     else: 
         for n, dih in enumerate(conf.graph.nodes[ring_number][PG]['dih_atoms']):
-            utilities.set_dihedral(conf, dih, (utilities.draw_random()*360-180.0))
+            pass
 
-def modify_ring(conf, ring, prob_model = None):
+
+def modify_ring(conf, ring, rd_list, prob_model = None):
 
     pucker = draw_random_pucker(prob_model)
+    print(pucker,'\n')
     utilities.set_ring_pucker(conf, ring, pucker)
 
 def draw_random_pucker(prob_model=None):
@@ -147,7 +145,3 @@ def cross_over(conf1, conf2):
 
     conf2.set_glycosidic(bond, phi1, psi1)
     conf1.set_glycosidic(bond, phi2, psi2)
-
-
-
-

@@ -1,0 +1,266 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarP.ga_operations &mdash; CarPpy 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            CarPpy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">CarPpy</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">CarPpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">CarP.ga_operations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for CarP.ga_operations</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">rmsd</span><span class="p">,</span> <span class="n">utilities</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">These functions are all genetic algorithm operations. Each operation modifies existing conformer objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="modify_glyc">
+<a class="viewcode-back" href="../../CarP.html#CarP.ga_operations.modify_glyc">[docs]</a>
+<span class="k">def</span> <span class="nf">modify_glyc</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">bond</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span><span class="p">,</span> <span class="n">Fmap</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modifies the angle between the two rings attached by a specified glycosidic bond</span>
+<span class="sd">    :param conf: a conformer object</span>
+<span class="sd">    :param bond: (int) index of which edge in the list of edges of the conformer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">edge</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">bond</span><span class="p">]</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="s1">&#39;linker_atoms&#39;</span><span class="p">])</span> <span class="p">;</span> <span class="n">angles</span> <span class="o">=</span> <span class="p">[]</span> <span class="p">;</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;Fmaps&quot;</span> <span class="ow">and</span> <span class="n">edge</span><span class="p">[</span><span class="s1">&#39;linker_type&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Fmap</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span> 
+
+        <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">atoms</span><span class="o">-</span><span class="mi">3</span><span class="p">:</span> 
+            <span class="n">angles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random</span><span class="p">()</span><span class="o">*</span><span class="mi">360</span><span class="p">)</span><span class="o">-</span><span class="mf">180.0</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span> 
+        <span class="k">if</span> <span class="n">atoms</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span> <span class="c1">#NAc linkage, set two bonds linear</span>
+            <span class="n">angles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random_int</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mf">0.005</span><span class="p">)</span><span class="o">*</span><span class="mf">179.0</span>
+            <span class="n">angles</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random_int</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mf">0.005</span><span class="p">)</span><span class="o">*</span><span class="mf">179.0</span>
+
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;Fmaps&quot;</span> <span class="p">:</span> 
+
+        <span class="n">Fmap</span> <span class="o">=</span> <span class="n">Fmap</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="s1">&#39;linker_type&#39;</span><span class="p">]]</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">Fmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">Fmap_cum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">Fmap</span><span class="p">))</span> 
+        <span class="n">rnd</span>  <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">draw_random</span><span class="p">()</span>
+        <span class="n">Fmap_cum</span> <span class="o">-=</span> <span class="n">rnd</span> 
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Fmap_cum</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="k">break</span>
+       
+        <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="n">grid</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a2</span><span class="o">*</span><span class="mf">360.0</span><span class="o">/</span><span class="n">grid</span> <span class="o">-</span> <span class="mf">180.0</span><span class="p">)</span>
+        <span class="n">angles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">grid</span><span class="o">-</span><span class="n">a1</span><span class="p">)</span><span class="o">*</span><span class="mf">360.0</span><span class="o">/</span><span class="n">grid</span> <span class="o">-</span> <span class="mf">180.0</span><span class="p">)</span>
+        <span class="c1">#print (edge[&#39;linker_type&#39;], angles[0], angles[1])</span>
+        <span class="c1">#Take care of x16 linkages</span>
+        <span class="k">if</span>   <span class="n">edge</span><span class="p">[</span><span class="s1">&#39;linker_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;a16&#39;</span> <span class="ow">or</span> <span class="n">edge</span><span class="p">[</span><span class="s1">&#39;linker_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;b16&#39;</span><span class="p">:</span>  
+            <span class="n">angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random_int</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mf">120.0</span><span class="o">-</span><span class="mf">60.0</span><span class="p">)</span>
+            <span class="c1">#print(angles[-1])</span>
+
+    <span class="k">if</span>   <span class="n">atoms</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">conf</span><span class="o">.</span><span class="n">set_glycosidic</span><span class="p">(</span><span class="n">bond</span><span class="p">,</span> <span class="n">angles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">atoms</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">conf</span><span class="o">.</span><span class="n">set_glycosidic</span><span class="p">(</span><span class="n">bond</span><span class="p">,</span> <span class="n">angles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">atoms</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span> <span class="c1">#NAc linkage, set two bonds linear</span>
+        <span class="n">conf</span><span class="o">.</span><span class="n">set_glycosidic</span><span class="p">(</span><span class="n">bond</span><span class="p">,</span> <span class="n">angles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="modify_c6">
+<a class="viewcode-back" href="../../CarP.html#CarP.ga_operations.modify_c6">[docs]</a>
+<span class="k">def</span> <span class="nf">modify_c6</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">ring</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modifies the 6th carbon of a ring, randomly draws an integer and edits the dihedral angle</span>
+
+<span class="sd">    :param conf: a conformer object</span>
+<span class="sd">    :param ring: (int) index that specifies which ring of the conformer is being edited </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ring</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;c6_atoms&#39;</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;c6_atoms&#39;</span><span class="p">]</span>
+        <span class="n">dih</span> <span class="o">=</span> <span class="p">((</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random_int</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mf">120.0</span><span class="p">)</span><span class="o">+</span><span class="mf">60.0</span>
+        <span class="n">conf</span><span class="o">.</span><span class="n">set_c6</span><span class="p">(</span><span class="n">ring</span><span class="p">,</span> <span class="n">dih</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="modify_pg">
+<a class="viewcode-back" href="../../CarP.html#CarP.ga_operations.modify_pg">[docs]</a>
+<span class="k">def</span> <span class="nf">modify_pg</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">ring_number</span><span class="p">,</span> <span class="n">PG</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">):</span>
+
+    <span class="n">PGs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C2&#39;</span><span class="p">,</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span> <span class="s1">&#39;C6&#39;</span><span class="p">]</span> 
+
+    <span class="k">if</span> <span class="n">PG</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">PGs</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">conf</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ring_number</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> 
+                <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">dih</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ring_number</span><span class="p">][</span><span class="n">pg</span><span class="p">][</span><span class="s1">&#39;dih_atoms&#39;</span><span class="p">]):</span>
+                    <span class="n">utilities</span><span class="o">.</span><span class="n">set_dihedral</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">dih</span><span class="p">,</span> <span class="p">(</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random</span><span class="p">()</span><span class="o">*</span><span class="mi">360</span><span class="o">-</span><span class="mf">180.0</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">PG</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span> 
+            <span class="n">n</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">draw_random_int</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> 
+            <span class="n">pg</span> <span class="o">=</span> <span class="n">PGs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">conf</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ring_number</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">dih</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ring_number</span><span class="p">][</span><span class="n">pg</span><span class="p">][</span><span class="s1">&#39;dih_atoms&#39;</span><span class="p">]):</span>
+                    <span class="n">utilities</span><span class="o">.</span><span class="n">set_dihedral</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">dih</span><span class="p">,</span> <span class="p">(</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random</span><span class="p">()</span><span class="o">*</span><span class="mi">360</span><span class="o">-</span><span class="mf">180.0</span><span class="p">))</span>
+                <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">dih</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ring_number</span><span class="p">][</span><span class="n">PG</span><span class="p">][</span><span class="s1">&#39;dih_atoms&#39;</span><span class="p">]):</span>
+            <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="modify_ring">
+<a class="viewcode-back" href="../../CarP.html#CarP.ga_operations.modify_ring">[docs]</a>
+<span class="k">def</span> <span class="nf">modify_ring</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">ring</span><span class="p">,</span> <span class="n">rd_list</span><span class="p">,</span> <span class="n">prob_model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">pucker</span> <span class="o">=</span> <span class="n">draw_random_pucker</span><span class="p">(</span><span class="n">prob_model</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">pucker</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">utilities</span><span class="o">.</span><span class="n">set_ring_pucker</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">ring</span><span class="p">,</span> <span class="n">puckerF</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="draw_random_pucker">
+<a class="viewcode-back" href="../../CarP.html#CarP.ga_operations.draw_random_pucker">[docs]</a>
+<span class="k">def</span> <span class="nf">draw_random_pucker</span><span class="p">(</span><span class="n">prob_model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">pucker_list</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;Chair&#39;</span><span class="p">,</span> <span class="s1">&#39;Boat&#39;</span><span class="p">,</span> <span class="s1">&#39;Skew&#39;</span><span class="p">,</span> <span class="s1">&#39;Half&#39;</span><span class="p">,</span> <span class="s1">&#39;Env&#39;</span><span class="p">]</span>
+    <span class="n">puckers</span> <span class="o">=</span> <span class="p">{</span>  <span class="s1">&#39;Chair&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1C4&#39;</span> <span class="p">,</span>  <span class="s1">&#39;4C1&#39;</span><span class="p">],</span> 
+                 <span class="s1">&#39;Boat&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1,4B&#39;</span><span class="p">,</span> <span class="s1">&#39;B1,4&#39;</span><span class="p">,</span>  <span class="s1">&#39;2,5B&#39;</span><span class="p">,</span> <span class="s1">&#39;B2,5&#39;</span><span class="p">,</span> <span class="s1">&#39;3,6B&#39;</span><span class="p">,</span> <span class="s1">&#39;B3,6&#39;</span><span class="p">],</span> 
+                 <span class="s1">&#39;Half&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1H2&#39;</span> <span class="p">,</span>  <span class="s1">&#39;2H1&#39;</span><span class="p">,</span>  <span class="s1">&#39;2H3&#39;</span> <span class="p">,</span>  <span class="s1">&#39;3H2&#39;</span><span class="p">,</span> <span class="s1">&#39;3H4&#39;</span> <span class="p">,</span>  <span class="s1">&#39;4H3&#39;</span><span class="p">,</span>  <span class="s1">&#39;4H5&#39;</span> <span class="p">,</span>  <span class="s1">&#39;5H4&#39;</span><span class="p">,</span>  <span class="s1">&#39;5H6&#39;</span> <span class="p">,</span>  <span class="s1">&#39;6H5&#39;</span><span class="p">,</span>  <span class="s1">&#39;6H1&#39;</span> <span class="p">,</span>  <span class="s1">&#39;1H6&#39;</span><span class="p">],</span>
+                 <span class="s1">&#39;Skew&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1S3&#39;</span> <span class="p">,</span>  <span class="s1">&#39;3S1&#39;</span><span class="p">,</span>  <span class="s1">&#39;5S1&#39;</span> <span class="p">,</span>  <span class="s1">&#39;1S5&#39;</span><span class="p">,</span>  <span class="s1">&#39;6S2&#39;</span> <span class="p">,</span>  <span class="s1">&#39;2S6&#39;</span><span class="p">],</span>
+                 <span class="s1">&#39;Env&#39;</span>  <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1E&#39;</span>  <span class="p">,</span>  <span class="s1">&#39;E1&#39;</span> <span class="p">,</span>  <span class="s1">&#39;2E&#39;</span>  <span class="p">,</span>  <span class="s1">&#39;E2&#39;</span> <span class="p">,</span>  <span class="s1">&#39;3E&#39;</span>  <span class="p">,</span>  <span class="s1">&#39;E3&#39;</span> <span class="p">,</span>  <span class="s1">&#39;4E&#39;</span>  <span class="p">,</span>  <span class="s1">&#39;E4&#39;</span> <span class="p">,</span>   <span class="s1">&#39;5E&#39;</span>  <span class="p">,</span>  <span class="s1">&#39;E5&#39;</span> <span class="p">,</span>  <span class="s1">&#39;6E&#39;</span>  <span class="p">,</span>  <span class="s1">&#39;E6&#39;</span> <span class="p">]</span>
+                 <span class="p">}</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">prob_model</span><span class="p">:</span> 
+        <span class="n">prob_model</span> <span class="o">=</span> <span class="p">[</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="n">P</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">prob_model</span><span class="p">:</span> <span class="n">P</span> <span class="o">+=</span> <span class="n">x</span> 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prob_model</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span> <span class="ow">or</span> <span class="n">P</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Probablity model must have 5 elements (Chair, Boat, Skew, Half, Env) and the probabliities must add to one&quot;</span><span class="p">)</span>
+
+    <span class="c1">#for i,j  in zip(pucker_list, prob_model):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">draw_random</span><span class="p">()</span>
+    <span class="n">J</span> <span class="o">=</span>  <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span>  <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pucker_list</span><span class="p">,</span> <span class="n">prob_model</span><span class="p">):</span>
+        <span class="n">J</span> <span class="o">+=</span> <span class="n">j</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">J</span><span class="p">:</span> 
+            <span class="n">pucker</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">return</span> <span class="n">puckers</span><span class="p">[</span><span class="n">pucker</span><span class="p">][</span><span class="n">utilities</span><span class="o">.</span><span class="n">draw_random_int</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">puckers</span><span class="p">[</span><span class="n">pucker</span><span class="p">]))]</span></div>
+
+
+<div class="viewcode-block" id="cross_over">
+<a class="viewcode-back" href="../../CarP.html#CarP.ga_operations.cross_over">[docs]</a>
+<span class="k">def</span> <span class="nf">cross_over</span><span class="p">(</span><span class="n">conf1</span><span class="p">,</span> <span class="n">conf2</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Swaps angle measures of two conformers</span>
+<span class="sd">    :param conf1: the first conformer object</span>
+<span class="sd">    :param conf2: the second conformer object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#Compare the edges.</span>
+    <span class="c1">#if connectivity is identical, compare dihs angles, then exchange the information if different. </span>
+    <span class="c1">#if conf1.graph.edges == conf2.graph.edges: </span>
+    <span class="c1">#    for e1, e2 in zip(conf1.graph.edges, conf2.graph.edges):</span>
+    <span class="c1">#        if bond_distance(l1, conf1.graph.edges[e1][&#39;dih&#39;], conf2.graph.edges[e2][&#39;dih&#39;], &#39;l1&#39;) &lt; 5.0:</span>
+    <span class="c1">#            pass</span>
+    <span class="c1">#        else:</span>
+    <span class="c1">#exchange glycosidic bond:</span>
+    <span class="n">bond</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">draw_random_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conf1</span><span class="o">.</span><span class="n">dih</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modifying bond number </span><span class="si">{0:2d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bond</span><span class="p">))</span>
+    <span class="n">phi1</span><span class="p">,</span> <span class="n">psi1</span> <span class="o">=</span> <span class="n">conf1</span><span class="o">.</span><span class="n">dih_angels</span><span class="p">[</span><span class="n">bond</span><span class="p">]</span>
+    <span class="n">phi2</span><span class="p">,</span> <span class="n">psi2</span> <span class="o">=</span> <span class="n">conf2</span><span class="o">.</span><span class="n">dih_angels</span><span class="p">[</span><span class="n">bond</span><span class="p">]</span> 
+
+    <span class="n">conf2</span><span class="o">.</span><span class="n">set_glycosidic</span><span class="p">(</span><span class="n">bond</span><span class="p">,</span> <span class="n">phi1</span><span class="p">,</span> <span class="n">psi1</span><span class="p">)</span>
+    <span class="n">conf1</span><span class="o">.</span><span class="n">set_glycosidic</span><span class="p">(</span><span class="n">bond</span><span class="p">,</span> <span class="n">phi2</span><span class="p">,</span> <span class="n">psi2</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Eugene Chung, Shonel Rahim, Murat Yaman, Mateusz Marianski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

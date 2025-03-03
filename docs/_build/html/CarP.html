@@ -1,0 +1,1152 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarP package &mdash; CarPpy 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="CarPpy" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CarPpy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">CarPpy</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CarP package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-CarP.conf_space">CarP.conf_space module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.conf_space.Space"><code class="docutils literal notranslate"><span class="pre">Space</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-CarP.conformer">CarP.conformer module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.conformer.Conformer"><code class="docutils literal notranslate"><span class="pre">Conformer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-CarP.display_utilities">CarP.display_utilities module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.display_utilities.display_table"><code class="docutils literal notranslate"><span class="pre">display_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.display_utilities.generate_heatmap"><code class="docutils literal notranslate"><span class="pre">generate_heatmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.display_utilities.make_plots"><code class="docutils literal notranslate"><span class="pre">make_plots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.display_utilities.return_2d_lists"><code class="docutils literal notranslate"><span class="pre">return_2d_lists()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-CarP.ga_operations">CarP.ga_operations module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.ga_operations.cross_over"><code class="docutils literal notranslate"><span class="pre">cross_over()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.ga_operations.draw_random_pucker"><code class="docutils literal notranslate"><span class="pre">draw_random_pucker()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.ga_operations.modify_c6"><code class="docutils literal notranslate"><span class="pre">modify_c6()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.ga_operations.modify_glyc"><code class="docutils literal notranslate"><span class="pre">modify_glyc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.ga_operations.modify_pg"><code class="docutils literal notranslate"><span class="pre">modify_pg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.ga_operations.modify_ring"><code class="docutils literal notranslate"><span class="pre">modify_ring()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-CarP.rmsd">CarP.rmsd module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.rmsd.rmsd_qcp"><code class="docutils literal notranslate"><span class="pre">rmsd_qcp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.rmsd.test"><code class="docutils literal notranslate"><span class="pre">test()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-CarP.utilities">CarP.utilities module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.adjacent_atoms"><code class="docutils literal notranslate"><span class="pre">adjacent_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.calculate_normal_vector"><code class="docutils literal notranslate"><span class="pre">calculate_normal_vector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.calculate_rmsd"><code class="docutils literal notranslate"><span class="pre">calculate_rmsd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.clashcheck"><code class="docutils literal notranslate"><span class="pre">clashcheck()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.connect_atoms"><code class="docutils literal notranslate"><span class="pre">connect_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.deriv"><code class="docutils literal notranslate"><span class="pre">deriv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.determine_carried_atoms"><code class="docutils literal notranslate"><span class="pre">determine_carried_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.disconnect_atoms"><code class="docutils literal notranslate"><span class="pre">disconnect_atoms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.draw_random"><code class="docutils literal notranslate"><span class="pre">draw_random()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.draw_random_int"><code class="docutils literal notranslate"><span class="pre">draw_random_int()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.dtime"><code class="docutils literal notranslate"><span class="pre">dtime()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.element_number"><code class="docutils literal notranslate"><span class="pre">element_number()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.element_symbol"><code class="docutils literal notranslate"><span class="pre">element_symbol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.error"><code class="docutils literal notranslate"><span class="pre">error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.get_distance"><code class="docutils literal notranslate"><span class="pre">get_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.get_range"><code class="docutils literal notranslate"><span class="pre">get_range()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.integrate"><code class="docutils literal notranslate"><span class="pre">integrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.measure_angle"><code class="docutils literal notranslate"><span class="pre">measure_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.measure_dihedral"><code class="docutils literal notranslate"><span class="pre">measure_dihedral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.measure_distance"><code class="docutils literal notranslate"><span class="pre">measure_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.norm"><code class="docutils literal notranslate"><span class="pre">norm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.order_layer"><code class="docutils literal notranslate"><span class="pre">order_layer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.protecting_group_dihedrals"><code class="docutils literal notranslate"><span class="pre">protecting_group_dihedrals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.protecting_group_name"><code class="docutils literal notranslate"><span class="pre">protecting_group_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.pucker_scan"><code class="docutils literal notranslate"><span class="pre">pucker_scan()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.rfac"><code class="docutils literal notranslate"><span class="pre">rfac()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.ring_canon"><code class="docutils literal notranslate"><span class="pre">ring_canon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.ring_dihedrals"><code class="docutils literal notranslate"><span class="pre">ring_dihedrals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.ring_pucker_dict"><code class="docutils literal notranslate"><span class="pre">ring_pucker_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.select_freeze"><code class="docutils literal notranslate"><span class="pre">select_freeze()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.set_angle"><code class="docutils literal notranslate"><span class="pre">set_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.set_dihedral"><code class="docutils literal notranslate"><span class="pre">set_dihedral()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.set_distance"><code class="docutils literal notranslate"><span class="pre">set_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.set_ring_pucker"><code class="docutils literal notranslate"><span class="pre">set_ring_pucker()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#CarP.utilities.ypendry"><code class="docutils literal notranslate"><span class="pre">ypendry()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-CarP">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CarPpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">CarPpy</a></li>
+      <li class="breadcrumb-item active">CarP package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/CarP.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="carp-package">
+<h1>CarP package<a class="headerlink" href="#carp-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-CarP.conf_space">
+<span id="carp-conf-space-module"></span><h2>CarP.conf_space module<a class="headerlink" href="#module-CarP.conf_space" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="CarP.conf_space.Space">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CarP.conf_space.</span></span><span class="sig-name descname"><span class="pre">Space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">software</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g16'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">determine_PGs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+<p>A conformational space consisting of all conformers found in specified directory.
+The directory tree should have a structure:
+‘molecule’/<a href="#id1"><span class="problematic" id="id2">*</span></a>/<a href="#id3"><span class="problematic" id="id4">*</span></a>log
+if directory ‘molecule’ holds a directory ‘experimental’, an attibute self.expIR is
+created using the data found there.
+for different molecules, different lists can (meaning should!) be made.</p>
+<p>Generally constructing a conformer space is the first thing to do when using this package.
+A conformer space will generate a list of conformers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.assign_atoms">
+<span class="sig-name descname"><span class="pre">assign_atoms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.assign_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.assign_atoms" title="Link to this definition"></a></dt>
+<dd><p>Labels each atom for each conformer in the space</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.assign_glycosidic_angles">
+<span class="sig-name descname"><span class="pre">assign_glycosidic_angles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.assign_glycosidic_angles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.assign_glycosidic_angles" title="Link to this definition"></a></dt>
+<dd><p>Calculates the dihedral angles for each conformer in the space</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.assign_ring_puckers">
+<span class="sig-name descname"><span class="pre">assign_ring_puckers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.assign_ring_puckers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.assign_ring_puckers" title="Link to this definition"></a></dt>
+<dd><p>Identifies each ring of each conformer in the space</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.calculate_ccs">
+<span class="sig-name descname"><span class="pre">calculate_ccs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pa'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.calculate_ccs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.calculate_ccs" title="Link to this definition"></a></dt>
+<dd><p>Calculates the collision cross section for each conformer. The parameters passed should generally just remain as their defaults values
+f</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param methond<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(string) pa or ehss, methods of calculation</p>
+</dd>
+<dt class="field-even">param accuracy<span class="colon">:</span></dt>
+<dd class="field-even"><p>dont change the default, return a value converged within 1%</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.cluster">
+<span class="sig-name descname"><span class="pre">cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'E'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[100.0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dist_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1.0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.cluster" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.create_connectivity_matrix">
+<span class="sig-name descname"><span class="pre">create_connectivity_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distXX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.create_connectivity_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.create_connectivity_matrix" title="Link to this definition"></a></dt>
+<dd><p>Create a connectivity matrix as an attribute to the conf_space:
+distXX - cutoff distance between heavy atoms
+distXH - cutoff distance between heavy at - hydrogen</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.dump_xyz">
+<span class="sig-name descname"><span class="pre">dump_xyz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.dump_xyz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.dump_xyz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.gaussian_broadening">
+<span class="sig-name descname"><span class="pre">gaussian_broadening</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">broaden</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.gaussian_broadening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.gaussian_broadening" title="Link to this definition"></a></dt>
+<dd><p>Performs gaussian broadening for the set</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.load_Fmaps">
+<span class="sig-name descname"><span class="pre">load_Fmaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Temp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.load_Fmaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.load_Fmaps" title="Link to this definition"></a></dt>
+<dd><p>Loads a set of free energy maps for the glycosidic linkages located in path
+The directory name that contains eps file with the map should be the linkage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.load_dir">
+<span class="sig-name descname"><span class="pre">load_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">software</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g16'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">determine_PGs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.load_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.load_dir" title="Link to this definition"></a></dt>
+<dd><p>Loads a directory with data files to be processed. The path is just the name of the directory, the function will handle the presence of multiple directories within it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – (string) this is the path to the directory with all the conformer data. This directory should be filled with other directories with the intended name of the conformer and it’s .xyz and input.log files</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.load_exp">
+<span class="sig-name descname"><span class="pre">load_exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.load_exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.load_exp" title="Link to this definition"></a></dt>
+<dd><p>Selects the experimental conformer that other conformers will be compared to. Creates/updates the self.expIR member of this class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – (string) the path to a specific exp.dat file, the path should not just go to the general dir but also include the filename</p></li>
+<li><p><strong>ir_resolution</strong> – (float) Resolution of the plot. The value is used to make a grid and the ir_resolution is the number of values skipped between each plotted point. Ex: assuming exp is an array size 10 exp = [1…10], and ir_resolution is 3 the values plotted will be [1,4,7]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.load_models">
+<span class="sig-name descname"><span class="pre">load_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deter_PGs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.65</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.load_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.load_models" title="Link to this definition"></a></dt>
+<dd><p>Loads a set of specific models used of analysis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.plot_XE">
+<span class="sig-name descname"><span class="pre">plot_XE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_extend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'E'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Distance</span> <span class="pre">[$\\AA$]'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">8)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.plot_XE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.plot_XE" title="Link to this definition"></a></dt>
+<dd><p>Coformational free energy vs ccs, for every conformer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.plot_glycosidic_bond">
+<span class="sig-name descname"><span class="pre">plot_glycosidic_bond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'E'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Blues_r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Set1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.plot_glycosidic_bond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.plot_glycosidic_bond" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.plot_puckers">
+<span class="sig-name descname"><span class="pre">plot_puckers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'E'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.plot_puckers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.plot_puckers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.print_relative">
+<span class="sig-name descname"><span class="pre">print_relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pucker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glycosidic_bond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.print_relative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.print_relative" title="Link to this definition"></a></dt>
+<dd><p>Prints relative energies of each conformer, related to reference_to_zero</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.reference_to_zero">
+<span class="sig-name descname"><span class="pre">reference_to_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'E'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.reference_to_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.reference_to_zero" title="Link to this definition"></a></dt>
+<dd><p>Finds a conformer with the lowest specified energy function and
+references remaining conformers to this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>energy_function</strong> – (char) either E, F or H. The table will be sorted least to greatest in terms of the energy indicated by this parameter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.remove_duplicates">
+<span class="sig-name descname"><span class="pre">remove_duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rmsd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hydrogen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.remove_duplicates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.remove_duplicates" title="Link to this definition"></a></dt>
+<dd><p>Removes duplicate conformers from the space</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.rmsd_matrix">
+<span class="sig-name descname"><span class="pre">rmsd_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Hydrogen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.rmsd_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.rmsd_matrix" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.rotate_all_conf">
+<span class="sig-name descname"><span class="pre">rotate_all_conf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.rotate_all_conf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.rotate_all_conf" title="Link to this definition"></a></dt>
+<dd><p>Finds and applies the rotation matrix to each conformer being optimally rotated to match a conformer in the list of space with the index provided
+:param index: (int) the index in the list of conformers that each confromer will be rotated to match</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.set_theory">
+<span class="sig-name descname"><span class="pre">set_theory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">software</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g16'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.set_theory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.set_theory" title="Link to this definition"></a></dt>
+<dd><p>Parameters for simulations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conf_space.Space.sort_energy">
+<span class="sig-name descname"><span class="pre">sort_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'E'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conf_space.html#Space.sort_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conf_space.Space.sort_energy" title="Link to this definition"></a></dt>
+<dd><p>Sorted the conformers according to selected energy_function</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-CarP.conformer">
+<span id="carp-conformer-module"></span><h2>CarP.conformer module<a class="headerlink" href="#module-CarP.conformer" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CarP.conformer.</span></span><span class="sig-name descname"><span class="pre">Conformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class that creates an instance of a molecule defined as conformer.
+It parses gaussian output file (optimization + freq at this moment to
+set proper flags, to be fixed for only freq calcs) and creates an object</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.amide_check">
+<span class="sig-name descname"><span class="pre">amide_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.amide_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.amide_check" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.amine_check">
+<span class="sig-name descname"><span class="pre">amine_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.amine_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.amine_check" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.calculate_ccs">
+<span class="sig-name descname"><span class="pre">calculate_ccs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pa'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.calculate_ccs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.calculate_ccs" title="Link to this definition"></a></dt>
+<dd><p>Calls program sigma to calculate collision cross section, the sigma must be in the PATH variable. Need to change hardcoded paths otherwise it won’t work</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temp_dir</strong> – (string) name of a directory that will be generated to hold onto some files generated during the calculations</p></li>
+<li><p><strong>methond</strong> – (string) pa or ehss, different methods of calculation</p></li>
+<li><p><strong>accuracy</strong> – dont change the default, return a value converged within 1%</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.connectivity_matrix">
+<span class="sig-name descname"><span class="pre">connectivity_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distXX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distXH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.connectivity_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.connectivity_matrix" title="Link to this definition"></a></dt>
+<dd><p>Creates a connectivity matrix of the molecule. A connectivity matrix holds the information of which atoms are bonded and to what.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distXX</strong> – The max distance between two atoms (not hydrogen) to be considered a bond</p></li>
+<li><p><strong>distXH</strong> – The max distance between any atom and a hydrogen atom to be considered a bond</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.create_input">
+<span class="sig-name descname"><span class="pre">create_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">software</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g16'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.create_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.create_input" title="Link to this definition"></a></dt>
+<dd><p>Creates the parameters to run simulation in Gaussian
+:param theory: (dict) a dictionary with the simulation parameters
+:param output: (string) this is the name of the output directory to be created
+:param software: (string) g16 or fhiaims</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.dihedral_angle">
+<span class="sig-name descname"><span class="pre">dihedral_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.dihedral_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.dihedral_angle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.find_pg">
+<span class="sig-name descname"><span class="pre">find_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.find_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.find_pg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.find_red_end">
+<span class="sig-name descname"><span class="pre">find_red_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.find_red_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.find_red_end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.furanose_basis">
+<span class="sig-name descname"><span class="pre">furanose_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sugar_basis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.furanose_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.furanose_basis" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.gaussian_broadening">
+<span class="sig-name descname"><span class="pre">gaussian_broadening</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">broaden</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.gaussian_broadening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.gaussian_broadening" title="Link to this definition"></a></dt>
+<dd><p>Performs gaussian broadening on IR spectrum
+generates attribute self.IR - np.array with dimmension 4000/resolution consisting gaussian-boraden spectrum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>broaden</strong> – (float) gaussian broadening in wn-1</p></li>
+<li><p><strong>resolution</strong> – (float) resolution of the spectrum (number of points for 1 wn) defaults is 1, needs to be fixed in plotting</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.glycosidic_link_check">
+<span class="sig-name descname"><span class="pre">glycosidic_link_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c1_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.glycosidic_link_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.glycosidic_link_check" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.glycosidic_link_type">
+<span class="sig-name descname"><span class="pre">glycosidic_link_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.glycosidic_link_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.glycosidic_link_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.load_log">
+<span class="sig-name descname"><span class="pre">load_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">software</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g16'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.load_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.load_log" title="Link to this definition"></a></dt>
+<dd><p>Creates a conformer object using infromation from the self.path attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.measure_c6">
+<span class="sig-name descname"><span class="pre">measure_c6</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.measure_c6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.measure_c6" title="Link to this definition"></a></dt>
+<dd><p>Dihedral angle between carbon 5 and carbon 6. Sugars with 1,6 glycosidic bond does not have c6 atoms. This angle would just the angle on the glycocidic bond</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.measure_glycosidic">
+<span class="sig-name descname"><span class="pre">measure_glycosidic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.measure_glycosidic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.measure_glycosidic" title="Link to this definition"></a></dt>
+<dd><p>Measures the dihedral angle of the glycosidic bond</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.measure_pg">
+<span class="sig-name descname"><span class="pre">measure_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.measure_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.measure_pg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.measure_ring">
+<span class="sig-name descname"><span class="pre">measure_ring</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.measure_ring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.measure_ring" title="Link to this definition"></a></dt>
+<dd><p>Assigns the theta angles and the canonical ring pucker</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.plot_ir">
+<span class="sig-name descname"><span class="pre">plot_ir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">900</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.965</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_exp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_int_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal_modes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.plot_ir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.plot_ir" title="Link to this definition"></a></dt>
+<dd><p>Plots the IR spectrum in xmin – xmax range,
+x-axis is multiplied by scaling factor, everything
+is normalized to 1. If exp_data is specified,
+then the top panel is getting plotted too.
+Need to add output directory. Default name is self._id</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.pyranose_basis">
+<span class="sig-name descname"><span class="pre">pyranose_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sugar_basis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.pyranose_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.pyranose_basis" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.ring_connectivity_checker">
+<span class="sig-name descname"><span class="pre">ring_connectivity_checker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.ring_connectivity_checker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.ring_connectivity_checker" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.ring_dict_finder">
+<span class="sig-name descname"><span class="pre">ring_dict_finder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.ring_dict_finder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.ring_dict_finder" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.ring_graph_maker">
+<span class="sig-name descname"><span class="pre">ring_graph_maker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.ring_graph_maker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.ring_graph_maker" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.ring_stereo_compiler">
+<span class="sig-name descname"><span class="pre">ring_stereo_compiler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.ring_stereo_compiler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.ring_stereo_compiler" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.rotate_conf">
+<span class="sig-name descname"><span class="pre">rotate_conf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotmat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.rotate_conf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.rotate_conf" title="Link to this definition"></a></dt>
+<dd><p>Stores the following in each conformer obj the name of the conformer it is being rotated to match, the index of that conformer and the rotation matrix.
+The rotation matrix is then multiplied to the existing xyz matrix and the vibrations matrix. Those rotated matrices are also saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf_name</strong> – (string) name of the conformer this conformer has been rotated to</p></li>
+<li><p><strong>conf_index</strong> – (int) index of the conformer rotated to, in the list of conformers of the conformer space</p></li>
+<li><p><strong>rotmat</strong> – (3x3 numpy array) the rotation matrix</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.run_qm">
+<span class="sig-name descname"><span class="pre">run_qm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">software</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g16'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.run_qm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.run_qm" title="Link to this definition"></a></dt>
+<dd><p>Opens and runs a simulation in the Gaussian application. To run this function GausView must already be intalled on the device
+:param mpi: (bool) message passing interface, set true to use parallel programming. experimental.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.save_xyz">
+<span class="sig-name descname"><span class="pre">save_xyz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.save_xyz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.save_xyz" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.set_c6">
+<span class="sig-name descname"><span class="pre">set_c6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dih</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.set_c6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.set_c6" title="Link to this definition"></a></dt>
+<dd><p>Sets a new dihedral angle between carbon 5 and carbon 6
+:param ring: index to indicate which ring is being considered in the molecule
+:param dih: the new dihedral angle</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.set_glycosidic">
+<span class="sig-name descname"><span class="pre">set_glycosidic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.set_glycosidic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.set_glycosidic" title="Link to this definition"></a></dt>
+<dd><p>Changes the dihedral angle of the glycosidic bond</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bond</strong> – (int) index of which glycosidic bond to alter</p></li>
+<li><p><strong>phi</strong> – (float) phi angle</p></li>
+<li><p><strong>psi</strong> – (float) psi angle</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.set_pg">
+<span class="sig-name descname"><span class="pre">set_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dihs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.set_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.set_pg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.set_ring">
+<span class="sig-name descname"><span class="pre">set_ring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ring_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pucker</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.set_ring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.set_ring" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_xyz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.show" title="Link to this definition"></a></dt>
+<dd><p>Displays a 3D rendering of the conformer using Py3Dmol</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> – the width of the display window</p></li>
+<li><p><strong>height</strong> – the height of the display window</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.snfg">
+<span class="sig-name descname"><span class="pre">snfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glyco_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stero_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sugar_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.snfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.snfg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.sort_ring_atoms">
+<span class="sig-name descname"><span class="pre">sort_ring_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cycles_in_graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.sort_ring_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.sort_ring_atoms" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.sort_rings">
+<span class="sig-name descname"><span class="pre">sort_rings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.sort_rings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.sort_rings" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.sugar_stero">
+<span class="sig-name descname"><span class="pre">sugar_stero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.sugar_stero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.sugar_stero" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.sugar_type_checker">
+<span class="sig-name descname"><span class="pre">sugar_type_checker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.sugar_type_checker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.sugar_type_checker" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CarP.conformer.Conformer.update_topol">
+<span class="sig-name descname"><span class="pre">update_topol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/conformer.html#Conformer.update_topol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.conformer.Conformer.update_topol" title="Link to this definition"></a></dt>
+<dd><p>Updates topology and checks for proton shifts</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-CarP.display_utilities">
+<span id="carp-display-utilities-module"></span><h2>CarP.display_utilities module<a class="headerlink" href="#module-CarP.display_utilities" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.display_utilities.display_table">
+<span class="sig-prename descclassname"><span class="pre">CarP.display_utilities.</span></span><span class="sig-name descname"><span class="pre">display_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmsd_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmsd_no_H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pendry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/display_utilities.html#display_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.display_utilities.display_table" title="Link to this definition"></a></dt>
+<dd><p>Prints into terminal and saves as .txt a table displaying each conformer and the associated value rmsd, rmsd without H and pendry R factor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – (int) all the values are calculated comparing all conformers to one conformer which is sepcified by this index</p></li>
+<li><p><strong>molecule_ids</strong> – (list) the list of molecule id number</p></li>
+<li><p><strong>molecule_names</strong> – (list) the lost of molecule names</p></li>
+<li><p><strong>rmsd_all</strong> – (list) list of rmsd values</p></li>
+<li><p><strong>rmsd_no_H</strong> – (list) list of rmsd values without H</p></li>
+<li><p><strong>pendry</strong> – (list) list of all pendry values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.display_utilities.generate_heatmap">
+<span class="sig-prename descclassname"><span class="pre">CarP.display_utilities.</span></span><span class="sig-name descname"><span class="pre">generate_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/display_utilities.html#generate_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.display_utilities.generate_heatmap" title="Link to this definition"></a></dt>
+<dd><p>Returns a heatmap of the 2D matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matrix</strong> – (list) 2D list</p></li>
+<li><p><strong>max_value</strong> – a number for a max cutoff value to be represented in the heatmap</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.display_utilities.make_plots">
+<span class="sig-prename descclassname"><span class="pre">CarP.display_utilities.</span></span><span class="sig-name descname"><span class="pre">make_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf_space_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/display_utilities.html#make_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.display_utilities.make_plots" title="Link to this definition"></a></dt>
+<dd><p>Displays plots
++</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param conf_space_object<span class="colon">:</span></dt>
+<dd class="field-odd"><p>an initialized conformer space, this should be a list of conformer objects containing molecule data</p>
+</dd>
+<dt class="field-even">param index<span class="colon">:</span></dt>
+<dd class="field-even"><p>(int) identifies which conformer in the list of conformers, the default is the first conformer at index 0</p>
+</dd>
+<dt class="field-odd">param bar<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(bool) specifies if bar plots should be generated, this is a triple bar plot (rmsd, rmsd without H, pendry factor); default set to TRUE</p>
+</dd>
+<dt class="field-even">param scatter<span class="colon">:</span></dt>
+<dd class="field-even"><p>(bool) specifies if scatterplot should be generated, there will be 3 things plotted (rmsd, rmsd without H, pendry factor); default set to TRUE</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.display_utilities.return_2d_lists">
+<span class="sig-prename descclassname"><span class="pre">CarP.display_utilities.</span></span><span class="sig-name descname"><span class="pre">return_2d_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf_space_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/display_utilities.html#return_2d_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.display_utilities.return_2d_lists" title="Link to this definition"></a></dt>
+<dd><p>Returns 3 different 2D lists calculating rmsd, rmsd without considering H atoms and pendry R factor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conf_space_object</strong> – an initialized conformer space, this should be a list of conformer objects containing molecule data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(list) 3 different 2D lists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-CarP.ga_operations">
+<span id="carp-ga-operations-module"></span><h2>CarP.ga_operations module<a class="headerlink" href="#module-CarP.ga_operations" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.ga_operations.cross_over">
+<span class="sig-prename descclassname"><span class="pre">CarP.ga_operations.</span></span><span class="sig-name descname"><span class="pre">cross_over</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/ga_operations.html#cross_over"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.ga_operations.cross_over" title="Link to this definition"></a></dt>
+<dd><p>Swaps angle measures of two conformers
+:param conf1: the first conformer object
+:param conf2: the second conformer object</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.ga_operations.draw_random_pucker">
+<span class="sig-prename descclassname"><span class="pre">CarP.ga_operations.</span></span><span class="sig-name descname"><span class="pre">draw_random_pucker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/ga_operations.html#draw_random_pucker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.ga_operations.draw_random_pucker" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.ga_operations.modify_c6">
+<span class="sig-prename descclassname"><span class="pre">CarP.ga_operations.</span></span><span class="sig-name descname"><span class="pre">modify_c6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/ga_operations.html#modify_c6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.ga_operations.modify_c6" title="Link to this definition"></a></dt>
+<dd><p>Modifies the 6th carbon of a ring, randomly draws an integer and edits the dihedral angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> – a conformer object</p></li>
+<li><p><strong>ring</strong> – (int) index that specifies which ring of the conformer is being edited</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.ga_operations.modify_glyc">
+<span class="sig-prename descclassname"><span class="pre">CarP.ga_operations.</span></span><span class="sig-name descname"><span class="pre">modify_glyc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Fmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/ga_operations.html#modify_glyc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.ga_operations.modify_glyc" title="Link to this definition"></a></dt>
+<dd><p>Modifies the angle between the two rings attached by a specified glycosidic bond
+:param conf: a conformer object
+:param bond: (int) index of which edge in the list of edges of the conformer</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.ga_operations.modify_pg">
+<span class="sig-prename descclassname"><span class="pre">CarP.ga_operations.</span></span><span class="sig-name descname"><span class="pre">modify_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/ga_operations.html#modify_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.ga_operations.modify_pg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.ga_operations.modify_ring">
+<span class="sig-prename descclassname"><span class="pre">CarP.ga_operations.</span></span><span class="sig-name descname"><span class="pre">modify_ring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/ga_operations.html#modify_ring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.ga_operations.modify_ring" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-CarP.rmsd">
+<span id="carp-rmsd-module"></span><h2>CarP.rmsd module<a class="headerlink" href="#module-CarP.rmsd" title="Link to this heading"></a></h2>
+<p>RMSD calculation, via quaterion-based characteristic polynomial in
+pure python/numpy.
+Reference
+———
+Rapid calculation of RMSDs using a quaternion-based characteristic polynomial.
+Acta Crystallogr A 61(4):478-480.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.rmsd.rmsd_qcp">
+<span class="sig-prename descclassname"><span class="pre">CarP.rmsd.</span></span><span class="sig-name descname"><span class="pre">rmsd_qcp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conformation1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformation2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/rmsd.html#rmsd_qcp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.rmsd.rmsd_qcp" title="Link to this definition"></a></dt>
+<dd><p>Returns the optimal rotation matrix of two conformers and compute the RMSD with Theobald’s quaterion-based characteristic polynomial
+Rapid calculation of RMSDs using a quaternion-based characteristic polynomial. Acta Crystallogr A 61(4):478-480.
+This function is taken from Liu, Pu, Dimitris K. Agrafiotis, and Douglas L. Theobald. “Fast determination of the optimal rotational matrix for macromolecular superpositions.” Journal of computational chemistry 31.7 (2010): 1561-1563.
+Things to revise:
+-The function is copy and paste the determination of max_eigenvalue from the rmsd function
+-returning the identity matrix if all columns of the adj matrix is too small should be dependent on the size of the conformers in question. Rn it is just hardcoded from the original script. This does not impact this function very much because the case is very unlikely and it returns an identity matrix as an indication of failure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conformation1</strong> – (np.ndarray, shape=(n_atoms, 3)) The cartesian coordinates of the first conformation</p></li>
+<li><p><strong>conformation2</strong> – (np.ndarray, shape=(n_atoms, 3)) The cartesian coordinates of the second conformation</p></li>
+<li><p><strong>rotation_matrix</strong> – (bool) parameter that will only return the rotation matrix when set to true. False is the default for the function so it will return the rmsd</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(list) This is a list of floats that indicate the optimal rotation matrix of two conformers. The optimal rotation matrix is the rotation that minimizes rmsd of the two conformers</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.rmsd.test">
+<span class="sig-prename descclassname"><span class="pre">CarP.rmsd.</span></span><span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/rmsd.html#test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.rmsd.test" title="Link to this definition"></a></dt>
+<dd><p>This function was just to test the rmsd function. Ignore this. This should just be removed</p>
+</dd></dl>
+
+</section>
+<section id="module-CarP.utilities">
+<span id="carp-utilities-module"></span><h2>CarP.utilities module<a class="headerlink" href="#module-CarP.utilities" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.adjacent_atoms">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">adjacent_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#adjacent_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.adjacent_atoms" title="Link to this definition"></a></dt>
+<dd><p>returns all adjacent atoms to a specific atom in a conformation
+:param conn_mat: the connectivity matrix
+:param at: index of the selected atom
+:return: indices of all atoms adjacent to the selected atom</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.calculate_normal_vector">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">calculate_normal_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#calculate_normal_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.calculate_normal_vector" title="Link to this definition"></a></dt>
+<dd><p>Calculate the normal vector of a plane by
+cross product of two vectors belonging to it.
+:param list_of_atoms: (list) of 3 atoms
+:param conf: a conformer object
+:return cross_product: cross product of two matricies</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.calculate_rmsd">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">calculate_rmsd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#calculate_rmsd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.calculate_rmsd" title="Link to this definition"></a></dt>
+<dd><p>calculate the rmsd of two conformers; how similar the positions of the atoms are to each other</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf1</strong> – a conformer object</p></li>
+<li><p><strong>conf2</strong> – another conformer object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Atoms<span class="colon">:</span></dt>
+<dd class="field-even"><p>(string) passing the atomic symbol the function will omit those atoms when calculating the rmsd. Most commonly used is ‘H’ to remove hydrogen</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.clashcheck">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">clashcheck</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#clashcheck"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.clashcheck" title="Link to this definition"></a></dt>
+<dd><p>Checks if there is a clash between atoms
+:param conf: passes a conformer object. Conn_mat attributre of the conf is used to exclude ‘bound’ atoms.
+:param cutoff: (float) the maximum value that would not be considered a clashing distance, default to 1.2
+:return: (bool) True for a clash or False for no clash</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.connect_atoms">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">connect_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#connect_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.connect_atoms" title="Link to this definition"></a></dt>
+<dd><p>Connects two atoms in the conn_mat
+:param conf: conf objenumpyct that has associated conn_mat
+:return: None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.deriv">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">deriv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#deriv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.deriv" title="Link to this definition"></a></dt>
+<dd><p>calculate first derivative of function ‘spec’
+using the central finite difference method up to 6th order,
+and for the first 3 and last 3 grid points the
+forward/backward finite difference method up to 2nd order.
+…as used in f77-program and suggested by Zanazzi-Jona…</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spec</strong> – (list) an IR spectrum</p></li>
+<li><p><strong>h</strong> – (float) the delta x between each data point, must be less than 1 for accurate integral results</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the first derivative of the parameter spec</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.determine_carried_atoms">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">determine_carried_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#determine_carried_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.determine_carried_atoms" title="Link to this definition"></a></dt>
+<dd><p>Find all atoms necessary to be carried over during rotation
+of an atom
+:param at1: (list) the xyz coordinates of an atom
+:param at2: (list) the xyz coordinates of another atom
+:param conn_matt: the connectivity matrix of a conformer</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.disconnect_atoms">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">disconnect_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#disconnect_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.disconnect_atoms" title="Link to this definition"></a></dt>
+<dd><p>Disconnects two atoms in the conn_mat
+:param conf: conf object that has associated conn_mat
+:return: None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.draw_random">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">draw_random</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#draw_random"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.draw_random" title="Link to this definition"></a></dt>
+<dd><p>Draw a random float between 0 and 1
+:return: (float) random sample</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.draw_random_int">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">draw_random_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#draw_random_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.draw_random_int" title="Link to this definition"></a></dt>
+<dd><p>draw a random int between 0-top
+:param top: (int) the upperbound of the random int generator
+:return: (int) returns a random integer</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.dtime">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">dtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#dtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.dtime" title="Link to this definition"></a></dt>
+<dd><p>finds the current date and time
+:return: the current date and time</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.element_number">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">element_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#element_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.element_number" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.element_symbol">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">element_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#element_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.element_symbol" title="Link to this definition"></a></dt>
+<dd><p>A dictionary for atomic number and atomic symbol
+:param A: either atomic number or atomic symbol for Hydrogen, Carbon, Nitrogen, Oxygen, Fluorine and Silicon
+:return: the corresponding atomic symbol or atomic number</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.error">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.error" title="Link to this definition"></a></dt>
+<dd><p>write error message and quit
+:param msg: (string) the message to be outputted</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.get_distance">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">get_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">at1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#get_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.get_distance" title="Link to this definition"></a></dt>
+<dd><p>Finds the distance between two atoms
+:param at1: (list) a list of xyz coordinates of atom1
+:param at2: (list) a list of xyz coordinates of atom2
+:return: (float) the distance between 2 atoms</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.get_range">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">get_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tspec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">espec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_incr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#get_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.get_range" title="Link to this definition"></a></dt>
+<dd><p>determine wavenumber range within the comparison between theoretical
+and experimental spectrum is performed (depends on the shift)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tspec</strong> – (list) theoretical spectrum</p></li>
+<li><p><strong>espec</strong> – (list) experimental spectrum</p></li>
+<li><p><strong>w_incr</strong> – (float) grid interval of the spectra – should be 1 or smaller!</p></li>
+<li><p><strong>shift</strong> – the shift on the spectrum</p></li>
+<li><p><strong>start</strong> – (int) the starting point on the spectrum</p></li>
+<li><p><strong>stop</strong> – (int) the ending point on the spectrum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(tnstart, tnstop, enstart, enstop) the start and stop for thee range of the theoretical and experimental spectra</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.integrate">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integrand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.integrate" title="Link to this definition"></a></dt>
+<dd><p>integrate using the trapezoid method as Zanazzi-Jona suggested and was used in the f77-program…</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integrand</strong> – (list) A spectrum that is to be integrated</p></li>
+<li><p><strong>delta</strong> – (float) the delta x in the trapezoidal method, the length of the base of each trapezoid. In implementation it is the increment of the data point of the spectrum, must be less than 1 for accurate integral results</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(float) returns a product of the calculated integral and the delta</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.measure_angle">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">measure_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#measure_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.measure_angle" title="Link to this definition"></a></dt>
+<dd><p>Calculate an angle between three atoms:
+angle = acos(dot(X,Y)/(norm(X)*norm(Y)))
+:param list_of_atoms: (list) list of 3 atoms
+:param conf: a conformer object
+:return angle, axor: returns angle in degrees and axis of rotation of the angle</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.measure_dihedral">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">measure_dihedral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#measure_dihedral"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.measure_dihedral" title="Link to this definition"></a></dt>
+<dd><p>Calculate a dihedral angle between two planes defined by
+a list of four atoms. It returns the angle and the rotation axis
+required to set a new dihedral.
+:param conf: conformer object which associated xyz matrix
+:param list_of_atoms: (list) list of 4 atoms</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.measure_distance">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">measure_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#measure_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.measure_distance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.norm">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.norm" title="Link to this definition"></a></dt>
+<dd><p>Norm of a vector
+:param a: a vector in a form of a numpy array
+:return: (float) the norm of the vector</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.order_layer">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">order_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#order_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.order_layer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.protecting_group_dihedrals">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">protecting_group_dihedrals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pg_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PG_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#protecting_group_dihedrals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.protecting_group_dihedrals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.protecting_group_name">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">protecting_group_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#protecting_group_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.protecting_group_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.pucker_scan">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">pucker_scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#pucker_scan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.pucker_scan" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.rfac">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">rfac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">espec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tspec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_incr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_incr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pendry'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#rfac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.rfac" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>%prog [options] r-fac.in</dt><dd><p>Reads two spectra and calculates various R-factors – FS 2011
+Attention: both spectra have to be given on the same, equidistant grid!
+NOTE: in the f77-program R1 is scaled by 0.75 and R2 is scaled by 0.5; this is not done here
+Please provide a file r-fac.in with the following specifications (without the comment lines!!!)
+(the numbers are just examples, choose them according to your particular case)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>espec</strong> – (list) the experimental spectrum</p></li>
+<li><p><strong>tspec</strong> – (list) the theoretical spectrum, the conformer spectrum that the experimental spectrum is being compared to</p></li>
+<li><p><strong>start</strong> – (int) where to start the comparison, default to 1000</p></li>
+<li><p><strong>stop</strong> – (int) where to stop the comparison, default to 1800</p></li>
+<li><p><strong>w_incr</strong> – (float) grid interval of the spectra – should be 1 or smaller! (otherwise integrations/derivatives are not accurate) Default to 0.5</p></li>
+<li><p><strong>shift_min</strong> – (int) minimal shift of the theoretical spectrum, default to -10</p></li>
+<li><p><strong>shift_max</strong> – (int) maximal shift of the experimental spectrum, default to +10</p></li>
+<li><p><strong>shift_incr</strong> – (int) shift interval, default to 1</p></li>
+<li><p><strong>r</strong> – (string) specify which r-factor should be calculated options: pendry, ZJ, R1, R2 (give a list of the requested r-factors separated by comma). The default is “pendry”</p></li>
+<li><p><strong>VI</strong> – (int) approximate half-width of the peaks (needed for pendry r-factor). Default to 10</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.ring_canon">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">ring_canon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'l2'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#ring_canon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.ring_canon" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.ring_dihedrals">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">ring_dihedrals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#ring_dihedrals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.ring_dihedrals" title="Link to this definition"></a></dt>
+<dd><p>This function will return the 3 theta angles that define a ring pucker
+:param conf: conformer object with associated rings:
+:param ring_number: which ring will be measured
+:return: theta dihedrals associated with the ring</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.ring_pucker_dict">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">ring_pucker_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pucker</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#ring_pucker_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.ring_pucker_dict" title="Link to this definition"></a></dt>
+<dd><p>Returns a value of theta angles associated with a ring pucker</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.select_freeze">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">select_freeze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freeze</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#select_freeze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.select_freeze" title="Link to this definition"></a></dt>
+<dd><p>Returns the string parameter for gaussian to freeze either the dihedral angles or atom postitions that form the dihedral angles
+:param freeze: (str) a string either “dih”, “atoms” or “fhiaims”; this will return the string parameter to freeze the dihedral angles or freezing the atoms that form the dihedrals
+:param ra: (dict) ra (ring atoms) is a dictionary with the atom name and the atom number in the list of molecules</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.set_angle">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">set_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_ang</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#set_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.set_angle" title="Link to this definition"></a></dt>
+<dd><p>Set a new angle between three atoms
+:param list_of_atoms: (list) list of three atoms
+:param new_ang: value of dihedral angle (in degrees) to be set</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.set_dihedral">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">set_dihedral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dih</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bond'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#set_dihedral"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.set_dihedral" title="Link to this definition"></a></dt>
+<dd><p>Set a new dihedral angle between two planes defined by
+atoms first and last three atoms of the supplied list.
+:param list_of_atoms: (list) list of four atoms
+:param new_dih: (float) value of dihedral angle (in degrees) to be set
+:incr: (bool) whether the new_dih should be treated as incremental value to current dih
+:axis_pos: whether to set the axor along the central bond, or the terminal bond in the list of 4 atoms
+:returns: xyz modified numpy array with new atoms positions</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.set_distance">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">set_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#set_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.set_distance" title="Link to this definition"></a></dt>
+<dd><p>Set a new distance between two atoms
+:param list_of_atoms: (list) list of two atoms
+:param new_distance: value of bond distance to be set</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.set_ring_pucker">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">set_ring_pucker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pucker</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#set_ring_pucker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.set_ring_pucker" title="Link to this definition"></a></dt>
+<dd><p>Edits the ring pucker by assigning a new angle to the C2, C4 and O angles. This is based on the ring puckering model proposed in Puckering Coordinates of Monocyclic Rings by Triangular Decomposition Anthony D. Hill and Peter J. Reilly
+:param conf: a conformer object
+:param ring_number: (int) selects which ring of the conformer, an index to select the graph node
+:param ring_pucker: (list) or (string) this is the ring puckering angles. Either a list with 3 numbers or a string that defines the intended topology which is looked up in the topol_dict</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CarP.utilities.ypendry">
+<span class="sig-prename descclassname"><span class="pre">CarP.utilities.</span></span><span class="sig-name descname"><span class="pre">ypendry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VI</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CarP/utilities.html#ypendry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CarP.utilities.ypendry" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>calculate the Pendry Y-function: y= l^-1/(l^-2+VI^2) with l=I’/I (logarithmic derivative),</dt><dd><p>J.B. Pendry, J. Phys. C: Solid St. Phys. 13 (1980) 937-44</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spec</strong> – (list) a conformer IR spectrum</p></li>
+<li><p><strong>d1_spec</strong> – (list) the first derivative of the IR spectrum</p></li>
+<li><p><strong>VI</strong> – (int) approximate half-width of the peaks</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(2D list) returns the calculated pendry y-function</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-CarP">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-CarP" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="CarPpy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Eugene Chung, Shonel Rahim, Murat Yaman, Mateusz Marianski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

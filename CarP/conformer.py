@@ -18,11 +18,16 @@
 import numpy as np
 import re, os
 from subprocess import Popen, PIPE
+
+from networkx.classes import nodes
+
 from .utilities import *
 import networkx as nx
-from operator import itemgetter, attrgetter
 import matplotlib.pyplot as plt
 import py3Dmol as p3D
+from itertools import zip_longest
+import PIL
+p
 
 class Conformer():
 
@@ -96,7 +101,7 @@ class Conformer():
 
             control_file = self.outdir + '/control.in'
             geom_file    = self.outdir + '/geometry.in'
-            
+
             c = open(control_file, 'w')
             c.write('xc ' + str(theory['xc']) + '\n')
             c.write(theory['disp'] + '\n')
@@ -444,7 +449,7 @@ class Conformer():
 
         return ' '
 
-    def gaussian_broadening(self, broaden, resolution=1):
+    def gaussian_broadening(self, broaden=1, resolution=1):
  
         """ Performs gaussian broadening on IR spectrum
         generates attribute self.IR - np.array with dimmension 4000/resolution consisting gaussian-boraden spectrum
@@ -458,7 +463,7 @@ class Conformer():
         for f, i in zip(self.Freq, self.Ints):  IR += i*np.exp(-0.5*((X-f)/int(broaden))**2)
         self.IR=np.vstack((X, IR)).T #tspec
 
-    def connectivity_matrix(self, distXX, distXH):
+    def connectivity_matrix(self, distXX=1.65, distXH=1.15):
 
         """ Creates a connectivity matrix of the molecule. A connectivity matrix holds the information of which atoms are bonded and to what. 
 
@@ -471,405 +476,887 @@ class Conformer():
 
         for at1 in range(Nat):
             for at2 in range(Nat):
-                
+
                 dist = get_distance(self.xyz[at1], self.xyz[at2])
+
                 if at1 == at2: pass
+
                 elif (self.atoms[at1] == 'H' or self.atoms[at2] == 'H') and dist < distXH: 
                     self.conn_mat[at1,at2] = 1; self.conn_mat[at2,at1] = 1 
                 elif (self.atoms[at1] != 'H' and self.atoms[at2] != 'H') and dist < distXX:
-                    self.conn_mat[at1,at2] = 1; self.conn_mat[at2,at1] = 1   
+                    self.conn_mat[at1,at2] = 1; self.conn_mat[at2,at1] = 1
 
         #Remove bifurcated Hs:
         for at1 in range(Nat):
             if self.atoms[at1] == 'H' and np.sum(self.conn_mat[at1,:]) > 1:
 
-                    at2list = np.where(self.conn_mat[at1,:] == 1) 
-                    at2dist = [ round(get_distance(self.xyz[at1], self.xyz[at2x]), 3) for at2x in at2list[0]]
-                    at2 = at2list[0][at2dist.index(min(at2dist))]
-                    for at2x in at2list[0]: 
+                    at2list = np.where(self.conn_mat[at1,:] == 1)
+                    at2list = at2list[0].tolist()
+
+                    at2dist = [ round(get_distance(self.xyz[at1], self.xyz[at2x]), 3) for at2x in at2list]
+                    for at,dist in zip(at2list, at2dist):
+                        if self.atoms[at] == 'H':
+                            at2list.remove(at)
+                            at2dist.remove(dist)
+
+                    at2 = at2list[at2dist.index(min(at2dist))]
+                    for at2x in at2list:
                         if at2x != at2: 
                             print('remove', self._id, at2x, at1, at2)
                             self.conn_mat[at1, at2x] = 0 ; self.conn_mat[at2x, at1] = 0
 
         cm = nx.graph.Graph(self.conn_mat)
         self.Nmols = nx.number_connected_components(cm)
+        return cm
 
-    def assign_atoms(self, sort_atoms = False, deter_PGs = False):
+    def pyranose_basis(self, rd, sugar_basis):
+        adj_atom_O = adjacent_atoms(self.conn_mat, rd['O'])
 
-        """ Labels each atom in the graph with its atomic symbol
+        """
+        Creates the ring dictionary for a 6 membered sugar ring.
+
+        :param rd: (dict) dictionary of ring atoms with just the ring oxygen.
+        :param sugar_basis: (list) list of atoms in the sugar ring in order.
         """
 
-        def get_C1s(self, cycles_in_graph): 
+        for atom in adj_atom_O:
+            if self.atoms[atom].count('H') == 2 or [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count(
+                    'H') == 2:
+                rd['C5'] = atom
 
-            C1s = []
-            for r in cycles_in_graph:
-                for atom in r:
-                    adj_atoms = [ self.atoms[x] for x in adjacent_atoms(self.conn_mat, atom)]
-                    if adj_atoms.count('O') == 2:
-                        C1s.append(atom)
+            elif (
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('O') == 1
+            ):
+                rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
+            elif (
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('H') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('O') == 2
+            ):
+                rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
+            elif (
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('O') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('H') == 3
+            ):
+                rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
 
-                    elif len(adj_atoms) == 3 and adj_atoms.count('O') == 1: #carbocation
-                        C1s.append(atom)
-            return C1s
+        if sugar_basis.index(rd['C5']) == 0:
+            sugar_basis.reverse()
+        sugar_basis_no_rep = []
+        for at in sugar_basis:
+            if at not in sugar_basis_no_rep:
+                sugar_basis_no_rep.append(at)
 
-        def order_rings(cm, C1s):
+        sugar_basis = sugar_basis_no_rep
 
-            C1pos = []
-            for C1 in C1s:
-                NRed=0 #NRed = reducing end NNon = non reducing end
-                for C12 in C1s:
-                    path = nx.shortest_path(cm, C1, C12)
-                    if len(path) == 1: continue
-                    elif len(path) == 3:  #1-1 glycosidic bond, oxygen will belong to the Reducing Carb, 
-                        NRed += 0.5
-                        break
+        Carb_Oxygen = [atom for atom in sugar_basis if 'O' in self.atoms[atom]][0]
+        sugar_basis.remove(Carb_Oxygen)
 
-                    nred = 0
-                    for r in cycles_in_graph:
-                       if path[1] not in r: nred += 1
+        for atom_index, atom in enumerate(sugar_basis):
+            rd[f"C{atom_index + 1}"] = atom
 
-                    if nred == len(cycles_in_graph): NRed += 1
+        if 'C6' in rd.keys():
+            if (
+                    [self.atoms[rd['C6']]].count('H') >= 1 and
+                    [self.atoms[rd['C1']]].count('C') > 1):
 
-                if int(NRed) != NRed:
-                    if NRed == 0.5: pass
-                    else: NRed+=1 #It's will be placed last
-                C1pos.append(NRed)
+                rd_index = 6
+                while rd_index > 0:
+                    rd[f"C{rd_index + 1}"] = rd[f"C{rd_index}"]
+                    rd_index -= 1
 
-            ring_atoms = sort_ring_atoms(self, cycles_in_graph)
-            C1s = [ i[0] for i in sorted(zip(C1s, C1pos), key=itemgetter(1)) ]
-            ring_atoms = [ i[0] for i in sorted(zip(ring_atoms, C1pos), key=itemgetter(1)) ]
-            C1pos.sort()
-            #print(self._id, C1s, C1pos)
+                for C2_adjaceent in adjacent_atoms(self.atoms[rd['C2']]):
+                    if C2_adjaceent not in sugar_basis and 'C' in C2_adjaceent:
+                        rd['C1'] = C2_adjaceent
 
-            for i in range(len(C1pos)):
-                for j in range(i+1, len(C1pos)):
-                    if C1pos[i] == C1pos[j]: 
-                        path = nx.shortest_path(cm, C1s[i], C1s[j])
-                        link = []
-                        #print(path)
-                        for at in path[1:-1]: 
-                            for r in ring_atoms: 
-                                if at in r.values(): 
-                                    link.append(list(r.keys())[list(r.values()).index(at)])
+        return rd
 
-                        #print(link)
-                        if int(link[0][-1:]) > int(link[-1][-1:]):
-                            C1pos[i] += 0.1
-                        elif int(link[0][-1:]) < int(link[-1][-1:]):
-                            C1pos[j] += 0.1 
+    def furanose_basis(self, rd, sugar_basis):
+        adj_atom_O = adjacent_atoms(self.conn_mat, rd['O'])
 
-            C1s = [ i[0] for i in sorted(zip(C1s, C1pos), key=itemgetter(1)) ]
-            ring_atoms = [ i[0] for i in sorted(zip(ring_atoms, C1pos), key=itemgetter(1)) ]
-            C1pos.sort()
+        """
+        Creates the ring dictionary for a 5 membered sugar ring.
+        
+        :param rd: (dict) dictionary of ring atoms with just the ring oxygen........
+        :param sugar_basis: (list) list of atoms in the sugar ring in order.
+        """
 
-            return C1s, C1pos, ring_atoms
+        for atom in adj_atom_O:
+            if self.atoms[atom].count('H') == 2 or [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count(
+                    'H') == 2:
+                rd['C5'] = atom
+            elif (
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('H') == 2 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('O') == 1 and
+                    atom.count('H') == 1
+            ):
+                rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
+            elif (
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat, atom)].count('H') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('O') == 2
+            ):
+                rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
+            elif (
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('O') == 0 and
+                    [self.atoms[adj_at] for adj_at in adjacent_atoms(self.conn_mat,atom)].count('H') == 3
+            ):
+                rd['C5'] = atom
+                for adj_at in adjacent_atoms(self.conn_mat, atom):
+                    if self.atoms[adj_at] == 'C' and adj_at not in sugar_basis:
+                        rd['C6'] = adj_at
 
-        def sort_ring_atoms(self, cycles_in_graph): 
+        if sugar_basis.index(rd['C5']) == 0:
+            sugar_basis.reverse()
 
-            ring_atoms = []
+        sugar_basis_no_rep = []
+        for at in sugar_basis:
+            if at not in sugar_basis_no_rep:
+                sugar_basis_no_rep.append(at)
 
-            for r in cycles_in_graph:
-                if len(r) != 6: continue #Non six-membered rings not implemented
+        sugar_basis = sugar_basis_no_rep
 
-                ring_atoms.append({}) #dictionary, probably atom desc
-                # C5 and O
-                rd = ring_atoms[-1] # rd = ring dicitionary
-                for at in r:
-                    if self.atoms[at] == 'O':
-                        rd['O'] = at #Ring Oxygen, we start counting from here
+        Carb_Oxygen = [atom for atom in sugar_basis if 'O' in atom][0]
+        sugar_basis.remove(Carb_Oxygen)
 
-                adj_atoms_O  = adjacent_atoms(self.conn_mat, rd['O'])
-                for at in adj_atoms_O:
-                    adj_atoms = adjacent_atoms(self.conn_mat, at)
-                    if [self.atoms[atom] for atom in adj_atoms].count('H') == 2: #no C6 carbon:
-                        rd['C5'] = at
-                    else:
-                        for at2 in adj_atoms:
-                            if self.atoms[at2] == 'C' and at2 not in r: #C5 atom with C6 carbon
-                                rd['C5'] = at
-                                rd['C6'] = at2
-                                for at3 in adjacent_atoms(self.conn_mat, rd['C6']):
-                                    if self.atoms[at3] == 'O': rd['O6'] = at3
+        for atom_index, atom in enumerate(sugar_basis):
+            rd[f"C{atom_index + 2}"] = atom
 
-                for at in [rd['O'], rd['C5']]: r.remove(at)
+        return rd
 
-                for at in r:
-                    if self.conn_mat[at][rd['O']] == 1: rd['C1'] = at
-                    elif self.conn_mat[at][rd['C5']] == 1: rd['C4'] = at
-                for at in [rd['C4'], rd['C1']]:  r.remove(at)
+    def sort_ring_atoms(self, cycles_in_graph, conn_mat, conf):
 
-                for at in r:
-                    if self.conn_mat[at][rd['C1']] == 1: rd['C2'] = at
-                    elif self.conn_mat[at][rd['C4']] == 1: rd['C3'] = at
-                for at in [rd['C3'], rd['C2']]:  r.remove(at)
+        """
+        Creates the dictionary of ring atoms for each sugar ring in the molecule.
 
-            return ring_atoms
+        :param cycles_in_graph: (list) list of cycles in the molecule.
+        """
 
+        rd_list = []
 
-        def determine_PGs(self, ring_number):
+        for ring in cycles_in_graph:
 
-            ra = self.graph.nodes[ring_number]['ring_atoms']
-            self.graph.nodes[ring_number]['PGs_dih'] = []
-            linkages = []
-            for e in self.graph.edges:
-                for at in self.graph.edges[e]['linker_atoms']: linkages.append(at)
-            #print(linkages)
+            if not (5 <= len(ring) <= 7):
+                continue
 
-            for at in ['C2', 'C3', 'C4', 'C6']:
-                if at in ra.keys():
-                    adj_atoms = adjacent_atoms(self.conn_mat, ra[at])
-                    for at2 in adj_atoms:
-                        if self.atoms[at2] in ['C', 'N', 'O', 'F', 'S'] and at2 not in linkages:
-                            if at2 not in ra.values() or ('O6' in ra.keys() and ra['O6'] == at2):
+            rd = {}
+            oxygen_atoms = 0
+            oxygen_atom_list = []
 
-                                disconnect_atoms(self, ra[at], at2)
-                                PG_atoms = determine_carried_atoms(self, ra[at], at2)
-                                connect_atoms(self, ra[at], at2)
+            for at in ring:
 
-                                self.graph.nodes[ring_number][at] = {}
-                                #self.graph.nodes[ring_number][at]['PG_atoms'] = PG_atoms
+                if self.atoms[at] == 'O':
+                    oxygen_atoms += 1
+                    oxygen_atom_list.append(at)
 
-                                PG_sum = ""
-                                PG_atoms_names = [ self.atoms[pgat] for pgat in PG_atoms ]
-                                for atom in [ 'H', 'B', 'C', 'N', 'O', 'F', 'Si', 'P', 'S', 'Cl', 'Br']: 
-                                    natom = PG_atoms_names.count(atom) 
-                                    if  natom > 0: 
-                                        PG_sum += atom + str(natom)
+            if oxygen_atoms == 0:
+                continue
 
-                                self.graph.nodes[ring_number][at]['PG_name']   = protecting_group_name(PG_sum)
-                                self.graph.nodes[ring_number][at]['dih_atoms'] = protecting_group_dihedrals(self, at2, at, PG_atoms)
-                                self.graph.nodes[ring_number][at]['PG_dihs'] = []
-                                for d in self.graph.nodes[ring_number][at]['dih_atoms']:
-                                    self.graph.nodes[ring_number][at]['PG_dihs'].append(measure_dihedral(self, d)[0])
+            if oxygen_atoms == 1:
 
+                sugar_basis_list = list(nx.cycle_basis(conn_mat, oxygen_atom_list[0]))
+                rd['O'] = oxygen_atom_list[0]
 
-                                #if at == 'C6': 
-                                #    self.graph.nodes[ring_number][at]['dihedrals'][0] = copy.copy(self.graph.nodes[ring_number]['c6_atoms'])
+                for sugar_basis in sugar_basis_list:
+                    if len(sugar_basis) < 5:
+                        continue
 
-        def resort_atoms(self):
+                    if type(rd) is not dict:
+                        continue
 
-            order = []
-            C1s = [ x['C1'] for x in ring_atoms] #get ring atoms in order
+                    if 'O' not in rd.keys():
+                        continue
 
-            for n, C1 in enumerate(C1s):
-                for C in ["C1", "C2", "C3", "C4", "C5", "C6", "O"]:
-                    C = ring_atoms[n][C]
-                    order.append(C)
-                    for at in [ x for x in adjacent_atoms(self.conn_mat, C)]:
-                        if at not in ring_atoms[n].values() and self.atoms[at] != 'H':
-                            carried_atoms =  determine_carried_atoms(self, C, at)
-                            for a, c in enumerate(carried_atoms):
-                                if c in order or c in C1s: #Check whether last three atoms of the linkage is branched (amide for instance)
-                                    for prev_atoms in range(1,a):
-                                        #print(a, prev_atoms, carried_atoms[a], carried_atoms[a-prev_atoms])
-                                        for adj in adjacent_atoms(self.conn_mat, carried_atoms[a-prev_atoms]):
-                                            if adj not in C1s and adj not in order: order.append(adj)
-                                    break
-                                else: order.append(c)
+                    if len(sugar_basis) == len(ring) and rd['O'] in sugar_basis:
 
-                        elif "O6" in ring_atoms[n].keys() and at == ring_atoms[n]["O6"]: #O6 is encoded in a part of the ring
-                            carried_atoms =  determine_carried_atoms(self, C, at)
-                            for c in carried_atoms:
-                                if c in order or c in C1s: break
-                                else: order.append(c)
+                        if len(ring) == 6:
+                            rd = Conformer.pyranose_basis(conf, rd = rd, sugar_basis = sugar_basis)
 
+                        elif len(ring) == 5:
+                            rd = Conformer.furanose_basis(conf, rd, sugar_basis)
 
+                    elif len(sugar_basis) != len(ring) and rd['O'] in sugar_basis:
+                        cycle = ring
 
-                    for at in [ x for x in adjacent_atoms(self.conn_mat, C)]:
-                        if at not in ring_atoms[n].values() and self.atoms[at] == 'H': order.append(at)
+                        new_cycle = []
 
-            #print(order, len(order))
+                        oxygen_atom = rd['O']
+                        if oxygen_atom not in cycle:
+                            continue
 
-            self.atoms =  [ self.atoms[x]  for x in order]
-            self.xyz   =  [ self.xyz[x]    for x in order]
-            self.xyz = np.array(self.xyz)
+                        oxygen_index = cycle.index(oxygen_atom)
+                        new_cycle.append(oxygen_atom)
 
-        self.graph = nx.DiGraph()
-        cm = nx.graph.Graph(self.conn_mat)
-        cycles_in_graph = nx.cycle_basis(cm) #a cycle in the conn_mat would be a ring
+                        index = oxygen_index + 1
+                        cycle_len = len(cycle)
 
-        #print(cycles_in_graph)
+                        if 'O' != self.atoms[cycle[0]]:
+                            while index != oxygen_index:
 
-        #Remove Bz/Np/etx, i.e. rings without 'O'
-        #Remove bond in dioxolenium/oxonium/fused rings:
-
-        atoms_in_cycles = []
-        for cycle in cycles_in_graph:
-            atoms_in_cycles += cycle
-        unique_atoms_in_cycles = set(atoms_in_cycles)
-
-        for unique in unique_atoms_in_cycles: 
-            if atoms_in_cycles.count(unique) >= 2: #Atom in multiple rings
-
-                #print('multiple', unique)
-                adj_atoms = []
-                for adj in adjacent_atoms(self.conn_mat, unique): #check how many Os are adj
-                    adj_atoms.append(self.atoms[adj])
-
-                if adj_atoms.count('O') == 2: #Change to how many non C and non H atoms are attached to it.
-                    #print('remove', unique)
-
-                    #dioxolenium ion => break the C1-O bond, we will check 
-                    #(1) how many bonds around O (oxonium), 
-                    #(2) whether next C is carbonyl or not. 
-
-                    for adj in adjacent_atoms(self.conn_mat, unique): 
-                        if self.atoms[adj] == 'O':
-                            #print(adj)
-                            if len(adjacent_atoms(self.conn_mat, adj)) == 3:
-                                disconnect_atoms(self, unique, adj)
-                            else:
-                                for adj2 in adjacent_atoms(self.conn_mat, adj):
-                                    if adj2 != unique and len(adjacent_atoms(self.conn_mat, adj2)) == 3:
-                                        disconnect_atoms(self, unique, adj)
-
-        #redo cycles in new matrix: 
-        cm = nx.graph.Graph(self.conn_mat)
-        cycles_in_graph = nx.cycle_basis(cm) 
-        #print(cycles_in_graph)
-
-        #Remove Bz/Np/etx, i.e. rings without 'O'
-        cycles_to_keep = []
-        for cycle in cycles_in_graph: 
-            for at in cycle: 
-                if self.atoms[at] == 'O': cycles_to_keep.append(cycle)
-        cycles_in_graph = cycles_to_keep
-        #print(cycles_in_graph)
-        C1s = get_C1s(self, cycles_in_graph)
-        C1s, C1pos, ring_atoms = order_rings(cm, C1s)
-
-        #ring_atoms = sort_ring_atoms(self, cycles_in_graph)
-        #C1s = [ i[0] for i in sorted(zip(C1s, C1pos), key=itemgetter(1)) ]
-        #ring_atoms = [ i[0] for i in sorted(zip(ring_atoms, C1pos), key=itemgetter(1)) ]
-
-        #print(self.atoms)
-        #print(C1s, ring_atoms)
-
-        if sort_atoms == True:
-
-            resort_atoms(self)
-            self.connectivity_matrix(distXX=self.distXX, distXH=self.distXH)
-            self.graph = nx.DiGraph()
-            cm = nx.graph.Graph(self.conn_mat)
-
-            cycles_in_graph = nx.cycle_basis(cm)
-            C1s = get_C1s(self, cycles_in_graph) 
-            C1s, C1pos, ring_atoms = order_rings(cm, C1s)
-
-        for n, i in enumerate(ring_atoms): 
-            self.graph.add_node(n, ring_atoms = i)
-
-        for n in self.graph.nodes:
-            if 'O6' not in self.graph.nodes[n]['ring_atoms'].keys(): pass 
-            else: 
-               atoms = [] 
-               for at in ['O', 'C5', 'C6', 'O6']:
-                    atoms.append(self.graph.nodes[n]['ring_atoms'][at])
-               self.graph.nodes[n]['c6_atoms'] = atoms
-               self.graph.nodes[n]['c6_dih'] = measure_dihedral(self, atoms)[0]
-
-        C1s = [ x['C1'] for x in ring_atoms] #Sorted list of C1s, first C1 is reducing end. 
-        cycles_in_graph = nx.cycle_basis(cm) #a cycle in the conn_mat would be a ring
-
-        for r1 in range(self.graph.number_of_nodes()):
-            for r2 in range(self.graph.number_of_nodes()):
-                linker_atoms = [] ; linked = False
-                if r1 >= r2 : pass
-                else:
-                    path = nx.shortest_path(cm, self.graph.nodes[r1]['ring_atoms']['C1'], self.graph.nodes[r2]['ring_atoms']['C1'])
-                    n = 1 ; term = False
-                    while n <= len(path):
-                        at = path[-n]
-                        #Check wheter path[n] is inside a cycle
-                        c = 0 
-                        for cycle in cycles_in_graph:
-                            if at in cycle: 
-                                if at in self.graph.nodes[r2]['ring_atoms'].values():
-                                    linker_atoms.append(self.graph.nodes[r2]['ring_atoms']['O'])
-                                    linker_atoms.append(at)
-                                    n += 1 ; break 
-                                elif at in self.graph.nodes[r1]['ring_atoms'].values():
-                                    linker_atoms.append(at)
-                                    linked = True ; term = True 
-                                    linker_type = (list(self.graph.nodes[r1]['ring_atoms'].keys())[list(self.graph.nodes[r1]['ring_atoms'].values()).index(at)])[-1]
-                                    if len(path) == 3:  C_psi='O' 
-                                    else:               C_psi = 'C'+str(int(linker_type)-1)
-                                    linker_atoms.append(self.graph.nodes[r1]['ring_atoms'][C_psi])
-                                    break
+                                if index != cycle_len:
+                                    new_cycle.append(cycle[index])
+                                    index += 1
                                 else:
-                                    term = True ; break
-                            else: c += 1 
+                                    index = 0
+                                    new_cycle.append(cycle[index])
+                                    index += 1
 
-                        if term == True: 
-                            break
-                        if c == len(cycles_in_graph):
-                          linker_atoms.append(at) 
-                          n += 1
+                            cycle = new_cycle
 
-                    #print(linker_type, linker_atoms)
+                        sugar_basis = cycle
 
-                    if linked == True:
-                        adj = adjacent_atoms(self.conn_mat, linker_atoms[1])
-                        for at in adj:
-                            if self.atoms[at] == 'H':
-                                list_of_atoms = linker_atoms[:3] + [at]
-                        #print(list_of_atoms)
-                        idih = measure_dihedral( self, list_of_atoms )[0]
-                        if linker_type == '5': linker_type = '6'
-                        if self.atoms[linker_atoms[4]] == 'N':
-                            linker_type += 'N'
-                        #print(idih)
-                        if idih < 0.0:
-                            if 'O6' in self.graph.nodes[r2]['ring_atoms'].keys(): linkage = 'b1'+linker_type 
-                            #whether it's a Fucose or not
-                            else: linkage = 'a1'+linker_type
-                        elif idih >= 0.0: 
-                            if 'O6' in self.graph.nodes[r2]['ring_atoms'].keys(): linkage = 'a1'+linker_type
-                            else: linkage = 'b1'+linker_type
-                        self.graph.add_edge(r1, r2, linker_atoms = linker_atoms, linker_type = linkage ) 
+                        if len(cycle) == 6:
+                            rd = self.pyranose_basis(rd, sugar_basis)
 
-        #Delete C6 bond if 16-linkage if present:
-        for n in self.graph.nodes:
-            node = self.graph.nodes[n]
-            edge = self.graph.out_edges(n)
-            if len(edge) == 0: break
-            #print(edge)
-            for e in edge:
-                if self.graph.edges[e]['linker_type'][-2:] == '16': 
-                    del node['c6_atoms'] ; del node['c6_dih']
+                        elif len(cycle) == 5:
+                            rd = self.furanose_basis(rd, sugar_basis)
 
-        #determine whether L- (Fuc) or D-sugar:
-        for n in self.graph.nodes:
-            node = self.graph.nodes[n]
-            adj = adjacent_atoms(self.conn_mat, node['ring_atoms']['C5'])
-            for at in adj: 
-                if self.atoms[at] == 'H': H5 = at
-            list_of_atoms = [ node['ring_atoms']['C4'], node['ring_atoms']['C5'], node['ring_atoms']['C6'], H5]
-            idih = measure_dihedral( self, list_of_atoms )[0]
-            if idih < 0.0 : node['absconf'] = 'D'
-            else: node['absconf'] = 'L'
+            if oxygen_atoms > 1 and len(ring) >= 7:
+                for oxygen_atom in oxygen_atom_list:
+                    test_basis = nx.minimum_cycle_basis(conn_mat, oxygen_atom)
 
-        #determine anomaricity of the redicing end: 
-        self.anomer = None
-        adj = adjacent_atoms(self.conn_mat, self.graph.nodes[0]['ring_atoms']['C1'])
-        for at in adj:
-            if self.atoms[at] == 'H': Ha = at
-            elif self.atoms[at] in ['C', 'N', 'O', 'F', 'S']  and at not in self.graph.nodes[0]['ring_atoms'].values(): O = at
-        if len(adj) == 3: self.anomer = 'carbocation' 
+                    for cycle in test_basis:
+                        if len(cycle) == 6:
+                            oxygen_atom_counter = sum(1 for cycle_atom in cycle if self.atoms[cycle_atom] == 'O')
+                            oxygen_atom_cycle_list = [cycle_atom for cycle_atom in cycle if
+                                                      self.atoms[cycle_atom] == 'O']
 
-        if not self.anomer:
-            list_of_atoms = [ self.graph.nodes[0]['ring_atoms']['O'], self.graph.nodes[0]['ring_atoms']['C1'], O, Ha] 
-            idih = measure_dihedral( self, list_of_atoms )[0]
+                            if oxygen_atom_counter == 1:
+                                rd['O'] = oxygen_atom_cycle_list[0]
+                                sugar_basis = list(cycle)
+                                rd = self.pyranose_basis(rd, sugar_basis)
 
-            if   idih <  0.0 and self.graph.nodes[0]['absconf'] == 'D': self.anomer = 'beta'
-            elif idih <  0.0 and self.graph.nodes[0]['absconf'] == 'L': self.anomer = 'alpha'
-            elif idih >= 0.0 and self.graph.nodes[0]['absconf'] == 'D': self.anomer = 'alpha'
-            elif idih >= 0.0 and self.graph.nodes[0]['absconf'] == 'L': self.anomer = 'beta'
+                        elif len(cycle) == 5:
+                            oxygen_atom_cycle_list = [cycle_atom for cycle_atom in cycle if
+                                                      self.atoms[cycle_atom] == 'O']
+                            oxygen_atom_counter = len(oxygen_atom_cycle_list)
 
-        if deter_PGs == True: 
-            for n in self.graph.nodes: determine_PGs(self, n)
+                            if oxygen_atom_counter == 1:
+                                rd['O'] = oxygen_atom_cycle_list[0]
+                                sugar_basis = list(cycle)
+                                rd = self.furanose_basis(rd, sugar_basis)
 
-        #print (self.dih_atoms, self.dih, self.anomer)
+            rd_list.append(rd)
+
+        rd_list = [rd for rd in rd_list if rd is not None]
+        rd_list = [rd for rd in rd_list if len(rd.keys()) >= 5]
+        return rd_list
+
+    def glycosidic_link_check(self, conn_mat, edge, c1_list, rd_list):
+
+        """
+        Finds which carbon in the ring has a glycosidic linkage.
+
+        :param c1_list: (list) list of C1 atoms in the molecule.
+        :param rd_list: (list) list of dictionaries for rings.
+        :param edge: (tuple) tuple of 2 nodes in the ring graph.
+        """
+
+        glycosidic_link_list = []
+
+        node_1 = edge[0]
+        node_2 = edge[1]
+
+        rd1_index = int(node_1.split(' ')[-1])
+        rd2_index = int(node_2.split(' ')[-1])
+
+        rd1 = rd_list[rd1_index]
+        rd2 = rd_list[rd2_index]
+
+        for ring_index in range(1, len(list(rd1.values()))):
+            if ring_index == 5:
+                continue
+
+            atom = rd1[f"C{ring_index}"]
+
+            for het_at in adjacent_atoms(atom):
+                if 'C' not in het_at and 'H' not in het_at and het_at not in rd1.values():
+                    adj_atom_list = adjacent_atoms(het_at)
+
+                    if het_at.count('C') == 2 and rd1['C5'] not in adj_atom_list:
+                        c1_count = sum(1 for adj_at in adj_atom_list if adj_at in c1_list)
+
+                        for c1_atom in adjacent_atoms(het_at):
+                            if c1_atom in c1_list and c1_atom in rd2.values():
+
+                                if c1_count > 0:
+                                    return f"C{ring_index}"
+
+        return glycosidic_link_list
+
+    def ring_dict_finder(atom, rd_list):
+        for rd in rd_list:
+            if atom in rd.values():
+                return rd
+
+    def find_red_end(self, c1_list, rd_list, conn_mat):
+
+        """
+        Finds the reducing end of the carbohydrate.
+
+        :param c1_list: (list) list of C1 atoms in the molecule.
+        :param rd_list: (list) list of dictionaries for rings.
+        """
+
+        for c1 in c1_list:
+            ring_dict = Conformer.ring_dict_finder(c1, rd_list)
+
+            for atom in adjacent_atoms(self.atoms[c1]):
+                if 'C' not in atom and 'H' not in atom:
+                    if atom in ring_dict.values():
+                        continue
+
+                    if [self.atoms[atom]].count('H') >= 1:
+                        return rd_list.index(ring_dict)
+                    else:
+                        c1_count = sum(1 for adj_atom in adjacent_atoms(self.atoms(atom))
+                                       if adj_atom in c1_list)
+
+                        if c1_count == 2 and len(
+                                Conformer.glycosidic_link_check(rd=ring_dict, c1_list=c1_list)) > 1:
+                            return rd_list.index(ring_dict)
+
+    def ring_connectivity_checker(self, rd1, rd2, conn_mat):
+
+        """
+        Checks to see if 2 rings are adjacent.
+
+        :param rd1: (dict) dictionary of ring atoms for ring 1.
+        :param rd2: (dict) dictionary of ring atoms for ring 2.
+        """
+
+        edge_check_list = []
+
+        atom1_list = list(range(1, len(rd1.keys())))
+        atom2_list = list(range(1, len(rd2.keys())))
+
+        for atom1_index, atom2_index in zip_longest(atom1_list, atom2_list):
+            if atom1_index == 5 or atom2_index == 5:
+                continue
+
+            if len(rd1.keys()) == 7 and atom2_index is not None:
+                edge_check_list.append([rd1['C1'], rd2[f"C{atom2_index}"]])
+            elif len(rd1.keys()) == 6 and atom2_index is not None:
+                edge_check_list.append([rd1['C2'], rd2[f"C{atom2_index}"]])
+                edge_check_list.append([rd2['C1'], rd1[f"C{atom1_index}"]])
+
+        connections = sum(1 for edge in edge_check_list if len(nx.shortest_path(conn_mat, edge[0], edge[1])) == 3)
+
+        return connections > 0
+
+    def amide_check(self, rd):
+
+        """
+        Checks to see if there is an amide in the ring.
+
+        :param rd: (dict) dictionary of ring atoms.
+        """
+
+        if len(list(rd.values())) == 7:
+            C2 = rd['C2']
+        elif len(list(rd.values())) == 8:
+            C2 = rd['C3']
+        else:
+            C2 = None
+
+        if C2 is not None:
+            HC2_count = self.atoms[C2].count('H')
+            NC2_count = self.atoms[C2].count('N')
+
+            for C2_adj_at in adjacent_atoms(self.atoms[C2]):
+                if 'N' in C2_adj_at:
+                    HN_count = [self.atoms[C2_adj_at]].count('H')
+                    CN_count = [self.atoms[C2_adj_at]].count('C')
+
+                    for N_adj_at in adjacent_atoms(self.atoms[C2_adj_at]):
+                        if 'C' in N_adj_at and N_adj_at != C2:
+                            OC_count = [self.atoms[N_adj_at]].count('O')
+                            CC_count = [self.atoms[N_adj_at]].count('C')
+
+                            if HC2_count == 1 and NC2_count == 1 and HN_count == 1 and CN_count == 2 and OC_count == 1 and CC_count == 2:
+                                amide = True
+
+                            else:
+                                amide = False
+
+            if 'amide' not in locals():
+                amide = False
+
+            return amide
+
+    def amine_check(self,conn_mat, rd):
+
+        """
+        Checks to see if there is an amine in the ring.
+
+        :param rd: (dict) dictionary of ring atoms.
+        """
+
+        if len(list(rd.values())) == 7:
+            C2 = rd['C2']
+        elif len(list(rd.values())) == 8:
+            C2 = rd['C3']
+        else:
+            C2 = None
+
+        if C2 is not None:
+            HC2_count = self.atoms[C2].count('H')
+            NC2_count = self.atoms[C2].count('N')
+
+            for C2_adj_at in adjacent_atoms(self.atoms[C2]):
+                if 'N' in C2_adj_at:
+                    HN_count = self.atoms[C2_adj_at].count('H')
+                    CN_count = self.atoms[C2_adj_at].count('C')
+
+                    if HN_count >= 1 and CN_count == 1:
+                        amine = True
+
+                    else:
+                        amine = False
+
+            if 'amide' not in locals():
+                amine = False
+
+            return amine
+
+    def ring_graph_maker(self, rd_list, conn_mat):
+
+        """
+        Creates a nextworkx graph where each node is a ring in the molecule.
+
+        :param rd_list: (list) list of dictionaries for rings.
+        """
+        ring_graph = nx.Graph()
+
+        for rd1 in rd_list:
+            for rd2 in rd_list:
+                if rd1 != rd2 and Conformer.ring_connectivity_checker(rd1=rd1, rd2=rd2, conn_mat=conn_mat) \
+                        and not ring_graph.has_edge(rd_list.index(rd1), rd_list.index(rd2)) \
+                        and not ring_graph.has_edge(rd_list.index(rd2), rd_list.index(rd1)):
+                    ring_graph.add_edge(rd_list.index(rd1), rd_list.index(rd2))
+
+        if ring_graph.number_of_edges() == 0:
+            ring_graph.add_node(0)
+
+        attribnute_dict = {}
+        for node, rd in enumerate(rd_list):
+            attribnute_dict[node] = rd
+
+
+        nx.set_node_attributes(ring_graph, attribnute_dict,'ring_atoms')
+        print(ring_graph.nodes[0]['ring_atoms'])
+
+        self.graph = ring_graph
+
+        return ring_graph
+
+    def sort_rings(self, rd_list, conn_mat):
+
+        """
+        Sorts all sugar rings in the molecule using the networkx dfs algorithm.
+
+        :param rd_list: (list) list of dictionaries for rings.
+        """
+
+        c1_list = [rd['C1'] if 'C1' in rd else rd['C2'] for rd in rd_list]
+        red_end = Conformer.find_red_end(c1_list=c1_list, rd_list=rd_list, conn_mat=conn_mat)
+        ring_graph = Conformer.ring_graph_maker(rd_list=rd_list, conn_mat=conn_mat)
+
+        dfs_ring_list = list(nx.dfs_preorder_nodes(ring_graph, red_end))
+        for dfs_index, node in enumerate(dfs_ring_list):
+            if 'Amide' in node:
+                dfs_ring_list.remove(node)
+            else:
+                rd_list_index = int(list(node.split())[-1])
+                dfs_ring_list[dfs_index] = rd_list[rd_list_index]
+
+        if dfs_ring_list == []:
+            dfs_ring_list = rd_list
+
+        tree =  nx.dfs_tree(ring_graph, red_end)
+
+        glyco_array = [Conformer.glycosidic_link_check(conn_mat,edge,c1_list) for edge in list(nx.dfs_edges(tree, red_end))]
+        return dfs_ring_list, tree, glyco_array
+
+    def dihedral_angle(self, atom1, atom2, atom3, atom4, conf):
+
+        atom1_index = list(conf[:, 0]).index(atom1)
+        atom2_index = list(conf[:, 0]).index(atom2)
+        atom3_index = list(conf[:, 0]).index(atom3)
+        atom4_index = list(conf[:, 0]).index(atom4)
+
+        atom1_coords = []
+        atom2_coords = []
+        atom3_coords = []
+        atom4_coords = []
+
+        for c_index in range(1, 4):
+            atom1_coords.append(float(conf[atom1_index, c_index]))
+            atom2_coords.append(float(conf[atom2_index, c_index]))
+            atom3_coords.append(float(conf[atom3_index, c_index]))
+            atom4_coords.append(float(conf[atom4_index, c_index]))
+
+        vector_1 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom1_coords, atom2_coords)])
+        vector_2 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom2_coords, atom3_coords)])
+        vector_3 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom3_coords, atom4_coords)])
+
+        norm1 = np.cross(vector_1, vector_2)
+        norm1_mag = math.sqrt(np.sum([n1 ** 2 for n1 in norm1]))
+        norm1 = np.array([n1 / norm1_mag for n1 in norm1])
+
+        vector_1 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom1_coords, atom2_coords)])
+        vector_2 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom2_coords, atom3_coords)])
+        vector_3 = np.array([coord2 - coord1 for coord1, coord2 in zip(atom3_coords, atom4_coords)])
+
+        norm1 = np.cross(vector_1, vector_2)
+        norm1_mag = math.sqrt(np.sum([n1 ** 2 for n1 in norm1]))
+        norm1 = np.array([n1 / norm1_mag for n1 in norm1])
+
+        norm2 = np.cross(vector_2, vector_3)
+        norm2_mag = math.sqrt(np.sum([n2 ** 2 for n2 in norm2]))
+        norm2 = np.array([n2 / norm2_mag for n2 in norm2])
+
+        vector2_mag = math.sqrt(np.sum([vcoord ** 2 for vcoord in vector_2]))
+        unit_vector_2 = np.array([vcoord / vector2_mag for vcoord in vector_2])
+        frame_vector = np.cross(norm1, unit_vector_2)
+
+        x = np.dot(norm1, norm2)
+        y = np.dot(frame_vector, norm2)
+
+        dihedral = math.atan2(y, x)
+
+        return dihedral
+
+    def sugar_stero(self,rd):
+
+        """
+        Finds the stereo isomer for a sugar ring.
+
+        :param rd: (dict) dictionary of ring atoms.
+        """
+
+        if len(rd.values()) == 7:
+            dihedral_angle = measure_dihedral(self, [rd['O'], rd['C5'], rd['C4'], rd['C6']])
+
+        else:
+            dihedral_angle = None
+
+        if dihedral_angle[0] is not None and 0 < dihedral_angle[0]:
+            sugar_type = 'D'
+        elif dihedral_angle[0] is not None and dihedral_angle[0] < 0:
+            sugar_type = "L"
+        else:
+            sugar_type = 'None'
+
+        self.stero = sugar_type 
+
+    def glycosidic_link_type(self, rd):
+
+        """
+        Finds the anomer for a sugar ring.
+
+        :param rd: (dict) dictionary of ring atoms.
+        """
+
+        sugar_type = self.stero
+        conn_mat = self.conn_mat
+        if len(rd.values()) == 7:
+
+            enumeric_H = [adj_at for adj_at in adjacent_atoms(conn_mat, rd['C1']) if
+                          'H' in self.atoms[adj_at] and adj_at not in rd][0]
+            dihedral_angle = measure_dihedral(self, [rd['O'], rd['C1'], rd['C2'], enumeric_H])[0]
+
+        elif len(rd.values()) > 7:
+
+            enumeric_H = [adj_at for adj_at in adjacent_atoms(conn_mat, rd['C2']) if
+                          'H' in self.atoms[adj_at] and adj_at not in rd][0]
+            dihedral_angle = measure_dihedral(self, [rd['O'], rd['C2'], rd['C3'], enumeric_H])[0]
+
+        else:
+            dihedral_angle = None
+
+        if dihedral_angle is not None and 0 > dihedral_angle:
+            if sugar_type == 'D':
+                link_type = 'beta'
+            elif sugar_type == "L":
+                link_type = 'alpha'
+            else:
+                link_type = "None"
+
+        elif dihedral_angle is not None and dihedral_angle > 0:
+            if sugar_type == 'D':
+                link_type = 'alpha'
+            elif sugar_type == "L":
+                link_type = 'beta'
+            else:
+                link_type = "None"
+        else:
+            link_type = "None"
+
+        self.anomer = link_type
+
+    def find_pg(self, dfs_list, conn_mat):
+
+        """
+        Checks to see if there is a protecting group in each ring.
+
+        :param dfs_list: (list) sorted list of dictionaries for rings.
+        """
+
+        pg_list = []
+
+        for ring in dfs_list:
+            pg_dict = {}
+
+            if len(ring.values()) == 7:
+                pg_root = ring['C6']
+                root_adj = [at for at in adjacent_atoms(self.conn_mat,pg_root)]
+
+                for adj_at in root_adj:
+                    if 'O' in self.atoms[adj_at]:
+                        pg_O_adj = [at for at in adjacent_atoms(self.conn_mat,adj_at) if at  != ring['C6']]
+                        OC_count = [self.atoms[ajat] for ajat in adjacent_atoms(self.conn_mat,adj_at)].count('C')
+                        OH_count = [self.atoms[ajat] for ajat in adjacent_atoms(self.conn_mat,adj_at)].count('H')
+
+                        pg_dict['C5'] = ring['C5']
+                        pg_dict['C6'] = ring['C6']
+                        pg_dict['O'] = adj_at
+
+                        if OC_count == 2:
+                            pg_dict['R'] = pg_O_adj[0]
+
+                        elif OH_count == 1 and OC_count == 1:
+                            pg_dict['H'] = pg_O_adj[0]
+
+            elif len(ring.values()) > 7:
+                pg_root = ring['C7']
+                root_adj = adjacent_atoms(conn_mat=conn_mat, at=pg_root)
+
+                for adj_at in root_adj:
+                    if 'O' in adj_at:
+                        pg_O_adj = [at for at in adjacent_atoms(conn_mat=conn_mat,at=adj_at) if at != ring['C7']]
+                        OC_count = [self.atoms[at] for at in adjacent_atoms(conn_mat, adj_at)].count('C')
+                        OH_count = [self.atoms[at] for at in adjacent_atoms(conn_mat, adj_at)].count('H')
+
+                        pg_dict['C5'] = ring['C6']
+                        pg_dict['C6'] = ring['C7']
+                        pg_dict['O'] = adj_at
+                        if OC_count == 2:
+                            pg_dict['R'] = pg_O_adj[0]
+
+                        elif OH_count == 1 and OC_count == 1:
+                            pg_dict['H'] = pg_O_adj[0]
+
+            pg_list.append(pg_dict)
+        return pg_list
+
+    def ring_stereo_compiler(self, conf, dfs_list, conn_mat):
+
+        sugar_type_list = []
+        glyco_type_list = []
+
+        for rd in dfs_list:
+            sugar_type = Conformer.sugar_stero(rd, conf)
+            link_type = Conformer.glycosidic_link_type(rd, sugar_type, conf, conn_mat)
+            sugar_type_list.append(sugar_type)
+            glyco_type_list.append(link_type)
+
+        return sugar_type_list, glyco_type_list
+
+    def sugar_type_checker(rd,xyz_array,conn_mat):
+
+        """
+        Identifies what type of sugar each ring is.
+
+        :param rd: (dict) dictionary of ring atoms.
+        """
+
+        # Bit Order: Ring Size, C6, O2, O3, O4, Amide, O6, Amine
+        sugar_dict = {'Tal':11111010, 'TalNac':11111110, 'TalA':11111020, 'TalN':11111011,'6dTal':11111000, '6dTalNac':11111100,
+                      'Man':11110010, 'ManNac':11110110, 'ManA':11110020, 'ManN':11110011, 'Rha':11110000, 'RhaNac':11110100,
+                      'Ido':11101010, 'IdoNac':11101110, 'IdoA':11101020, 'IdoN':11101011,
+                      'Alt':11100010, 'AltNac':11100110, 'AltA':11100020, 'AltN':11100011, '6dAlt':11011011, '6dAltNac':11011100,
+                      'Gul':11001010, 'GulNac':11001110, 'GulA':11001020, 'GulN':11001011, '6dGul':11001000,
+                      'All':11000010, 'AllNac':11000110, 'AllA':11000020, 'AllN':11000011,
+                      'Gal':11011010, 'GalNac':11011110, 'GalA':11011020, 'GalN':11011011, 'Fuc':11100000, 'FucNac':11100100,
+                      'Glc':11010010, 'GlcNac':11010110, 'GlcA':11010020, 'GlcN':11010011, 'Qui':11010000, 'QuiNac':11010100, 'Xyl':11010030}
+
+        if len(rd.keys()) >=7:
+
+            O2 = [atom for atom in adjacent_atoms(rd['C2']) if 'H' not in atom and atom not in rd.values()][0]
+            O3 = [atom for atom in adjacent_atoms(rd['C3']) if 'H' not in atom and atom not in rd.values()][0]
+            O4 = [atom for atom in adjacent_atoms(rd['C4']) if 'H' not in atom and atom not in rd.values()][0]
+
+            O2_Dihedral = Conformer.dihedral_angle(rd['C1'],rd['C2'],rd['C3'],O2,xyz_array)
+            O3_Dihedral = Conformer.dihedral_angle(rd['C2'],rd['C3'],rd['C4'],O3,xyz_array)
+            O4_Dihedral = Conformer.dihedral_angle(rd['C3'],rd['C4'],rd['C5'],O4,xyz_array)
+
+            amide_check = Conformer.amide_check(conn_mat, rd)
+            amine_check = Conformer.amine_check(conn_mat, rd)
+
+            C5H = rd['C5'].count('H')
+
+            if C5H == 1:
+                O6_num = rd['C6'].count('O')
+            else:
+                O6_num = None
+
+            sugar_bit = '11'
+            for value in [O2_Dihedral, O3_Dihedral, O4_Dihedral, amide_check, O6_num, amine_check]:
+                if type(value) == float:
+                    if value < 0:
+                        sugar_bit += '0'
+                    elif value > 0:
+                        sugar_bit += '1'
+
+                elif type(value) == bool:
+                    if value is True:
+                        sugar_bit += '1'
+                    else:
+                        sugar_bit += '0'
+
+                elif type(value) == int:
+                    if value == 1:
+                        sugar_bit += '1'
+                    elif value == 2:
+                        sugar_bit += '2'
+                    else:
+                        sugar_bit += '0'
+
+                elif type(value) == None:
+                    sugar_bit += '3'
+
+            sugar_bits = int(sugar_bit)
+
+            for key,value in zip(sugar_dict.keys(),sugar_dict.values()):
+                if value == sugar_bits:
+                    return key
+
+    def snfg(tree,dfs_list,glyco_list,stero_list,sugar_list, rd_list, node_size:float = 3, edge_length:float = 5):
+
+
+        """
+        Generates athe snfg diagram for a carbohydrate,
+
+        :param tree: (Graph) tree of all ring atomsa,
+        :param dfs_list: (list) sorted list of dictionaries for rings,
+        :param glyco_list: (list) list of all anomers in the molecule,
+        :param sugar_list: (list) list of all sugar types in the molecule,
+        :param node_size: (float) size of the nodes in the diagram,
+        :param edge_length: (float) length of edges in the diagram,
+        """
+
+        snfg_graph = nx.Graph()
+
+        sugar_dict = {'Tal': 11111010, 'TalNac': 11111110, 'TalA': 11111020, 'TalN': 11111011, '6dTal': 11111000,
+                      '6dTalNac': 11111100,
+                      'Man': 11110010, 'ManNac': 11110110, 'ManA': 11110020, 'ManN': 11110011, 'Rha': 11110000,
+                      'RhaNac': 11110100,
+                      'Ido': 11101010, 'IdoNac': 11101110, 'IdoA': 11101020, 'IdoN': 11101011,
+                      'Alt': 11100010, 'AltNac': 11100110, 'AltA': 11100020, 'AltN': 11100011, '6dAlt': 11011011,
+                      '6dAltNac': 11011100,
+                      'Gul': 11001010, 'GulNac': 11001110, 'GulA': 11001020, 'GulN': 11001011, '6dGul': 11001000,
+                      'All': 11000010, 'AllNac': 11000110, 'AllA': 11000020, 'AllN': 11000011,
+                      'Gal': 11011010, 'GalNac': 11011110, 'GalA': 11011020, 'GalN': 11011011, 'Fuc': 11100000,
+                      'FucNac': 11100100,
+                      'Glc': 11010010, 'GlcNac': 11010110, 'GlcA': 11010020, 'GlcN': 11010011, 'Qui': 11010000,
+                      'QuiNac': 11010100, 'Xyl': 11010030}
+
+        current_dir = os.path.abspath('')
+        string_list = current_dir.split('CarPpy')
+        image_dir = os.path.join(string_list[0], 'CarPpy', 'CarP', 'snfg')
+
+        image_dict = {}
+        for key in sugar_dict:
+            image = os.path.join(image_dir,f"{key}.png")
+            image_dict[key] = image
+
+        images = {k: PIL.Image.open(fname) for k, fname in image_dict.items()}
+
+        covered_nodes = []
+        dfs_edges = list(nx.dfs_edges(tree))
+
+        for index, node in enumerate(sugar_list):
+            if node in images.keys():
+                snfg_graph.add_node(f"{node} {index}", image=images[node])
+            else:
+                snfg_graph.add_node(f"{node} {index}")
+
+        pos = {}
+
+        root_node = dfs_edges[0][0]
+        pos[f"{sugar_list[0]} 0"] = [0,0]
+        covered_nodes.append(root_node)
+
+        for link,edge in zip(glyco_list,dfs_edges):
+            node = edge[-1]
+            prev_node = edge[0]
+            if node not in covered_nodes:
+                covered_nodes.append(node)
+
+                rd2_index = int(node.split(' ')[-1])
+                rd2 = rd_list[rd2_index]
+
+                rd1_index = int(prev_node.split(' ')[-1])
+                rd1 = rd_list[rd1_index]
+
+                dfs2_index = dfs_list.index(rd2)
+                dfs1_index = dfs_list.index(rd1)
+
+                snfg_graph.add_edge(f"{sugar_list[dfs1_index]} {dfs1_index}", f"{sugar_list[dfs2_index]} {dfs2_index}")
+                prev_coords = pos[f"{sugar_list[dfs1_index]} {dfs1_index}"]
+                if len(sugar_list) <= 3:
+                    if link == 'C4':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length,prev_coords[1]]
+                    elif link == 'C6':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] + math.sqrt(3)*edge_length/2]
+                    elif link == 'C3':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] - math.sqrt(3)*edge_length/2]
+                    elif link == 'C2':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0], prev_coords[1] - edge_length]
+                else:
+                    if link == 'C4' or link == 'C2':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length,prev_coords[1]]
+                    elif link == 'C6':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] + math.sqrt(3)*edge_length/2]
+                    elif link == 'C3':
+                        pos[f"{sugar_list[dfs2_index]} {dfs2_index}"] = [prev_coords[0] - edge_length/2, prev_coords[1] - math.sqrt(3)*edge_length/2]
+
+        fig, ax = plt.subplots(1,1)
+        nx.draw(snfg_graph, pos=pos, ax=ax, with_labels=False, width=50*node_size/(len(sugar_list)*edge_length**1.5), node_size=0)
+
+        tr_figure = ax.transData.transform
+        tr_axes = fig.transFigure.inverted().transform
+
+        icon_size = (ax.get_xlim()[1] - ax.get_xlim()[0]) * (0.4*node_size/(len(sugar_list)*edge_length**1.5))
+        icon_center = icon_size / 2.0
+
+        for n in snfg_graph.nodes:
+            xf, yf = tr_figure(pos[n])
+            xa, ya = tr_axes((xf, yf))
+            # get overlapped axes and plot icon
+            a = plt.axes([xa - icon_center, ya - icon_center, icon_size, icon_size])
+            print(snfg_graph.nodes[n]['image'])
+
+            if 'image' in snfg_graph.nodes[n].keys():
+                a.imshow(snfg_graph.nodes[n]["image"])
+
+            a.axis("off")
+
+        return fig,ax
 
     def measure_c6(self): 
 
@@ -981,10 +1468,10 @@ class Conformer():
             mat = self.conn_mat - m.conn_mat #difference in connectivity
 
             if not np.any(mat) and conf_links == m_links and self.anomer == m.anomer : 
-                self.topol = m.topol
+                self.topol = m.topolf
                 return 0  
 
-            elif conf_links == m_links and self.anomer == m.anomer: 
+            elif conf_links == m_links and self.anomer == m.anomer:
                 atc = 0 #atom counter
                 acm = np.argwhere(np.abs(mat) == 1) #absolute connectivity matrix
                 for at in acm:
@@ -1036,7 +1523,9 @@ class Conformer():
         import matplotlib.pyplot as plt
         from matplotlib.ticker import NullFormatter
 
-        fig, ax = plt.subplots(1, figsize=(10,3))
+        fig, ax = plt.subplots(1, figsize=(math.ceil(10*(xmax-xmin)/(1500)),3))
+
+        self.gaussian_broadening(resolution=0.001,broaden=2)
 
         #left, width = 0.02, 0.98 ; bottom, height = 0.15, 0.8
         #ax  = [left, bottom, width, height ]
@@ -1054,7 +1543,8 @@ class Conformer():
         ax.set_xticklabels([int(x) for x in xticks], fontsize=10)
         ax.set_xlim(xmin-exten, xmax+exten+10)
 
-        shift = 0.05 ;         incr = (self.IR[-1,0] - self.IR[0,0])/(len(self.IR)-1)
+        shift = 0.05
+        incr = (self.IR[-1,0] - self.IR[0,0])/(len(self.IR)-1)
         scale_t  =  1/np.amax(self.IR[int(xmin/incr):int(xmax/incr)+100,1])
 
         if plot_exp == True:
@@ -1075,9 +1565,8 @@ class Conformer():
                 ax.fill_between(exp_data[split_wn:,0], exp_data[split_wn:,1]*scale_expH+shift, np.linspace(shift,shift, len(exp_data[split_wn:,1])), color='r', alpha=0.5)
 
         Xsc = self.IR[:,0]* scaling_factor ; IRsc = self.IR[:,1]*scale_t
-        ir_theo = ax.plot(Xsc, IRsc+shift, color='0.25', linewidth=2)
+        ir_theo = ax.plot(Xsc, IRsc+shift, color='k', linewidth=0.5)
         ax.fill_between(Xsc, np.linspace(shift, shift, len(IRsc)), IRsc+shift, color='0.5', alpha=0.5)
-
 
         if normal_modes == True:
             for l in range(len(self.Freq)):
@@ -1088,7 +1577,7 @@ class Conformer():
         #output_path =  os.path.join(current_path, self.path, self._id+'.png')
         #print(output_path + self._id+'.png')
         if save_fig == True:  
-            plt.savefig('/'.join([self.path,'ir_plot.pdf']) , dpi=300)
+            plt.savefig('/'.join([self.path,'ir_plot.png']) , dpi=500)
 
         if save_dat == True:
             with open('/'.join([self.path, 'ir_harm.dat']),'w') as out:
@@ -1099,6 +1588,7 @@ class Conformer():
 
         """Stores the following in each conformer obj the name of the conformer it is being rotated to match, the index of that conformer and the rotation matrix.
         The rotation matrix is then multiplied to the existing xyz matrix and the vibrations matrix. Those rotated matrices are also saved.
+
 
         :param conf_name: (string) name of the conformer this conformer has been rotated to
         :param conf_index: (int) index of the conformer rotated to, in the list of conformers of the conformer space

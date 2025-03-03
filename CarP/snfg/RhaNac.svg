@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="7.9412684mm"
+   height="7.4726148mm"
+   viewBox="0 0 7.9412684 7.4726148"
+   version="1.1"
+   id="svg91903"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="RhaNac.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview91905"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="16"
+     inkscape:cx="6.96875"
+     inkscape:cy="10.15625"
+     inkscape:window-width="1920"
+     inkscape:window-height="1012"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g103959" />
+  <defs
+     id="defs91900" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-109.51425,-185.16574)">
+    <g
+       id="g103959">
+      <path
+         id="path4282-0-2"
+         style="fill:#01a552;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.501715;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 117.03823,192.3875 h -7.10677 l 1.77553,-3.34419 1.77927,-3.3432 z" />
+      <path
+         style="fill:#9fd1e8;fill-opacity:1;stroke:#000000;stroke-width:0.502;stroke-dasharray:none;stroke-opacity:1"
+         d="m 113.50269,185.94344 c -0.0856,4.73762 -0.10472,6.41999 -0.10472,6.41999"
+         id="path102348" />
+      <path
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.0214408;stroke-dasharray:none;stroke-opacity:1"
+         d="m 110.36164,192.13059 c 0,-0.005 1.35992,-2.56775 2.29323,-4.3218 0.32507,-0.61095 0.59248,-1.10937 0.59424,-1.1076 0.002,0.002 -0.004,0.39481 -0.0125,0.87346 -0.009,0.47864 -0.0258,1.50854 -0.0382,2.28866 -0.0124,0.78012 -0.0259,1.6104 -0.03,1.84506 l -0.007,0.42665 h -1.39965 c -0.76981,0 -1.39966,-0.002 -1.39966,-0.004 z"
+         id="path103221" />
+    </g>
+  </g>
+</svg>

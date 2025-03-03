@@ -16,8 +16,6 @@ The following packages are also required:
   
   - numpy
   - networkx
-  - copy
-  - math
   - matplotlib
   - seaborn
   - texttable
@@ -28,8 +26,8 @@ Clone this project directory
 
 Within a python environment install all the dependencies
 
-```pip install numpy,networkx,copy,math,matplotlib,seaborn,texttable```
+```pip install numpy,networkx,matplotlib,seaborn,texttable```
 
 ## Contact
 
-srahim457@gmail.com
+echung@gradcenter.cuny.edu
