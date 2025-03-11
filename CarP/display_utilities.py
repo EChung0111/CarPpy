@@ -2,21 +2,34 @@ from .utilities import *
 import numpy as np 
 import matplotlib
 import matplotlib.pyplot as plt
-import seaborn as sns #this is for heatmaps
 import sys #this is for changing the form of output to write to files
 
-def generate_heatmap( matrix, max_value=0.5): 
-	"""	Returns a heatmap of the 2D matrix
-
-	:param matrix: (list) 2D list 
-	:param max_value: a number for a max cutoff value to be represented in the heatmap
-	"""
-	numpy_matrix = np.array(matrix)
-	#print(numpy_matrix.ndim)
-	#print(numpy_matrix.shape)
-	with sns.axes_style("white"):
-		f, ax = plt.subplots(figsize=(12, 10)) #change size of figure here
-		ax = sns.heatmap(numpy_matrix,linewidths=.2 , vmax=max_value, square=True)
+def generate_heatmap(matrix, max_value=0.5, color='viridis'):
+    """ Returns a heatmap of the 2D matrix using pure matplotlib
+    :param matrix: (list) 2D list
+    :param max_value: a number for a max cutoff value to be represented in the heatmap
+    """
+    numpy_matrix = np.array(matrix)
+    
+    # Create figure and axes
+    fig, ax = plt.subplots(figsize=(12, 10))  # change size of figure here
+    
+    # Create heatmap
+    im = ax.imshow(numpy_matrix, cmap=color, vmax=max_value)
+    
+    # Add colorbar
+    cbar = fig.colorbar(im, ax=ax)
+    
+    # Create white grid to mimic seaborn's linewidths
+    ax.set_xticks(np.arange(-.5, numpy_matrix.shape[1], 1), minor=True)
+    ax.set_yticks(np.arange(-.5, numpy_matrix.shape[0], 1), minor=True)
+    ax.grid(which="minor", color="white", linestyle='-', linewidth=0.2)
+    ax.tick_params(which="minor", bottom=False, left=False)
+    
+    # Make it square
+    ax.set_aspect('equal')
+    
+    return fig, ax
 
 #? maybe make this built into the conf_space objects, saves making a copy and some functions
 def return_2d_lists(conf_space_object): 
