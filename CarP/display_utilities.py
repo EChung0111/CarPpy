@@ -2,22 +2,34 @@ from .utilities import *
 import numpy as np 
 import matplotlib
 import matplotlib.pyplot as plt
-import seaborn as sns #this is for heatmaps
-import texttable as tx #this is for commandline table output
 import sys #this is for changing the form of output to write to files
 
-def generate_heatmap( matrix, max_value=0.5): 
-	"""	Returns a heatmap of the 2D matrix
-
-	:param matrix: (list) 2D list 
-	:param max_value: a number for a max cutoff value to be represented in the heatmap
-	"""
-	numpy_matrix = np.array(matrix)
-	#print(numpy_matrix.ndim)
-	#print(numpy_matrix.shape)
-	with sns.axes_style("white"):
-		f, ax = plt.subplots(figsize=(12, 10)) #change size of figure here
-		ax = sns.heatmap(numpy_matrix,linewidths=.2 , vmax=max_value, square=True)
+def generate_heatmap(matrix, max_value=0.5, color='viridis'):
+    """ Returns a heatmap of the 2D matrix using pure matplotlib
+    :param matrix: (list) 2D list
+    :param max_value: a number for a max cutoff value to be represented in the heatmap
+    """
+    numpy_matrix = np.array(matrix)
+    
+    # Create figure and axes
+    fig, ax = plt.subplots(figsize=(12, 10))  # change size of figure here
+    
+    # Create heatmap
+    im = ax.imshow(numpy_matrix, cmap=color, vmax=max_value)
+    
+    # Add colorbar
+    cbar = fig.colorbar(im, ax=ax)
+    
+    # Create white grid to mimic seaborn's linewidths
+    ax.set_xticks(np.arange(-.5, numpy_matrix.shape[1], 1), minor=True)
+    ax.set_yticks(np.arange(-.5, numpy_matrix.shape[0], 1), minor=True)
+    ax.grid(which="minor", color="white", linestyle='-', linewidth=0.2)
+    ax.tick_params(which="minor", bottom=False, left=False)
+    
+    # Make it square
+    ax.set_aspect('equal')
+    
+    return fig, ax
 
 #? maybe make this built into the conf_space objects, saves making a copy and some functions
 def return_2d_lists(conf_space_object): 
@@ -105,40 +117,3 @@ def make_plots(conf_space_object, index=0, bar=True, scatter=True):
 		plt.title('Matplot scatter plot')
 		plt.legend(loc=2)
 		plt.show()
-
-def display_table(index,molecule_ids,molecule_names,rmsd_all,rmsd_no_H,pendry):
-	""" Prints into terminal and saves as .txt a table displaying each conformer and the associated value rmsd, rmsd without H and pendry R factor
-
-	:param index: (int) all the values are calculated comparing all conformers to one conformer which is sepcified by this index
-	:param molecule_ids: (list) the list of molecule id number
-	:param molecule_names: (list) the lost of molecule names
-	:param rmsd_all: (list) list of rmsd values
-	:param rmsd_no_H: (list) list of rmsd values without H
-	:param pendry: (list) list of all pendry values
-	"""
-	index_vs_all=[] #comparing every conformer to the conformer specified by index
-	index_vs_all.append(["index",("comparing molecules to "+molecule_names[index]),"rmsd","rmsd hydrogens removed","pendry"])
-	#? maybe make this csv writing thing a separate function
-	#i need to clear the file i'm appending to so that i dont keep the old values
-	with open('rmsd.csv','a') as file:
-		file.truncate(0)
-	for i in range(len(molecule_ids)):
-		temp=[]
-		temp.append(i)
-		temp.append(molecule_names[i])
-		temp.append(rmsd_all[i])
-		temp.append(rmsd_no_H[i])
-		temp.append(pendry[i]) 
-		index_vs_all.append(temp)
-		#Writing this as a csv
-		original_output = sys.stdout #save ref of original output to reset later
-		with open('rmsd.csv','a') as file:
-			sys.stdout = file #set output to the file
-			print(str(i)+','+str(molecule_names[i])+','+str(rmsd_all[i])+','+str(rmsd_no_H[i])+','+str(pendry[i]))
-			sys.stdout = original_output #reset output stream        
-	table = tx.Texttable()
-	#table.header(["comparing molecules to","rmsd","rmsd hydrogens removed"]) #idk why this not working, got it from https://pypi.org/project/texttable/ documentation
-	table.set_cols_dtype(['a','t','f','f','f']) #identifies the type of each item in the matrix
-	#table.set_cols_align(["l", "r", "r", "r", "l"])
-	table.add_rows(index_vs_all)
-	print (table.draw())
