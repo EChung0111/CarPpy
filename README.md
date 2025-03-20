@@ -1,4 +1,4 @@
-# glyP 
+# CarPpy
 
 ## Description
 
@@ -10,14 +10,14 @@ Furthermore, there is also a simple genetic algorithm that generates and updates
 
 ## Dependencies
 
-Required Python 3.8.3
+Required Python >= 3.8.3
 
 The following packages are also required:
   
   - numpy
   - networkx
+  - py3Dmol
   - matplotlib
-  - seaborn
   - texttable
 
 ## Installation
@@ -26,7 +26,7 @@ Clone this project directory
 
 Within a python environment install all the dependencies
 
-```pip install numpy,networkx,matplotlib,seaborn,texttable```
+```pip install numpy,networkx,matplotlib,texttable```
 
 ## Contact
 
