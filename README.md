@@ -18,7 +18,6 @@ The following packages are also required:
   - networkx
   - py3Dmol
   - matplotlib
-  - texttable
 
 ## Installation
 
@@ -26,7 +25,7 @@ Clone this project directory
 
 Within a python environment install all the dependencies
 
-```pip install numpy,networkx,matplotlib,texttable```
+```pip install numpy networkx matplotlib py3Dmol```
 
 ## Contact
 
