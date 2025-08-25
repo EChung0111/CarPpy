@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 import py3Dmol as p3D
 from itertools import zip_longest
 import PIL
-p
+
 
 class Conformer():
 
